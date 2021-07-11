@@ -17,7 +17,7 @@ class Team:
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("../webdaw-vue/dist/index.html")
+        self.render("../frontend/dist/index.html")
 
 class WebDAWHandler(tornado.websocket.WebSocketHandler):
     def open(self):
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     application = tornado.web.Application([
         (r"/", IndexHandler),
         (r"/websocket", WebDAWHandler),
-        (r"/(.*)", tornado.web.StaticFileHandler, {"path": "../webdaw-vue/dist/"})
+        (r"/(.*)", tornado.web.StaticFileHandler, {"path": "../frontend/dist/"})
     ])
     application.listen(int(os.environ.get('PORT', 8888)))
     tornado.ioloop.IOLoop.current().start()
