@@ -1,1 +1,1 @@
-web: gunicorn -b 0.0.0.0:$PORT --pythonpath backend backend.main:app
+web: python3 main.py --port=$PORT
