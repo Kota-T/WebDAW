@@ -1,0 +1,42 @@
+<template>
+<div id="popup-background" v-show="isShow" @click.stop @keydown.stop>
+  <div id="popup">
+    <slot></slot>
+  </div>
+</div>
+</template>
+
+<style>
+#popup-background{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(200,200,200,0.6);
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 150;
+}
+#popup{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  width: 300px;
+  height: 150px;
+  border-radius: 10px;
+}
+</style>
+
+<script>
+export default {
+  name: 'Popup',
+  data(){
+    return {
+      isShow: false
+    }
+  }
+}
+</script>
