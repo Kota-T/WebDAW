@@ -6,7 +6,8 @@
     <a v-if="projectId === null">
       プロジェクトに参加:<textarea cols="2" rows="1" style="resize:none;text-align:right" @keydown.enter="joinProject" ref="projectIdField"></textarea>
     </a>
-    <a v-else>プロジェクトID: {{ projectId }}</a>
+    <a v-if="projectId === 'loading'">Loading...</a>
+    <a v-if="projectId && projectId !== 'loading'">プロジェクトID: {{ projectId }}</a>
   </SideMenu>
   <Popup v-show="isShowPopup">
     <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="writeProjectAudio"/>
@@ -467,8 +468,12 @@ export default {
     },
 
     shareProject(){
+      this.projectId = "loading";
       this.ajax = new WebSocket(`wss://${location.host}/websocket`);
-      this.ajax.onerror = console.error;
+      this.ajax.onerror = err=>{
+        this.projectId = null;
+        console.error(err);
+      }
       this.ajax.onopen = async () => this.ajax.send(JSON.stringify({
         state: "shareProject",
         project: await this.getUploadData()
@@ -481,6 +486,7 @@ export default {
             console.log("shareProject" + this.projectId);
             break;
           case 'error':
+            this.projectId = null;
             console.log(data.msg);
             break;
         }
@@ -488,9 +494,13 @@ export default {
     },
 
     joinProject(){
+      this.projectId = "loading";
       const id = this.$refs.projectIdField.value;
       this.ajax = new WebSocket(`wss://${location.host}/websocket`);
-      this.ajax.onerror = console.error;
+      this.ajax.onerror = err=>{
+        this.projectId = null;
+        console.error(err);
+      }
       this.ajax.onopen = async () => this.ajax.send(JSON.stringify({
         state: "joinProject",
         id: id
@@ -504,6 +514,7 @@ export default {
             console.log("joinProject " + this.projectId);
             break;
           case 'error':
+            this.projectId = null;
             console.log(data.msg);
             break;
         }
