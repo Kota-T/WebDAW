@@ -467,7 +467,7 @@ export default {
     },
 
     shareProject(){
-      this.ajax = new WebSocket(`ws://${location.host}/websocket`);
+      this.ajax = new WebSocket(`wss://${location.host}/websocket`);
       this.ajax.onerror = console.error;
       this.ajax.onopen = async () => this.ajax.send(JSON.stringify({
         state: "shareProject",
@@ -489,7 +489,7 @@ export default {
 
     joinProject(){
       const id = this.$refs.projectIdField.value;
-      this.ajax = new WebSocket(`ws://${location.host}/websocket`);
+      this.ajax = new WebSocket(`wss://${location.host}/websocket`);
       this.ajax.onerror = console.error;
       this.ajax.onopen = async () => this.ajax.send(JSON.stringify({
         state: "joinProject",
