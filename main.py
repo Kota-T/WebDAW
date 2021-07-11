@@ -30,13 +30,13 @@ class WebDAWHandler(tornado.websocket.WebSocketHandler):
             self.team = Team(data['project'])
             self.team.members.append(self)
             self.write_message({'type': "id", 'id': self.team.id})
-            print("プロジェクトに参加")
+            print("プロジェクトを共有")
         elif state == 'joinProject':
             try:
                 self.team = [team for team in Team.teams if str(team.id) == data['id']][0]
                 self.team.members.append(self)
                 self.write_message({'type': 'project', 'project': self.team.project.getData()})
-                print("プロジェクトを共有")
+                print("プロジェクトに参加")
             except IndexError as e:
                 print(e)
                 self.write_message({'type': 'error', 'msg': 'invalid project id.'})
