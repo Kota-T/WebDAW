@@ -1,5 +1,5 @@
 <template>
-<input type="range" min="10" max="100" step="1" value="20" :title="value" v-model="value" @input="valueChanged">
+<input type="range" min="10" max="100" step="1" :title="value" v-model="value" @input="valueChanged">
 </template>
 
 <style>

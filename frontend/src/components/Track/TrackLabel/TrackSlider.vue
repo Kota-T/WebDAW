@@ -4,8 +4,8 @@
     <option selected title="Volume">V</option>
     <option title="Pan">P</option>
   </select>
-  <input type="range" min="0" max="1" step="0.05" value="0.5" v-show="selectedValue==='V'" v-model="gainValue" :title="gainValue">
-  <input type="range" min="-1" max="1" step="0.1" value="0"   v-show="selectedValue==='P'" v-model="panValue"  :title="panValue">
+  <input type="range" min="0" max="1" step="0.05" v-show="selectedValue==='V'" v-model="gainValue" :title="gainValue">
+  <input type="range" min="-1" max="1" step="0.1" v-show="selectedValue==='P'" v-model="panValue"  :title="panValue">
 </div>
 </template>
 

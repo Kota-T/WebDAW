@@ -2,41 +2,17 @@
   <SideMenu>
     <a @click="downloadProject">プロジェクトファイルをダウンロード</a>
     <a @click="isShowPopup=true;popUpType='WriteRange';">選択範囲を書き出す</a>
-    <a v-if="projectId === null" @click="shareProject">プロジェクトを共有</a>
-    <a v-if="projectId === null">
-      プロジェクトに参加:<textarea cols="2" rows="1" style="resize:none;text-align:right" @keydown.enter="joinProject" ref="projectIdField"></textarea>
-    </a>
-    <a v-if="projectId === 'loading'">Loading...</a>
-    <a v-if="projectId && projectId !== 'loading'">プロジェクトID: {{ projectId }}</a>
+    <template v-if="projectId === null">
+      <a @click="shareProject">プロジェクトを共有</a>
+      <a>プロジェクトに参加:<textarea cols="2" rows="1" style="resize:none;text-align:right" @keydown.enter="joinProject" ref="projectIdField"></textarea></a>
+    </template>
+    <a v-else-if="projectId === 'loading'">Loading...</a>
+    <a v-else>プロジェクトID: {{ projectId }}</a>
   </SideMenu>
   <Popup v-show="isShowPopup">
-    <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="writeProjectAudio"/>
+    <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="$refs.editor.writeProjectAudio"/>
   </Popup>
-  <div id="header">
-    <Count ref="count" :audioCtx="audioCtx"/>
-    <Rhythm ref="rhythm"/>
-    <img src="./assets/play.png"  class="play-or-pause" v-show="!isPlaying" @click="!isRecording ? play() : undefined">
-    <img src="./assets/pause.png" class="play-or-pause" v-show="isPlaying"  @click="!isRecording ? pause() : undefined">
-    <button id="start" @click="isRecording ? stopRecording() : startRecording()">R</button>
-    <Bpm ref="bpm"/>
-    <Resizer ref="resizer"/>
-  </div>
-  <div id="label_field" ref="label_field">
-    <AddTrackBtn @add-track="addTrack"/>
-  </div>
-  <div id="audio_field" ref="audio_field">
-    <Pointer @move="onPointerMove" ref="pointer"/>
-    <Ruler ref="ruler"/>
-  </div>
-  <Track
-  v-for="data in trackParams"
-  :key="data.id"
-  :audioCtx="audioCtx"
-  :data="data"
-  :stream="stream"
-  :pointer="$refs.pointer"
-  :ref="setTrackRef"
-  />
+  <Editor ref="editor"/>
 </template>
 
 <style>
@@ -46,84 +22,13 @@
   padding: 0;
   box-sizing: border-box;
 }
-#header{
-  background-color: #323232;
-  width: 100vw;
-  height: 80px;
-  border-bottom: 1px solid white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-#header > *{
-  margin: 0 10px;
-}
-.play-or-pause{
-  display: block;
-  width: 40px;
-  height: 40px;
-}
-.play-or-pause:hover{
-  cursor: pointer;
-}
-#start{
-  font-size: 30px;
-  display: block;
-  background-color: red;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-#start:hover{
-  cursor: pointer;
-}
-#label_field{
-  width: 200px;
-  height: calc(100vh - 80px);
-  position: absolute;
-  top: 80px;
-  left: 0;
-  overflow-y: scroll;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-#label_field::-webkit-scrollbar {
-  display:none;
-}
-#audio_field{
-  background-color: #323232;
-  width: calc(100vw - 200px);
-  height: calc(100vh - 80px);
-  position: absolute;
-  top: 80px;
-  left: 200px;
-  overflow: scroll;
-  overscroll-behavior: none;
-  font-size: 0;
-}
 </style>
 
 <script>
-import StereoPannerNode from './util/stereo-panner-node.min.js';
-StereoPannerNode.polyfill();
-
-import JSZip from 'jszip';
-
-import WavHandler from './util/WavHandler.js';
-
 import SideMenu from './components/SideMenu.vue';
 import Popup from './components/Popup.vue';
 import WriteRange from './components/WriteRange.vue';
-
-import Count from './components/Header/Count.vue';
-import Rhythm from './components/Header/Rhythm.vue';
-import Bpm from './components/Header/Bpm.vue';
-import Resizer from './components/Header/Resizer.vue';
-
-import AddTrackBtn from './components/AddTrackBtn.vue';
-import Ruler from './components/Ruler.vue';
-import Pointer from './components/Pointer.vue';
-import Track from './components/Track/Track.vue';
+import Editor from './components/Editor.vue';
 
 export default {
   name: 'App',
@@ -131,342 +36,17 @@ export default {
     SideMenu,
     Popup,
     WriteRange,
-    Count,
-    Rhythm,
-    Bpm,
-    Resizer,
-    AddTrackBtn,
-    Ruler,
-    Pointer,
-    Track
+    Editor
   },
   data(){
     return {
       isShowPopup: false,
       popUpType: null,
-      trackParams: [],
-      lastTrackId: 0,
-      tracks: [],
-      audioCtx: null,
-      stream: null,
-      isRecording: false,
-      isPlaying: false,
       projectId: null,
       ajax: null
     }
   },
-  created(){
-    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  },
-  mounted(){
-    window.onpopstate = e => e.preventDefault();
-    window.onbeforeunload = e=>{
-      e.preventDefault();
-      e.returnValue = 'ページを移動すると全てのデータが失われます。';
-    }
-
-    const label_field = this.$refs.label_field;
-    const audio_field = this.$refs.audio_field;
-    label_field.onscroll = e=>audio_field.scrollTop = label_field.scrollTop;
-    audio_field.onscroll = e=>{
-      label_field.scrollTop = audio_field.scrollTop;
-      this.$refs.pointer.y = audio_field.scrollTop;
-    }
-
-    audio_field.onpointerdown = e=>{
-      this.$refs.pointer.x = e.clientX - 200 + e.currentTarget.scrollLeft;
-      this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
-    }
-
-    audio_field.ondragover = e=>{
-      e.stopPropagation();
-      e.preventDefault();
-    }
-
-    audio_field.ondrop = async e=>{
-      e.stopPropagation();
-      e.preventDefault();
-
-      const items = e.dataTransfer.items;
-
-      if(items.length === 1){
-        const item = items[0];
-
-        let entry;
-        if(item.getAsEntry){
-          entry = item.getAsEntry();
-        }else if(item.webkitGetAsEntry){
-          entry = item.webkitGetAsEntry();
-        }
-
-        if(entry.isFile){
-          entry.file(
-            file=>{
-              if(this.isAudioFile(file)){
-                this.loadAudioFile(file);
-              }
-            },
-            console.error
-          );
-        }else{
-          const data = {};
-          await new Promise(resolve => this.readProjectDirectory(entry, data, resolve));
-          console.log(data);
-          await this.loadProject(data["project"]);
-        }
-      }
-    }
-
-    document.setDefaultOnkeydown = ()=>this.setDefaultOnkeydown();
-    document.setDefaultOnkeydown();
-  },
-  computed: {
-    scale_interval(){
-      const state = this.$store.state;
-      return state.beat_interval * 4 / state.rhythm[1];
-    }
-  },
   methods: {
-    getTimeOfDistance(distance){
-      const state = this.$store.state;
-      return  60 / state.bpm * distance / state.beat_interval;
-    },
-
-    setTrackRef(el){
-      this.tracks.push(el);
-    },
-
-    async addTrack(trackData){
-      if(this.audioCtx.state === "suspended"
-      || this.audioCtx.state === "interrupted"){
-        this.audioCtx.resume();
-      }
-
-      if(!this.stream){
-        this.stream = await navigator.mediaDevices
-          .getUserMedia({video: false, audio: true})
-          .catch(err=>{
-            console.error(err);
-            window.alert("マイク入力を取得できません。");
-          });
-        if(!this.stream){return;}
-      }
-
-      this.tracks = [];
-      if(!trackData){
-        trackData = {};
-      }
-      trackData.id = this.lastTrackId;
-      this.trackParams.push(trackData);
-      this.lastTrackId++;
-    },
-
-    onPointerMove(x){
-      const audio_field = this.$refs.audio_field;
-      if(this.isRecording && x - audio_field.scrollLeft > audio_field.offsetWidth){
-        audio_field.scrollLeft += audio_field.offsetWidth;
-      }
-      if(x >= this.$refs.ruler.$refs.canvas.width){
-        this.$store.commit('number_of_bars', this.$store.state.number_of_bars + 30);
-      }
-    },
-
-    async startRecording(){
-      this.selectedTracks = this.tracks.filter(track=>track.isSelected);
-      const notSelectedTracks = this.tracks.filter(track=>!track.isSelected);
-      if(!this.selectedTracks.length){return;}
-
-      if(this.isPlaying){
-        this.pause();
-      }
-
-      this.$refs.pointer.prepareRecording();
-      this.$refs.count.start();
-      this.$refs.pointer.start();
-      notSelectedTracks.forEach(track=>track.play());
-
-      this.isRecording = true;
-
-      setTimeout(()=>{
-        this.selectedTracks.forEach(track=>track.startRecording());
-      }, this.getTimeOfDistance(this.scale_interval * this.$store.state.rhythm[0]) * 1000);
-    },
-
-    stopRecording(){
-      this.selectedTracks.forEach(track=>track.stopRecording());
-      this.tracks.forEach(track=>track.pause());
-      this.$refs.count.stop();
-      this.$refs.pointer.stop();
-      this.isRecording = false;
-    },
-
-    play(){
-      this.tracks.forEach(track=>track.play());
-      const start_time = this.getTimeOfDistance(this.$refs.pointer.x % this.scale_interval);
-      this.$refs.count.start(start_time);
-      this.$refs.pointer.start();
-      this.isPlaying = true;
-    },
-
-    pause(){
-      this.tracks.forEach(track=>track.pause());
-      this.$refs.count.stop();
-      this.$refs.pointer.stop();
-      this.isPlaying = false;
-    },
-
-    setDefaultOnkeydown(){
-      document.onkeydown = e=>{
-        switch(e.key){
-          case "r":
-            !this.isRecording ? this.startRecording() : undefined;
-            break;
-          case "Backspace":
-            !this.isRecording ? this.deleteTracks() : undefined;
-            break;
-          case " ":
-            e.preventDefault();
-            this.isRecording ? this.stopRecording() : this.isPlaying ? this.pause() : this.play();
-            break;
-        }
-      }
-    },
-
-    deleteTracks(){
-      this.tracks.filter(track=>track.isSelected)
-        .map(track=>track.remove())
-        .map(track1=>this.tracks.splice(this.tracks.findIndex(track2=>track2===track1), 1));
-    },
-
-    isAudioFile(file){
-      return file.type.split('/')[0] === "audio";
-    },
-
-    async loadAudioFile(file){
-      const src = window.URL.createObjectURL(file);
-      await this.addTrack({
-        audioStack: [
-          {
-            startPoint: 0,
-            url: src
-          }
-        ]
-      });
-    },
-
-    download(url, filename){
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      link.click();
-    },
-
-    async downloadProject(){
-      const jszip = new JSZip();
-      const root = jszip.folder("project");
-
-      await this.createConfigBlob(root);
-
-      jszip.generateAsync({type: "blob"})
-        .then(blob=>this.download(URL.createObjectURL(blob), 'project.zip'));
-    },
-
-    async createConfigBlob(root){
-      const state = this.$store.state;
-      const json = JSON.stringify({
-        rhythm: state.rhythm,
-        bpm: state.bpm,
-        beat_interval: state.beat_interval,
-        number_of_bars: state.number_of_bars,
-        tracks: await Promise.all(this.tracks.map((track, index)=>track.getDownloadData(root, index)))
-      });
-      root.file("config.json", new Blob([json], {type: "application/json"}));
-    },
-
-    readProjectDirectory(entry, parent, resolve){
-      if(entry.isFile){
-        entry.file(
-          file=>{
-            if(file.name === "config.json"){
-              const reader = new FileReader();
-              reader.onload = e => {
-                parent[file.name] = JSON.parse(reader.result);
-                resolve();
-              };
-              reader.readAsText(file);
-            }else{
-              parent[file.name] = window.URL.createObjectURL(file);
-            }
-          },
-          console.error
-        );
-      }else if(entry.isDirectory){
-        parent[entry.name] = {};
-        entry.createReader().readEntries(
-          entries=>entries.forEach(innerEntry=>this.readProjectDirectory(innerEntry, parent[entry.name], resolve)),
-          console.error
-        );
-      }
-    },
-
-    async loadProject(data){
-      const config = data["config.json"];
-      this.setConfig(config);
-      await this.setTracksData(config.tracks, data);
-    },
-
-    setConfig(json){
-      this.$store.commit('rhythm', json.rhythm.map(elem=>Number(elem)));
-      this.$store.commit('bpm', Number(json.bpm));
-      this.$store.commit('beat_interval', Number(json.beat_interval));
-      this.$store.commit('number_of_bars', Number(json.number_of_bars));
-    },
-
-    async setTracksData(tracksData, data){
-      for await(let trackData of tracksData){
-        trackData.audioStack.forEach((elem, i)=>{
-          elem.url = data[trackData.name][i+".wav"];
-        });
-        await this.addTrack(trackData);
-      }
-    },
-
-    getStartAndStopTime(data){
-      const getTime = obj=>{
-        const state = this.$store.state;
-        return (obj.bar * state.rhythm[0] + obj.beat - 1) * 4 / state.rhythm[1] * 60 / state.bpm;
-      }
-      return {
-        start_time : getTime(data.start),
-        stop_time  : getTime(data.stop)
-      };
-    },
-
-    writeProjectAudio(data){
-      const { start_time, stop_time } = this.getStartAndStopTime(data);
-      const length = (stop_time - start_time) * this.audioCtx.sampleRate;
-      const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, length, this.audioCtx.sampleRate);
-      this.tracks.forEach(track=>track.createOffline(offlineCtx, start_time, stop_time));
-      const func = buffer=>this.download(WavHandler.AudioBuffer2WavFile(buffer), 'project.wav');
-      if(window.isSafari){
-        offlineCtx.oncomplete = e => func(e.renderedBuffer);
-        offlineCtx.startRendering();
-      }else{
-        offlineCtx.startRendering().then(func).catch(console.error);
-      }
-    },
-
-    async getUploadData(){
-      const state = this.$store.state;
-      return {
-        rhythm: state.rhythm,
-        bpm: state.bpm,
-        beat_interval: state.beat_interval,
-        number_of_bars: state.number_of_bars,
-        tracks: await Promise.all(this.tracks.map(track=>track.getUploadData()))
-      };
-    },
-
     shareProject(){
       this.projectId = "loading";
       this.ajax = new WebSocket(`wss://${location.host}/websocket`);
@@ -476,7 +56,7 @@ export default {
       }
       this.ajax.onopen = async () => this.ajax.send(JSON.stringify({
         state: "shareProject",
-        project: await this.getUploadData()
+        project: await this.$refs.editor.getUploadData()
       }));
       this.ajax.onmessage = e=>{
         const data = JSON.parse(e.data);
@@ -510,7 +90,7 @@ export default {
         switch(data.type){
           case 'project':
             this.projectId = id;
-            this.loadDownloadedProject(data.project);
+            this.$refs.editor.loadSharedProject(data.project);
             console.log("joinProject " + this.projectId);
             break;
           case 'error':
@@ -519,28 +99,6 @@ export default {
             break;
         }
       }
-    },
-
-    async setDownloadedTracksData(tracksData){
-      for await(let trackData of tracksData){
-        trackData.audioStack.forEach(elem=>{
-          const byteString = atob(elem.base64.split( "," )[1]) ;
-          const mimeType = elem.base64.match( /(:)([a-z\/]+)(;)/ )[2] ;
-          const content = new Uint8Array(byteString.length);
-          for(let i = 0; i < byteString.length; i++){
-	          content[i] = byteString.charCodeAt(i);
-          }
-
-          const blob = new Blob([content], {type: mimeType}) ;
-          elem.url = URL.createObjectURL(blob);
-        });
-        await this.addTrack(trackData);
-      }
-    },
-
-    async loadDownloadedProject(project){
-      this.setConfig(project);
-      await this.setDownloadedTracksData(project.tracks);
     }
   }
 }
