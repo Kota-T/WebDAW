@@ -1,3 +1,4 @@
 /venv
 /frontend/
 !/frontend/dist
+!/frontend/dist/_assets
