@@ -1,4 +1,4 @@
-import WavHandler from '../util/WavHandler.js';
+import WavHandler from './WavHandler.js';
 
 export class Loader{
   constructor(audioCtx, url, data){

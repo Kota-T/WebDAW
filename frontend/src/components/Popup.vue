@@ -1,5 +1,5 @@
 <template>
-<div id="popup-background" v-show="isShow" @click.stop @keydown.stop>
+<div id="popup-background" @click.stop @keydown.stop>
   <div id="popup">
     <slot></slot>
   </div>
@@ -32,11 +32,6 @@
 
 <script>
 export default {
-  name: 'Popup',
-  data(){
-    return {
-      isShow: false
-    }
-  }
+  name: 'Popup'
 }
 </script>

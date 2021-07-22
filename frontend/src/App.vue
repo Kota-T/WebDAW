@@ -28,7 +28,7 @@
 import SideMenu from './components/SideMenu.vue';
 import Popup from './components/Popup.vue';
 import WriteRange from './components/WriteRange.vue';
-import Editor from './components/Editor.vue';
+import Editor from './components/Editor/Editor.vue';
 
 export default {
   name: 'App',
