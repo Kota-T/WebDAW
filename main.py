@@ -53,7 +53,7 @@ if __name__ == "__main__":
     application = tornado.web.Application([
         (r"/", IndexHandler),
         (r"/websocket", WebDAWHandler),
-        (r"/_assets/(.*)", tornado.web.StaticFileHandler, {"path": "frontend/dist/_assets/"})
+        (r"/(.*)", tornado.web.StaticFileHandler, {"path": "frontend/dist/"})
     ])
     application.listen(int(os.environ.get('PORT', 8888)))
     tornado.ioloop.IOLoop.current().start()
