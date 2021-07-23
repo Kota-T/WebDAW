@@ -1,0 +1,151 @@
+<template>
+  <teleport to="#label_field">
+    <TrackLabel :gainNode="gainNode" :pannerNode="pannerNode" ref="label" @track-selected="select"/>
+  </teleport>
+  <teleport to="#audio_field">
+    <TrackAudioContainer
+    :audioCtx="audioCtx"
+    :audioNode="gainNode"
+    :stream="stream"
+    :pointer="pointer"
+    ref="container"
+    @track-selected="select"
+    />
+  </teleport>
+</template>
+
+<script>
+import TrackLabel from './TrackLabel/TrackLabel.vue';
+import TrackAudioContainer from './TrackAudio/TrackAudioContainer.vue';
+
+export default {
+  name: 'Track',
+  components: {
+    TrackLabel, TrackAudioContainer
+  },
+  props: ['data', 'audioCtx', 'stream', 'pointer'],
+  data(){
+    return {
+      gainNode: null,
+      pannerNode: null
+    }
+  },
+  created(){
+    this.gainNode = this.audioCtx.createGain();
+    this.gainNode.gain.value = 0.5;
+    this.pannerNode = this.audioCtx.createStereoPanner();
+    this.gainNode.connect(this.pannerNode);
+    this.pannerNode.connect(this.audioCtx.destination);
+  },
+  mounted(){
+    if(this.data.name){
+      this.name = this.data.name.split("_")[1] || this.data.name;
+    }
+    if(this.data.gain){
+      this.gain = this.data.gain;
+    }
+    if(this.data.pan){
+      this.pan = this.data.pan;
+    }
+    if(this.data.audioStack){
+      this.data.audioStack.forEach(elem=>this.createAudioCanvas(elem));
+    }
+  },
+  computed: {
+    name: {
+      get: function(){
+        return this.$refs.label.$refs.trackName.value;
+      },
+      set: function(value){
+        this.$refs.label.$refs.trackName.value = value;
+      },
+    },
+    gain: {
+      get: function(){
+        return this.gainNode.gain.value;
+      },
+      set: function(value){
+        this.$refs.label.$refs.trackSlider.gainValue = value;
+      }
+    },
+    pan: {
+      get: function(){
+        return this.pannerNode.pan.value;
+      },
+      set: function(value){
+        this.$refs.label.$refs.trackSlider.panValue = value;
+      }
+    },
+    isSelected: {
+      get: function(){
+        return this.$refs.label.isSelected;
+      },
+      set: function(value){
+        this.$refs.label.isSelected = value;
+      }
+    }
+  },
+  methods: {
+    select(){
+      this.$parent.tracks.forEach(track=>track.isSelected = false);
+      this.isSelected = true;
+    },
+
+    createAudioCanvas(initConfig){
+      this.$refs.container.createAudioCanvas(initConfig);
+    },
+
+    startRecording(){
+      this.$refs.container.startRecording();
+    },
+
+    stopRecording(){
+      this.$refs.container.stopRecording();
+    },
+
+    play(){
+      this.$refs.container.play();
+    },
+
+    pause(){
+      this.$refs.container.pause();
+    },
+
+    remove(){
+      this.$refs.label.remove();
+      this.$refs.container.remove();
+      return this;
+    },
+
+    async getDownloadData(root, index){
+      const name = index + "_" + this.name;
+      return {
+        name: name,
+        gain: this.gain,
+        pan : this.pan,
+        audioStack: await Promise.all(this.$refs.container.getDownloadData(root.folder(name)))
+      };
+    },
+
+    async getUploadData(){
+      return {
+        name: this.name,
+        gain: this.gain,
+        pan : this.pan,
+        audioStack: await Promise.all(this.$refs.container.getUploadData())
+      };
+    },
+
+    createOffline(offlineCtx, start_time, stop_time){
+      const gainNode = offlineCtx.createGain();
+      gainNode.gain.value = this.gain;
+      const pannerNode = offlineCtx.createStereoPanner();
+      pannerNode.pan.value = this.pan;
+      gainNode.connect(pannerNode);
+      pannerNode.connect(offlineCtx.destination);
+
+      this.$refs.container.createOffline(offlineCtx, gainNode, start_time, stop_time);
+    }
+  }
+}
+</script>
