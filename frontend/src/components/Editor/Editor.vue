@@ -4,7 +4,7 @@
     <Rhythm ref="rhythm"/>
     <img src="../../assets/play.png"  class="play-or-pause" v-show="state === null" @click="play">
     <img src="../../assets/pause.png" class="play-or-pause" v-show="state === 'playing'"  @click="pause">
-    <button type="button" id="start" @click="state === 'recording' ? stopRecording() : startRecording()">R</button>
+    <button type="button" id="start" @click="state === 'preparing' || state === 'recording' ? stopRecording() : startRecording()">R</button>
     <Bpm ref="bpm"/>
     <Resizer ref="resizer"/>
   </div>
@@ -118,7 +118,7 @@ export default {
       tracks: [],
       audioCtx: null,
       stream: null,
-      state: null//"playing" or "recording" or null
+      state: null//"playing" or "preparing" or "recording" or null
     }
   },
   created(){
@@ -254,7 +254,10 @@ export default {
       this.$refs.pointer.start();
       notSelectedTracks.forEach(track=>track.play());
 
+      this.state = "preparing";
+
       setTimeout(()=>{
+        if(this.state !== "preparing") return;
         this.state = "recording";
         this.selectedTracks.forEach(track=>track.startRecording());
       }, this.getTimeOfDistance(this.scale_interval * this.$store.state.rhythm[0]) * 1000);
@@ -295,7 +298,18 @@ export default {
             break;
           case " ":
             e.preventDefault();
-            this.state === "recording" ? this.stopRecording() : this.state === "playing" ? this.pause() : this.play();
+            switch(this.state){
+              case "preparing":
+              case "recording":
+                this.stopRecording();
+                break;
+              case "playing":
+                this.pause();
+                break;
+              default:
+                this.play();
+                break;
+            }
             break;
         }
       }
