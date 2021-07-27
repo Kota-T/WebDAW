@@ -141,6 +141,7 @@ export default {
     }
 
     audio_field.onpointerdown = e=>{
+      if(this.isRecording) return;
       this.$refs.pointer.x = e.clientX - 200 + e.currentTarget.scrollLeft;
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
     }
