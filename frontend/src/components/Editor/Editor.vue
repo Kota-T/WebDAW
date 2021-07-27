@@ -2,9 +2,9 @@
   <div id="header">
     <Count ref="count" :audioCtx="audioCtx"/>
     <Rhythm ref="rhythm"/>
-    <img src="../../assets/play.png"  class="play-or-pause" v-show="!isPlaying" @click="!isRecording ? play() : undefined">
-    <img src="../../assets/pause.png" class="play-or-pause" v-show="isPlaying"  @click="!isRecording ? pause() : undefined">
-    <button id="start" @click="isRecording ? stopRecording() : startRecording()">R</button>
+    <img src="../../assets/play.png"  class="play-or-pause" v-show="state === null" @click="play">
+    <img src="../../assets/pause.png" class="play-or-pause" v-show="state === 'playing'"  @click="pause">
+    <button type="button" id="start" @click="state === 'recording' ? stopRecording() : startRecording()">R</button>
     <Bpm ref="bpm"/>
     <Resizer ref="resizer"/>
   </div>
@@ -118,8 +118,7 @@ export default {
       tracks: [],
       audioCtx: null,
       stream: null,
-      isRecording: false,
-      isPlaying: false,
+      state: null//"playing" or "recording" or null
     }
   },
   created(){
@@ -140,8 +139,8 @@ export default {
       this.$refs.pointer.y = audio_field.scrollTop;
     }
 
-    audio_field.onpointerdown = e=>{
-      if(this.isRecording) return;
+    audio_field.onclick = e=>{
+      if(this.state === "recording") return;
       this.$refs.pointer.x = e.clientX - 200 + e.currentTarget.scrollLeft;
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
     }
@@ -233,7 +232,7 @@ export default {
 
     onPointerMove(x){
       const audio_field = this.$refs.audio_field;
-      if(this.isRecording && x - audio_field.scrollLeft > audio_field.offsetWidth){
+      if(this.state === "recording" && x - audio_field.scrollLeft > audio_field.offsetWidth){
         audio_field.scrollLeft += audio_field.offsetWidth;
       }
       if(x >= this.$refs.ruler.$refs.canvas.width){
@@ -246,7 +245,7 @@ export default {
       const notSelectedTracks = this.tracks.filter(track=>!track.isSelected);
       if(!this.selectedTracks.length){return;}
 
-      if(this.isPlaying){
+      if(this.state === "playing"){
         this.pause();
       }
 
@@ -255,19 +254,19 @@ export default {
       this.$refs.pointer.start();
       notSelectedTracks.forEach(track=>track.play());
 
-      this.isRecording = true;
-
       setTimeout(()=>{
+        this.state = "recording";
         this.selectedTracks.forEach(track=>track.startRecording());
       }, this.getTimeOfDistance(this.scale_interval * this.$store.state.rhythm[0]) * 1000);
     },
 
     stopRecording(){
-      this.selectedTracks.forEach(track=>track.stopRecording());
+      if(this.state === "recording")
+        this.selectedTracks.forEach(track=>track.stopRecording());
       this.tracks.forEach(track=>track.pause());
       this.$refs.count.stop();
       this.$refs.pointer.stop();
-      this.isRecording = false;
+      this.state = null;
     },
 
     play(){
@@ -275,28 +274,28 @@ export default {
       const start_time = this.getTimeOfDistance(this.$refs.pointer.x % this.scale_interval);
       this.$refs.count.start(start_time);
       this.$refs.pointer.start();
-      this.isPlaying = true;
+      this.state = "playing";
     },
 
     pause(){
       this.tracks.forEach(track=>track.pause());
       this.$refs.count.stop();
       this.$refs.pointer.stop();
-      this.isPlaying = false;
+      this.state = null;
     },
 
     setDefaultOnkeydown(){
       document.onkeydown = e=>{
         switch(e.key){
           case "r":
-            !this.isRecording ? this.startRecording() : undefined;
+            this.state !== "recording" ? this.startRecording() : undefined;
             break;
           case "Backspace":
-            !this.isRecording ? this.deleteTracks() : undefined;
+            this.state !== "recording" ? this.deleteTracks() : undefined;
             break;
           case " ":
             e.preventDefault();
-            this.isRecording ? this.stopRecording() : this.isPlaying ? this.pause() : this.play();
+            this.state === "recording" ? this.stopRecording() : this.state === "playing" ? this.pause() : this.play();
             break;
         }
       }
