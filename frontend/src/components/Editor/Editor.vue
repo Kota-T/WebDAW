@@ -18,8 +18,8 @@
   <Track
   v-for="data in trackParams"
   :key="data.id"
-  :audioCtx="audioCtx"
   :data="data"
+  :audioCtx="audioCtx"
   :stream="stream"
   :pointer="$refs.pointer"
   :ref="setTrackRef"
@@ -194,7 +194,7 @@ export default {
     },
 
     setTrackRef(el){
-      if(!this.tracks.includes(el)){
+      if(el && !this.tracks.includes(el)){
         this.tracks.push(el);
       }
     },
@@ -309,9 +309,14 @@ export default {
     },
 
     deleteTracks(){
-      this.tracks.filter(track=>track.isSelected)
-        .map(track=>track.remove())
-        .map(track1=>this.tracks.splice(this.tracks.findIndex(track2=>track2===track1), 1));
+      const indexArray = this.tracks
+        .filter(track=>track.isSelected)
+        .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
+        .sort((a, b) => b - a);
+      for(let index of indexArray){
+        this.tracks = [];
+        this.trackParams.splice(index, 1);
+      }
     },
 
     isAudioFile(file){

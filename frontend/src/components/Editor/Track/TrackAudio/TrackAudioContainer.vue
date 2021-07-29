@@ -49,7 +49,7 @@ export default {
   },
   methods: {
     setAudioRef(el){
-      if(!this.audioStack.includes(el)){
+      if(el && !this.audioStack.includes(el)){
         this.audioStack.push(el);
       }
     },
