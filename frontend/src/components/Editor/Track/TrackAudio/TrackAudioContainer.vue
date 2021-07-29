@@ -49,7 +49,9 @@ export default {
   },
   methods: {
     setAudioRef(el){
-      this.audioStack.push(el);
+      if(!this.audioStack.includes(el)){
+        this.audioStack.push(el);
+      }
     },
 
     createAudioCanvas(initConfig){

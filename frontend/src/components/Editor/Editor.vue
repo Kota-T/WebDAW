@@ -158,13 +158,7 @@ export default {
 
       if(items.length === 1){
         const item = items[0];
-
-        let entry;
-        if(item.getAsEntry){
-          entry = item.getAsEntry();
-        }else if(item.webkitGetAsEntry){
-          entry = item.webkitGetAsEntry();
-        }
+        const entry = item.getAsEntry?.() || item.webkitGetAsEntry?.();
 
         if(entry.isFile){
           entry.file(
@@ -200,7 +194,9 @@ export default {
     },
 
     setTrackRef(el){
-      this.tracks.push(el);
+      if(!this.tracks.includes(el)){
+        this.tracks.push(el);
+      }
     },
 
     async addTrack(trackData){
@@ -266,10 +262,7 @@ export default {
     stopRecording(){
       if(this.state === "recording")
         this.selectedTracks.forEach(track=>track.stopRecording());
-      this.tracks.forEach(track=>track.pause());
-      this.$refs.count.stop();
-      this.$refs.pointer.stop();
-      this.state = null;
+      this.pause();
     },
 
     play(){

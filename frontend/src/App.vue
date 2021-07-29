@@ -1,6 +1,6 @@
 <template>
   <SideMenu>
-    <a @click="downloadProject">プロジェクトファイルをダウンロード</a>
+    <a @click="$refs.editor.downloadProject">プロジェクトファイルをダウンロード</a>
     <a @click="isShowPopup=true;popUpType='WriteRange';">選択範囲を書き出す</a>
     <template v-if="projectId === null">
       <a @click="shareProject">プロジェクトを共有</a>
