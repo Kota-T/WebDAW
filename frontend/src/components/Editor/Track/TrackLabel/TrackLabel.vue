@@ -40,12 +40,14 @@
 import InputElement from '../../../util/InputElement.vue';
 import TrackSlider from './TrackSlider.vue';
 
+import ContextMenu from '../../../util/ContextMenu.vue';
+
 export default {
   name: 'TrackLabel',
   props: ['gainNode', 'pannerNode'],
   emits: ['track-selected'],
   components: {
-    InputElement, TrackSlider
+    InputElement, TrackSlider, ContextMenu
   },
   data(){
     return {
