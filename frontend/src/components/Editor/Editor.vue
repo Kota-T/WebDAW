@@ -309,14 +309,14 @@ export default {
     },
 
     deleteTracks(){
-      const indexArray = this.tracks
+      this.tracks
         .filter(track=>track.isSelected)
         .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
-        .sort((a, b) => b - a);
-      for(let index of indexArray){
-        this.tracks = [];
-        this.trackParams.splice(index, 1);
-      }
+        .sort((a, b) => b - a)
+        .forEach(index=>{
+          this.tracks = [];
+          this.trackParams.splice(index, 1);
+        });
     },
 
     isAudioFile(file){

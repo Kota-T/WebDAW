@@ -5,9 +5,14 @@
   :style="styles"
   :width="width"
   height="120"
+  @pointerdown="canvas.focus"
+  @contextmenu.prevent="$refs.menu.show"
   @keydown.delete.stop="$emit('remove')"
   ref="canvas"
   ></canvas>
+  <ContextMenu ref="menu">
+    <li @click.stop="$emit('remove')">削除</li>
+  </ContextMenu>
 </template>
 
 <style>
@@ -28,8 +33,13 @@
 import { Loader } from '../../../../webaudio/webaudio.js';
 import { Player, DrawDataProcessor, Drawer } from './AudioCanvas.js';
 
+import ContextMenu from '../../../util/ContextMenu.vue';
+
 export default {
   name: 'AudioCanvas',
+  components: {
+    ContextMenu
+  },
   props: ['initConfig', 'audioCtx', 'audioNode'],
   emits: ['track-selected', 'remove'],
   data(){
@@ -38,7 +48,7 @@ export default {
         left: "0px"
       },
       width: 0,
-      isSelected: false
+      isSelected: false,
     }
   },
   mounted(){
