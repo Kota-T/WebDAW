@@ -146,23 +146,21 @@ export default {
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
     }
 
-    const oldTouches = [];
+    let oldDiff;
     const getDiff = touches=>{
       return Math.abs(touches[0].clientX - touches[1].clientX);
     }
     audio_field.ontouchstart = e=>{
       if(e.touches !== 2) return;
-      e.touches.forEach(oldTouches.push);
+      oldDiff = getDiff(e.touches);
     }
     audio_field.ontouchmove = e=>{
       if(e.touches !== 2) return;
       e.preventDefault();
-      const rate = getDiff(e.touches) / getDiff(oldTouches);
-      this.$store.commit('beat_interval', Math.round(this.$store.state.beat_interval * rate));
-      oldTouches.length = 0;
-      e.touches.forEach(oldTouches.push);
+      const curDiff = getDiff(e.touches);
+      this.$store.commit('beat_interval', Math.round(this.$store.state.beat_interval * curDiff / oldDiff));
+      oldDiff = curDiff;
     }
-    audio_field.ontouchend = e=>oldTouches.length = 0;
 
     audio_field.ondragover = e=>{
       e.stopPropagation();
