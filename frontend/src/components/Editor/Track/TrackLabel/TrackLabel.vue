@@ -46,7 +46,7 @@ import ContextMenu from '../../../util/ContextMenu.vue';
 export default {
   name: 'TrackLabel',
   props: ['gainNode', 'pannerNode'],
-  emits: ['track-selected'],
+  emits: ['track-selected', 'track-remove'],
   components: {
     InputElement, TrackSlider, ContextMenu
   },

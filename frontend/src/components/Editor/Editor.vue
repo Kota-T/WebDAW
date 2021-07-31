@@ -146,6 +146,23 @@ export default {
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
     }
 
+    const zoomTouches = [];
+    audio_field.ontouchstart = e=>{
+      if(e.touches !== 2) return;
+      e.touches.forEach(zoomTouches.push);
+    }
+    audio_field.ontouchmove = e=>{
+      if(e.touches !== 2) return;
+      e.preventDefault();
+      const oldDiff = Math.abs(zoomTouches[0] - zoomTouches[1]);
+      const curDiff = Math.abs(e.touches[0] - e.touches[1]);
+      const diff = Math.round(curDiff - oldDiff);
+      this.$store.commit('beat_interval', this.$store.state.beat_interval + diff);
+      zoomTouches.length = 0;
+      e.touches.forEach(zoomTouches.push);
+    }
+    audio_field.ontouchend = e=>zoomTouches.length = 0;
+
     audio_field.ondragover = e=>{
       e.stopPropagation();
       e.preventDefault();

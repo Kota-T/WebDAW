@@ -33,6 +33,9 @@
   display: block;
   text-decoration: none;
 }
+#side-menu a:hover{
+  cursor: pointer;
+}
 </style>
 
 <script>
