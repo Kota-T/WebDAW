@@ -56,8 +56,8 @@ export default {
           break;
         case 'touchstart':
           if(e.touches.length !== 2) return;
-          this.style.top = (e.touches[0].clientY + e.touches[1].clientY) / 2 + 'px';
-          this.style.left = (e.touches[0].clientX + e.touches[1].clientX) / 2 + 'px';
+          this.styles.top = (e.touches[0].clientY + e.touches[1].clientY) / 2 + 'px';
+          this.styles.left = (e.touches[0].clientX + e.touches[1].clientX) / 2 + 'px';
           break;
       }
       this.$refs.domElement.focus();
