@@ -51,6 +51,7 @@ export default {
       this.isShow = true;
       switch(e.type){
         case 'contextmenu':
+          e.preventDefault();
           this.styles.top = e.clientY + 'px';
           this.styles.left = e.clientX + 'px';
           break;

@@ -4,6 +4,12 @@ import { store } from './store.js';
 
 const app = createApp(App);
 app.use(store);
+app.directive('menu', {
+  mounted(el, binding){
+    el.oncontextmenu = binding.value.show;
+    el.ontouchstart = binding.value.show;
+  }
+});
 app.mount('#app');
 
 import StereoPannerNode from './webaudio/stereo-panner-node.min.js';

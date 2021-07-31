@@ -3,6 +3,7 @@
   class="track-label"
   :class="{isTrackLabelSelected: isSelected}"
   @pointerdown="$emit('track-selected')"
+  v-menu="$refs.menu"
   ref="domElement"
   >
     <div>
@@ -10,6 +11,9 @@
       <TrackSlider :gainNode="gainNode" :pannerNode="pannerNode" ref="trackSlider"/>
     </div>
   </div>
+  <ContextMenu ref="menu">
+    <li @click="">削除</li>
+  </ContextMenu>
 </template>
 
 <style>
