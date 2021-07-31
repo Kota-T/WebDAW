@@ -163,7 +163,9 @@ export default {
       if(e.touches.length !== 2) return;
       e.preventDefault();
       const curDiff = getDiff(e.touches);
-      this.$refs.resizer.value = Math.round(this.$refs.resizer.value * curDiff / oldDiff);
+      const newVal = Math.round(this.$store.state.beat_interval * curDiff / oldDiff);
+      this.$refs.resizer.value = newVal;
+      this.$store.commit('beat_interval', newVal);
       oldDiff = curDiff;
     }
 
