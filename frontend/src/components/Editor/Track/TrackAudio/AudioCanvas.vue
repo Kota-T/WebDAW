@@ -5,8 +5,8 @@
   :style="styles"
   :width="width"
   height="120"
-  @pointerdown="canvas.focus"
   @contextmenu.prevent="$refs.menu.show"
+  @touchend="e => e.targetTouches.length === 2 ? $refs.menu.show() : undefined"
   @keydown.delete.stop="$emit('remove')"
   ref="canvas"
   ></canvas>
@@ -63,6 +63,7 @@ export default {
 
     this.canvas.onpointerdown = e => {
       e.stopPropagation();
+      this.canvas.focus();
       this.$emit('track-selected');
       const initLeft = e.offsetX;
       const initRight = this.canvas_width - initLeft;
