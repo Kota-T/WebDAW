@@ -148,7 +148,12 @@ export default {
 
     let oldDiff;
     const getDiff = touches=>{
-      return Math.abs(touches[0].clientX - touches[1].clientX);
+      const x1 = touches[0].clientX;
+      const y1 = touches[0].clientY;
+
+      const x2 = touches[1].clientX;
+      const y2 = touches[1].clientY;
+      return Math.sqrt(Math.pow(x2 - x1, 2), Math.pow(y2 - y1));
     }
     audio_field.ontouchstart = e=>{
       if(e.touches.length !== 2) return;
@@ -158,7 +163,7 @@ export default {
       if(e.touches.length !== 2) return;
       e.preventDefault();
       const curDiff = getDiff(e.touches);
-      this.$store.commit('beat_interval', Math.round(this.$store.state.beat_interval * curDiff / oldDiff));
+      this.$refs.resizer.value = Math.round(this.$refs.resizer.value * curDiff / oldDiff);
       oldDiff = curDiff;
     }
 
