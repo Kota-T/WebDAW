@@ -2,15 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import { store } from './store.js';
 
-const app = createApp(App);
-app.use(store);
-app.directive('menu', {
-  mounted(el, binding){
-    el.oncontextmenu = binding.value.show;
-    el.ontouchstart = binding.value.show;
-  }
-});
-app.mount('#app');
+createApp(App).use(store).mount('#app');
 
 import StereoPannerNode from './webaudio/stereo-panner-node.min.js';
 StereoPannerNode.polyfill();

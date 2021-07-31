@@ -6,7 +6,8 @@
   :width="width"
   height="120"
   @keydown.delete.stop="$emit('remove')"
-  v-menu="$refs.menu"
+  @contextmenu="$refs.menu.show"
+  @touchstart="$refs.menu.show"
   ref="canvas"
   ></canvas>
   <ContextMenu ref="menu">

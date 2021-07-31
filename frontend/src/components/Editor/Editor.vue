@@ -16,13 +16,14 @@
     <Ruler ref="ruler"/>
   </div>
   <Track
-  v-for="data in trackParams"
+  v-for="(data, index) in trackParams"
   :key="data.id"
   :data="data"
   :audioCtx="audioCtx"
   :stream="stream"
   :pointer="$refs.pointer"
   :ref="setTrackRef"
+  @track-remove="removeTrack(index)"
   />
 </template>
 
@@ -226,6 +227,19 @@ export default {
       this.lastTrackId++;
     },
 
+    removeTrack(index){
+      this.tracks = [];
+      this.trackParams.splice(index, 1);
+    },
+
+    removeSelectedTracks(){
+      this.tracks
+        .filter(track=>track.isSelected)
+        .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
+        .sort((a, b) => b - a)
+        .forEach(this.removeTrack);
+    },
+
     onPointerMove(x){
       const audio_field = this.$refs.audio_field;
       if(this.state === "recording" && x - audio_field.scrollLeft > audio_field.offsetWidth){
@@ -287,7 +301,7 @@ export default {
             this.state !== "recording" ? this.startRecording() : undefined;
             break;
           case "Backspace":
-            this.state !== "recording" ? this.deleteTracks() : undefined;
+            this.state !== "recording" ? this.removeSelectedTracks() : undefined;
             break;
           case " ":
             e.preventDefault();
@@ -306,17 +320,6 @@ export default {
             break;
         }
       }
-    },
-
-    deleteTracks(){
-      this.tracks
-        .filter(track=>track.isSelected)
-        .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
-        .sort((a, b) => b - a)
-        .forEach(index=>{
-          this.tracks = [];
-          this.trackParams.splice(index, 1);
-        });
     },
 
     isAudioFile(file){

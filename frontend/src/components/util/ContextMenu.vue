@@ -48,7 +48,6 @@ export default {
   },
   methods: {
     show(e){
-      this.isShow = true;
       switch(e.type){
         case 'contextmenu':
           e.preventDefault();
@@ -61,6 +60,7 @@ export default {
           this.styles.left = (e.touches[0].clientX + e.touches[1].clientX) / 2 + 'px';
           break;
       }
+      this.isShow = true;
       this.$refs.domElement.focus();
     },
   }

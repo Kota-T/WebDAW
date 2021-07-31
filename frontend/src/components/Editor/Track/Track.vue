@@ -1,6 +1,12 @@
 <template>
   <teleport to="#label_field">
-    <TrackLabel :gainNode="gainNode" :pannerNode="pannerNode" ref="label" @track-selected="select"/>
+    <TrackLabel
+    :gainNode="gainNode"
+    :pannerNode="pannerNode"
+    ref="label"
+    @track-selected="select"
+    @track-remove="$emit('track-remove')"
+    />
   </teleport>
   <teleport to="#audio_field">
     <TrackAudioContainer

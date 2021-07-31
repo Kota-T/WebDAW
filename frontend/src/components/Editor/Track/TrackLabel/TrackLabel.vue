@@ -3,7 +3,8 @@
   class="track-label"
   :class="{isTrackLabelSelected: isSelected}"
   @pointerdown="$emit('track-selected')"
-  v-menu="$refs.menu"
+  @contextmenu="$refs.menu.show"
+  @touchstart="$refs.menu.show"
   ref="domElement"
   >
     <div>
@@ -12,7 +13,7 @@
     </div>
   </div>
   <ContextMenu ref="menu">
-    <li @click.stop="">削除</li>
+    <li @click.stop="$emit('track-remove')">削除</li>
   </ContextMenu>
 </template>
 
