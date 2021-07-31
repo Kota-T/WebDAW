@@ -12,7 +12,7 @@
     </div>
   </div>
   <ContextMenu ref="menu">
-    <li @click="">削除</li>
+    <li @click.stop="">削除</li>
   </ContextMenu>
 </template>
 
