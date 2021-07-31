@@ -6,7 +6,7 @@
   :width="width"
   height="120"
   @contextmenu.prevent="$refs.menu.show"
-  @touchend="e => e.targetTouches.length === 2 ? $refs.menu.show() : undefined"
+  @touchend="e => e.touches.length === 2 ? $refs.menu.show() : undefined"
   @keydown.delete.stop="$emit('remove')"
   ref="canvas"
   ></canvas>
