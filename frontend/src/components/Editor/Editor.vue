@@ -157,8 +157,8 @@ export default {
     audio_field.ontouchmove = e=>{
       if(e.touches !== 2) return;
       e.preventDefault();
-      const diff = Math.round(getDiff(e.touches) - getDiff(oldTouches));
-      this.$store.commit('beat_interval', this.$store.state.beat_interval + diff);
+      const rate = getDiff(e.touches) / getDiff(oldTouches);
+      this.$store.commit('beat_interval', Math.round(this.$store.state.beat_interval * rate));
       oldTouches.length = 0;
       e.touches.forEach(oldTouches.push);
     }
