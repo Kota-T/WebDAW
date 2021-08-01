@@ -123,10 +123,6 @@ export default {
       this.currentAudio = null;
     },
 
-    remove(){
-      this.$refs.domElement.remove();
-    },
-
     getDownloadData(folder){
       return this.audioStack.map((audioCanvas, index)=>audioCanvas.getDownloadData(folder, index));
     },

@@ -54,11 +54,6 @@ export default {
     return {
       isSelected: false,
     }
-  },
-  methods: {
-    remove(){
-      this.$refs.domElement.remove();
-    }
   }
 }
 </script>

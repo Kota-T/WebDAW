@@ -162,8 +162,11 @@ export default {
     audio_field.ontouchmove = e=>{
       if(e.touches.length !== 2) return;
       e.preventDefault();
+      const state = this.$store.state;
       const curDiff = getDiff(e.touches);
-      const newVal = Math.round(this.$store.state.beat_interval * curDiff / oldDiff);
+      const newVal = Math.round(state.beat_interval * curDiff / oldDiff);
+      if(newVal * state.rhythm[0] / (state.rhythm[1] / 4) * state.number_of_bars > this.$refs.ruler.canvas.width)
+        return;
       this.$refs.resizer.value = newVal;
       this.$store.commit('beat_interval', newVal);
       oldDiff = curDiff;
