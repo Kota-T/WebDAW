@@ -74,6 +74,8 @@ export default {
       }
     }
 
+    this.canvas.ontouchend = e=>e.preventDefault();
+
     this.canvas.onpointerup = this.canvas.onpointerout = e=>{
       e.preventDefault();
       this.canvas.onpointermove = null;
