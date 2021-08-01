@@ -45,18 +45,10 @@ export default {
     this.pannerNode.connect(this.audioCtx.destination);
   },
   mounted(){
-    if(this.data.name){
-      this.name = this.data.name.split("_")[1] || this.data.name;
-    }
-    if(this.data.gain){
-      this.gain = this.data.gain;
-    }
-    if(this.data.pan){
-      this.pan = this.data.pan;
-    }
-    if(this.data.audioStack){
-      this.data.audioStack.forEach(elem=>this.createAudioCanvas(elem));
-    }
+    this.name = this.data?.name.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";
+    this.gain = this.data.gain || 0.5;
+    this.pan = this.data.pan || 0;
+    this.data?.audioStack.forEach(this.$refs.container.createAudioCanvas);
   },
   computed: {
     name: {
@@ -98,10 +90,6 @@ export default {
       this.isSelected = true;
     },
 
-    createAudioCanvas(initConfig){
-      this.$refs.container.createAudioCanvas(initConfig);
-    },
-
     startRecording(){
       this.$refs.container.startRecording();
     },
@@ -116,12 +104,6 @@ export default {
 
     pause(){
       this.$refs.container.pause();
-    },
-
-    remove(){
-      this.$refs.label.remove();
-      this.$refs.container.remove();
-      return this;
     },
 
     async getDownloadData(root, index){

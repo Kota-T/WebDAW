@@ -165,8 +165,7 @@ export default {
       const state = this.$store.state;
       const curDiff = getDiff(e.touches);
       const newVal = Math.round(state.beat_interval * curDiff / oldDiff);
-      if(newVal * state.rhythm[0] / (state.rhythm[1] / 4) * state.number_of_bars > this.$refs.ruler.canvas.width)
-        return;
+      if(newVal < 10 || newVal > 100) return;
       this.$refs.resizer.value = newVal;
       this.$store.commit('beat_interval', newVal);
       oldDiff = curDiff;
