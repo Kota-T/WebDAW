@@ -262,7 +262,7 @@ export default {
         .filter(track=>track.isSelected)
         .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
         .sort((a, b) => b - a)
-        .forEach(this.removeTrack);
+        .forEach(index=>this.removeTrack(index));
     },
 
     onPointerMove(x){

@@ -45,10 +45,10 @@ export default {
     this.pannerNode.connect(this.audioCtx.destination);
   },
   mounted(){
-    this.name = this.data?.name.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";
+    this.name = this.data.name?.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";
     this.gain = this.data.gain || 0.5;
     this.pan = this.data.pan || 0;
-    this.data?.audioStack.forEach(this.$refs.container.createAudioCanvas);
+    this.data.audioStack?.forEach(elem=>this.$refs.container.createAudioCanvas(elem));
   },
   computed: {
     name: {

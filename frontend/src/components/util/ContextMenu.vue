@@ -61,7 +61,7 @@ export default {
           break;
       }
       this.isShow = true;
-      this.$refs.domElement.focus();
+      setTimeout(()=>this.$refs.domElement.focus());
     },
   }
 }
