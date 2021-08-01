@@ -74,9 +74,12 @@ export default {
       }
     }
 
-    this.canvas.onpointerup = this.canvas.onpointerout = ()=>{
+    this.canvas.onpointerup = this.canvas.onpointerout = e=>{
       this.canvas.onpointermove = null;
+      return false;
     }
+
+    this.canvas.onclick = e=>false;
 
     this.data = { buffer: null };
 
