@@ -49,7 +49,7 @@ export default {
   methods: {
     shareProject(){
       this.projectId = "loading";
-      this.ajax = new WebSocket(`wss://${location.host}/websocket`);
+      this.ajax = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
       this.ajax.onerror = err=>{
         this.projectId = null;
         console.error(err);
@@ -76,7 +76,7 @@ export default {
     joinProject(){
       this.projectId = "loading";
       const id = this.$refs.projectIdField.value;
-      this.ajax = new WebSocket(`wss://${location.host}/websocket`);
+      this.ajax = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
       this.ajax.onerror = err=>{
         this.projectId = null;
         console.error(err);

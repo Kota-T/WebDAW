@@ -4,8 +4,7 @@ import { store } from './store.js';
 
 createApp(App).use(store).mount('#app');
 
-import StereoPannerNode from './webaudio/stereo-panner-node.min.js';
-StereoPannerNode.polyfill();
+import 'stereo-panner-node-polyfill';
 
 const userAgent = window.navigator.userAgent.toLowerCase();
 
