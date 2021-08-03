@@ -56,7 +56,8 @@ export default {
   methods: {
     start(when=0){
       setTimeout(()=>{
-        this.count();
+        if(when !== 0)
+          this.count();
         this.countId = setInterval(()=>{
           this.count();
         }, this.count_time * 1000);
