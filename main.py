@@ -1,7 +1,7 @@
 import os, json
-import tornado.ioloop
-import tornado.web
-import tornado.websocket
+from tornado.ioloop import IOLoop
+from tornado.web import Application, RequestHandler, StaticFileHandler
+from tornado.websocket import WebSocketHandler
 
 from model import Project
 
@@ -15,11 +15,11 @@ class Team:
         self.teams.append(self)
         self.lastId += 1
 
-class IndexHandler(tornado.web.RequestHandler):
+class IndexHandler(RequestHandler):
     def get(self):
         self.render("frontend/dist/index.html")
 
-class WebDAWHandler(tornado.websocket.WebSocketHandler):
+class WebDAWHandler(WebSocketHandler):
     def open(self):
         print("opened")
 
@@ -27,19 +27,9 @@ class WebDAWHandler(tornado.websocket.WebSocketHandler):
         data = json.loads(msg)
         state = data['state']
         if state == 'shareProject':
-            self.team = Team(data['project'])
-            self.team.members.append(self)
-            self.write_message({'type': "id", 'id': self.team.id})
-            print("プロジェクトを共有")
+            self.shareProject(data['project'])
         elif state == 'joinProject':
-            try:
-                self.team = [team for team in Team.teams if str(team.id) == data['id']][0]
-                self.team.members.append(self)
-                self.write_message({'type': 'project', 'project': self.team.project.getData()})
-                print("プロジェクトに参加")
-            except IndexError as e:
-                print(e)
-                self.write_message({'type': 'error', 'msg': 'invalid project id.'})
+            self.joinProject(data['id'])
 
     def on_close(self):
         if not hasattr(self, "team"):
@@ -49,11 +39,28 @@ class WebDAWHandler(tornado.websocket.WebSocketHandler):
         if self.team.members == []:
             Team.teams.remove(self.team)
 
+    def shareProject(self, projectData):
+        self.team = Team(projectData)
+        self.team.members.append(self)
+        self.write_message({'type': "id", 'id': self.team.id})
+        print("プロジェクトを共有")
+
+    def joinProject(self, id):
+        try:
+            self.team = [team for team in Team.teams if str(team.id) == id][0]
+            self.team.members.append(self)
+            self.write_message({'type': 'project', 'project': self.team.project.getData()})
+            print("プロジェクトに参加")
+        except IndexError as e:
+            print(e)
+            self.write_message({'type': 'error', 'msg': 'invalid project id.'})
+
+
 if __name__ == "__main__":
-    application = tornado.web.Application([
+    application = Application([
         (r"/", IndexHandler),
         (r"/websocket", WebDAWHandler),
-        (r"/(.*)", tornado.web.StaticFileHandler, {"path": "frontend/dist/"})
+        (r"/(.*)", StaticFileHandler, {"path": "frontend/dist/"})
     ])
     application.listen(int(os.environ.get('PORT', 8888)))
-    tornado.ioloop.IOLoop.current().start()
+    IOLoop.current().start()
