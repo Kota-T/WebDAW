@@ -156,11 +156,11 @@ export default {
       return Math.sqrt(Math.pow(x2 - x1, 2), Math.pow(y2 - y1));
     }
     audio_field.ontouchstart = e=>{
-      if(e.touches.length !== 2) return;
+      if(this.state === "recording" || e.touches.length !== 2) return;
       oldDiff = getDiff(e.touches);
     }
     audio_field.ontouchmove = e=>{
-      if(e.touches.length !== 2) return;
+      if(this.state === "recording" || e.touches.length !== 2) return;
       e.preventDefault();
       const state = this.$store.state;
       const curDiff = getDiff(e.touches);
@@ -294,13 +294,16 @@ export default {
       setTimeout(()=>{
         if(this.state !== "preparing") return;
         this.state = "recording";
+        this.$refs.resizer.disabled = true;
         this.selectedTracks.forEach(track=>track.startRecording());
       }, this.getTimeOfDistance(this.scale_interval * this.$store.state.rhythm[0]) * 1000);
     },
 
     stopRecording(){
-      if(this.state === "recording")
+      if(this.state === "recording"){
+        this.$refs.resizer.disabled = false;
         this.selectedTracks.forEach(track=>track.stopRecording());
+      }
       this.pause();
     },
 

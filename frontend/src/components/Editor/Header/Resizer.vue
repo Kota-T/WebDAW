@@ -1,5 +1,5 @@
 <template>
-<input type="range" min="10" max="100" step="1" :title="value" v-model="value" @input="valueChanged">
+<input type="range" min="10" max="100" step="1" :title="value" v-model="value" @input="valueChanged" :disabled="disabled">
 </template>
 
 <style>
@@ -10,7 +10,8 @@ export default {
   name: 'Resizer',
   data(){
     return {
-      value: 20
+      value: 20,
+      disabled: false
     }
   },
   methods: {
