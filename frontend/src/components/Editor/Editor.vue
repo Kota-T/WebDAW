@@ -309,7 +309,7 @@ export default {
 
     play(){
       this.tracks.forEach(track=>track.play());
-      const start_time = this.getTimeOfDistance(this.$refs.pointer.x % this.scale_interval);
+      const start_time = this.getTimeOfDistance(this.scale_interval - this.$refs.pointer.x % this.scale_interval);
       this.$refs.count.start(start_time);
       this.$refs.pointer.start();
       this.state = "playing";

@@ -35,7 +35,7 @@ export default {
   data(){
     return {
       isMuted: false,
-      number: this.$store.state.rhythm[0]
+      number: 1
     }
   },
   mounted(){
