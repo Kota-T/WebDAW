@@ -56,8 +56,7 @@ export default {
   methods: {
     start(when=0){
       setTimeout(()=>{
-        if(when !== 0)
-          this.count();
+        when !== 0 ? this.count() : this.playMetronome();
         this.countId = setInterval(()=>{
           this.count();
         }, this.count_time * 1000);
