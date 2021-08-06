@@ -294,6 +294,7 @@ export default {
       setTimeout(()=>{
         if(this.state !== "preparing") return;
         this.state = "recording";
+        this.$refs.bpm.disabled = true;
         this.$refs.resizer.disabled = true;
         this.selectedTracks.forEach(track=>track.startRecording());
       }, this.getTimeOfDistance(this.scale_interval * this.$store.state.rhythm[0]) * 1000);
@@ -301,6 +302,7 @@ export default {
 
     stopRecording(){
       if(this.state === "recording"){
+        this.$refs.bpm.disabled = false;
         this.$refs.resizer.disabled = false;
         this.selectedTracks.forEach(track=>track.stopRecording());
       }

@@ -1,6 +1,6 @@
 <template>
 <div class="input">
-  <p v-if="!isInputing" @dblclick="isInputing=true">{{ value }}</p>
+  <p v-if="!isInputing" @dblclick="if(!disabled){isInputing = true;}">{{ value }}</p>
   <textarea rows="1" :cols="length" v-else v-model="value" @keydown.enter.stop="finishInput" @keydown.stop></textarea>
 </div>
 </template>
@@ -27,7 +27,8 @@ export default {
   data(){
     return {
       isInputing: false,
-      value: this.default
+      value: this.default,
+      disabled: false
     }
   },
   methods: {
