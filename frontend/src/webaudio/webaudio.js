@@ -19,23 +19,12 @@ export class Loader{
   }
 
   decodeAudioData(data, resolve){
-    if(window.isSafari){
-      this.audioCtx.decodeAudioData(
-        data,
-        buffer=>{
-          this.data.buffer = buffer;
-          resolve();
-        },
-        console.error
-      );
-    }else{
-      this.audioCtx.decodeAudioData(data)
-        .then(buffer=>{
-          this.data.buffer = buffer;
-          resolve();
-        })
-        .catch(console.error);
-    }
+    this.audioCtx.decodeAudioData(data)
+      .then(buffer=>{
+        this.data.buffer = buffer;
+        resolve();
+      })
+      .catch(console.error);
   }
 }
 

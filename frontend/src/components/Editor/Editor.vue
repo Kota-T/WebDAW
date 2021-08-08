@@ -460,13 +460,9 @@ export default {
       const length = (stop_time - start_time) * this.audioCtx.sampleRate;
       const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, length, this.audioCtx.sampleRate);
       this.tracks.forEach(track=>track.createOffline(offlineCtx, start_time, stop_time));
-      const func = buffer=>this.download(WavHandler.AudioBuffer2WavFile(buffer), 'project.wav');
-      if(window.isSafari){
-        offlineCtx.oncomplete = e => func(e.renderedBuffer);
-        offlineCtx.startRendering();
-      }else{
-        offlineCtx.startRendering().then(func).catch(console.error);
-      }
+      offlineCtx.startRendering()
+        .then(buffer=>this.download(WavHandler.AudioBuffer2WavFile(buffer), 'project.wav'))
+        .catch(console.error);
     },
 
     async getUploadData(){
