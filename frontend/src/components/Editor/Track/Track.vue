@@ -41,8 +41,7 @@ export default {
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 0.5;
     this.pannerNode = this.audioCtx.createStereoPanner();
-    this.gainNode.connect(this.pannerNode);
-    this.pannerNode.connect(this.audioCtx.destination);
+    this.gainNode.connect(this.pannerNode).connect(this.audioCtx.destination);
   },
   mounted(){
     this.name = this.data.name?.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";

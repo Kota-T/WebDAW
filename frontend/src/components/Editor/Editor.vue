@@ -204,8 +204,7 @@ export default {
       }
     }
 
-    document.setDefaultOnkeydown = ()=>this.setDefaultOnkeydown();
-    document.setDefaultOnkeydown();
+    this.setDefaultOnkeydown();
   },
   computed: {
     scale_interval(){

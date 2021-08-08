@@ -48,8 +48,7 @@ export class AudioRecorder{
   }
 
   start(){
-    this.source.connect(this.sp);
-    this.sp.connect(this.audioCtx.destination);
+    this.source.connect(this.sp).connect(this.audioCtx.destination);
     this.sp.onaudioprocess = e=>this.audioData.push(WavHandler.AudioBuffer2WavData(e.inputBuffer));
     this.onstart();
   }

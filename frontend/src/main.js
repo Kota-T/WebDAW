@@ -4,8 +4,6 @@ import { store } from './store.js';
 
 createApp(App).use(store).mount('#app');
 
-import 'stereo-panner-node-polyfill';
-
 const userAgent = window.navigator.userAgent.toLowerCase();
 
 if(userAgent.indexOf('msie') != -1 ||
