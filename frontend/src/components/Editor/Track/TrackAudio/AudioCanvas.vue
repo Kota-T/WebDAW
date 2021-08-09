@@ -95,6 +95,7 @@ export default {
 
     (async ()=>{
       await this.loader.load();
+      console.log(this.audioCtx.destination.channelCount);
       this.canvas_width = this.data.buffer.duration * this.second_width;
       if(this.canvas_width > this.ruler_width){
         const state = this.$store.state;
