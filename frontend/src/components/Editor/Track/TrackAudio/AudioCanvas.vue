@@ -95,7 +95,6 @@ export default {
 
     (async ()=>{
       await this.loader.load();
-      console.log(this.audioCtx.destination.channelCount);
       this.canvas_width = this.data.buffer.duration * this.second_width;
       if(this.canvas_width > this.ruler_width){
         const state = this.$store.state;
@@ -205,6 +204,7 @@ export default {
     },
 
     resize(initLeft, initRight, e){
+      if(this.canvas_width <= 0) return;
       const left = e.offsetX;
       const right = this.canvas_width - left;
 
@@ -226,17 +226,10 @@ export default {
     },
 
     async getDownloadData(folder, index){
-      await new Promise(resolve=>{
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', this.loader.url);
-        xhr.responseType = 'blob';
-        xhr.onload = ()=>{
-          folder.file(index + ".wav", xhr.response);
-          resolve();
-        }
-        xhr.onerror = console.error;
-        xhr.send();
-      });
+      await fetch(this.loader.url)
+      .then(res=>res.blob())
+      .then(res=>folder.file(index + ".wav", res))
+      .catch(console.error);
 
       return {
         startPoint: this.startPoint,
@@ -245,22 +238,14 @@ export default {
     },
 
     async getUploadData(){
-      let base64;
-      await new Promise(resolve=>{
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', this.loader.url);
-        xhr.responseType = 'blob';
-        xhr.onload = ()=>{
-          const reader = new FileReader();
-          reader.onload = ()=>{
-            base64 = reader.result;
-            resolve();
-          }
-          reader.readAsDataURL(xhr.response);
-        }
-        xhr.onerror = console.error;
-        xhr.send();
-      });
+      const base64 = await fetch(this.loader.url)
+      .then(res=>res.blob())
+      .then(res=>new Promise(resolve=>{
+        const reader = new FileReader();
+        reader.onload = ()=>resolve(reader.result);
+        reader.readAsDataURL(res);
+      }))
+      .catch(console.error);
 
       return {
         startPoint: this.startPoint,
