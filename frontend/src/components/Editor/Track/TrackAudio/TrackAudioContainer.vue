@@ -81,7 +81,7 @@ export default {
         }
         recordingId = requestAnimationFrame(loop);
       }
-
+      
       this.recorder.onstop = url=>{
         cancelAnimationFrame(recordingId);
         this.createAudioCanvas({startPoint: startPoint, url: url});

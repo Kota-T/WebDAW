@@ -234,12 +234,24 @@ export default {
 
       if(!this.stream){
         this.stream = await navigator.mediaDevices
-          .getUserMedia({video: false, audio: true})
+          .getUserMedia(
+            {
+              video: false,
+              audio: {
+                autoGainControl: false,
+                channelCount: 2,
+                echoCancellation: false,
+                noiseSuppression: false,
+                sampleRate: 44100
+              }
+            }
+          )
           .catch(err=>{
             console.error(err);
             window.alert("マイク入力を取得できません。");
           });
         if(!this.stream){return;}
+        console.log(this.stream.getAudioTracks()[0].getSettings());
       }
 
       this.tracks = [];

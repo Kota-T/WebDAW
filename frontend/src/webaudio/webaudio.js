@@ -8,23 +8,11 @@ export class Loader{
   }
 
   async load(){
-    return await new Promise((resolve, reject)=>{
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', this.url);
-      xhr.responseType = 'arraybuffer';
-      xhr.onload = () => this.decodeAudioData(xhr.response, resolve);
-      xhr.onerror = console.error;
-      xhr.send();
-    });
-  }
-
-  decodeAudioData(data, resolve){
-    this.audioCtx.decodeAudioData(data)
-      .then(buffer=>{
-        this.data.buffer = buffer;
-        resolve();
-      })
-      .catch(console.error);
+    return await fetch(this.url)
+    .then(res=>res.arrayBuffer())
+    .then(res=>this.audioCtx.decodeAudioData(res))
+    .then(buf=>this.data.buffer = buf)
+    .catch(console.error);
   }
 }
 
