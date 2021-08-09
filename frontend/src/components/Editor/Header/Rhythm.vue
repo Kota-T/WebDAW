@@ -12,8 +12,8 @@ export default {
   },
   methods: {
     init(value){
-      this.$refs.inputElement.value = value;
-      this.$store.commit('rhythm', value.split('/').map(elem=>Number(elem)));
+      this.$refs.inputElement.value = value.join("/");
+      this.$store.commit('rhythm', value);
     },
     valueChanged(value){
       this.$store.commit('rhythm', value.split('/').map(elem=>Number(elem)));

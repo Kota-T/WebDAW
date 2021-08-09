@@ -396,7 +396,7 @@ export default {
     async createConfigBlob(root){
       const state = this.$store.state;
       const json = JSON.stringify({
-        rhythm: state.rhythm.join("/"),
+        rhythm: state.rhythm,
         bpm: state.bpm,
         beat_interval: state.beat_interval,
         number_of_bars: state.number_of_bars,
