@@ -22,6 +22,7 @@ export class AudioRecorder{
     this.source = this.audioCtx.createMediaStreamSource(stream);
     this.sp = this.audioCtx.createScriptProcessor(0, 2, 2);
     this.audioData = [];
+    console.log("source: " + this.source.channelCount);
   }
 
   start(){

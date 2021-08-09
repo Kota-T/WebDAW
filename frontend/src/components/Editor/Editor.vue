@@ -251,7 +251,6 @@ export default {
             window.alert("マイク入力を取得できません。");
           });
         if(!this.stream){return;}
-        console.log(this.stream.getAudioTracks()[0].getSettings());
       }
 
       this.tracks = [];
