@@ -198,7 +198,6 @@ export default {
         }else{
           const data = {};
           await new Promise(resolve => this.readProjectDirectory(entry, data, resolve));
-          console.log(data);
           await this.loadProject(data["project"]);
         }
       }
@@ -208,14 +207,12 @@ export default {
   },
   computed: {
     scale_interval(){
-      const state = this.$store.state;
-      return state.beat_interval * 4 / state.rhythm[1];
+      return this.$store.getters.scale_interval;
     }
   },
   methods: {
     getTimeOfDistance(distance){
-      const state = this.$store.state;
-      return  60 / state.bpm * distance / state.beat_interval;
+      return this.$store.getters.getTimeOfDistance(distance);
     },
 
     setTrackRef(el){
@@ -280,8 +277,8 @@ export default {
       if(this.state === "recording" && x - audio_field.scrollLeft > audio_field.offsetWidth){
         audio_field.scrollLeft += audio_field.offsetWidth;
       }
-      if(x >= this.$refs.ruler.$refs.canvas.width){
-        this.$store.commit('number_of_bars', this.$store.state.number_of_bars + 30);
+      if(x >= this.$store.getters.ruler_width){
+        this.$store.commit('addNumberOfBars', 30);
       }
     },
 
@@ -307,7 +304,7 @@ export default {
         this.$refs.bpm.disabled = true;
         this.$refs.resizer.disabled = true;
         this.selectedTracks.forEach(track=>track.startRecording());
-      }, this.getTimeOfDistance(this.scale_interval * this.$store.state.rhythm[0]) * 1000);
+      }, this.getTimeOfDistance(this.$store.getters.bar_width) * 1000);
     },
 
     stopRecording(){
@@ -321,7 +318,8 @@ export default {
 
     play(){
       this.tracks.forEach(track=>track.play());
-      const start_time = this.getTimeOfDistance(this.scale_interval - this.$refs.pointer.x % this.scale_interval);
+      const remain_interval = this.scale_interval - this.$refs.pointer.x % this.scale_interval;
+      const start_time = this.getTimeOfDistance(remain_interval);
       this.$refs.count.start(start_time);
       this.$refs.pointer.start();
       this.state = "playing";
@@ -398,7 +396,7 @@ export default {
     async createConfigBlob(root){
       const state = this.$store.state;
       const json = JSON.stringify({
-        rhythm: state.rhythm,
+        rhythm: state.rhythm.join("/"),
         bpm: state.bpm,
         beat_interval: state.beat_interval,
         number_of_bars: state.number_of_bars,
@@ -440,9 +438,9 @@ export default {
     },
 
     setConfig(json){
-      this.$store.commit('rhythm', json.rhythm.map(elem=>Number(elem)));
-      this.$store.commit('bpm', Number(json.bpm));
-      this.$store.commit('beat_interval', Number(json.beat_interval));
+      this.$refs.rhythm.init(json.rhythm);
+      this.$refs.bpm.init(json.bpm);
+      this.$refs.resizer.init(json.beat_interval);
       this.$store.commit('number_of_bars', Number(json.number_of_bars));
     },
 

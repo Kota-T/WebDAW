@@ -43,22 +43,22 @@ export default {
       isShowPopup: false,
       popUpType: null,
       projectId: null,
-      ajax: null
+      socket: null
     }
   },
   methods: {
     shareProject(){
       this.projectId = "loading";
-      this.ajax = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
-      this.ajax.onerror = err=>{
+      this.socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
+      this.socket.onerror = err=>{
         this.projectId = null;
         console.error(err);
       }
-      this.ajax.onopen = async () => this.ajax.send(JSON.stringify({
+      this.socket.onopen = async () => this.socket.send(JSON.stringify({
         state: "shareProject",
         project: await this.$refs.editor.getUploadData()
       }));
-      this.ajax.onmessage = e=>{
+      this.socket.onmessage = e=>{
         const data = JSON.parse(e.data);
         switch(data.type){
           case 'id':
@@ -76,16 +76,16 @@ export default {
     joinProject(){
       this.projectId = "loading";
       const id = this.$refs.projectIdField.value;
-      this.ajax = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
-      this.ajax.onerror = err=>{
+      this.socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
+      this.socket.onerror = err=>{
         this.projectId = null;
         console.error(err);
       }
-      this.ajax.onopen = async () => this.ajax.send(JSON.stringify({
+      this.socket.onopen = async () => this.socket.send(JSON.stringify({
         state: "joinProject",
         id: id
       }));
-      this.ajax.onmessage = async e=>{
+      this.socket.onmessage = async e=>{
         const data = JSON.parse(e.data);
         switch(data.type){
           case 'project':

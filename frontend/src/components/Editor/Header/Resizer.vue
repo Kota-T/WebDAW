@@ -15,6 +15,10 @@ export default {
     }
   },
   methods: {
+    init(value){
+      this.value = value;
+      this.$store.commit('beat_interval', Number(value));
+    },
     valueChanged(){
       this.$store.commit('beat_interval', Number(this.value));
     }

@@ -96,7 +96,7 @@ export default {
     (async ()=>{
       await this.loader.load();
       this.canvas_width = this.data.buffer.duration * this.second_width;
-      if(this.canvas_width > this.ruler_width){
+      if(this.canvas_width > this.$store.getters.ruler_width){
         const state = this.$store.state;
         const result = Math.ceil(this.data.buffer.duration * state.bpm / 60 / state.rhythm[0] * 4 / state.rhythm[1])
         this.$store.commit('number_of_bars', result);
@@ -112,10 +112,6 @@ export default {
     },
     second_width(){
       return this.bpm / 60 * this.beat_interval;
-    },
-    ruler_width(){
-      const state = this.$store.state;
-      return state.beat_interval * state.rhythm[0] * 4 / state.rhythm[1] * state.number_of_bars;
     },
     canvas(){
       return this.$refs.canvas;
@@ -159,11 +155,11 @@ export default {
   },
   methods: {
     getTimeOfDistance(distance){
-      return  60 / this.bpm * distance / this.beat_interval;
+      return this.$store.getters.getTimeOfDistance(distance);
     },
 
     getTime(point){
-      return  60 / this.bpm * (point - this.initStartPoint)/ this.beat_interval;
+      return this.getTimeOfDistance(point - this.initStartPoint);
     },
 
     play(startPoint, onended){

@@ -28,10 +28,6 @@ export default {
   },
   computed: {
     beat_interval(){return this.$store.state.beat_interval;},
-    animation_width(){
-      const state = this.$store.state;
-      return state.bpm / 60 * this.beat_interval / state.animation_fps;
-    },
     canvas(){
       return this.$refs.canvas;
     },
@@ -68,13 +64,13 @@ export default {
 
     prepareRecording(){
       const rhythm = this.$store.state.rhythm;
-      const scale_interval = this.beat_interval * 4 / rhythm[1];
+      const scale_interval = this.$store.getters.scale_interval;
       this.x = (Math.floor(this.x / scale_interval) - rhythm[0]) * scale_interval;
     },
 
     move(){
       this.$emit('move', this.x);
-      this.x += this.animation_width;
+      this.x += this.$store.getters.animation_width;
     }
   }
 }

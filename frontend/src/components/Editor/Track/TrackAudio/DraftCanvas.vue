@@ -34,12 +34,8 @@ export default {
     this.initCtxStyle();
   },
   computed: {
-    animation_width(){
-      const state = this.$store.state;
-      return state.bpm / 60 * state.beat_interval / state.animation_fps;
-    },
     slice_width(){
-      return this.animation_width / this.dataArray.length;
+      return this.$store.getters.animation_width / this.dataArray.length;
     },
     canvas(){
       return this.$refs.canvas;
@@ -74,7 +70,7 @@ export default {
       this.ctx.fillRect(
         this.drawPoint,
         0,
-        this.animation_width,
+        this.$store.getters.animation_width,
         this.canvas.height
       );
 

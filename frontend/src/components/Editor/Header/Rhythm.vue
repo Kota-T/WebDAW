@@ -1,5 +1,5 @@
 <template>
-  <InputElement length="5" default="4/4" @value-changed="valueChanged"/>
+  <InputElement length="5" default="4/4" @value-changed="valueChanged" ref="inputElement"/>
 </template>
 
 <script>
@@ -11,6 +11,10 @@ export default {
     InputElement
   },
   methods: {
+    init(value){
+      this.$refs.inputElement.value = value;
+      this.$store.commit('rhythm', value.split('/').map(elem=>Number(elem)));
+    },
     valueChanged(value){
       this.$store.commit('rhythm', value.split('/').map(elem=>Number(elem)));
     }

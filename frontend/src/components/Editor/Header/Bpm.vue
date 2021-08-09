@@ -17,6 +17,10 @@ export default {
     }
   },
   methods: {
+    init(value){
+      this.$refs.inputElement.value = value;
+      this.$store.commit('bpm', Number(value));
+    },
     valueChanged(value){
       if(this.disabled){
         this.$refs.inputElement.value = this.$store.state.bpm;

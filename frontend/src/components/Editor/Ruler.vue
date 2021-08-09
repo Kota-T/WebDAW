@@ -33,8 +33,8 @@ export default {
   },
   methods: {
     draw(){
-      const [num, den] = this.rhythm;
-      const scale_interval = this.beat_interval * 4 / den;
+      const num = this.rhythm[0];
+      const scale_interval = this.$store.getters.scale_interval;
       this.canvas.width = scale_interval * num * this.number_of_bars;
       this.ctx.fillStyle = "#323232";
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
