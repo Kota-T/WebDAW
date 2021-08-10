@@ -13,7 +13,7 @@ export default {
   methods: {
     init(value){
       this.$refs.inputElement.value = value.join("/");
-      this.$store.commit('rhythm', value);
+      this.$store.commit('rhythm', value.map(elem=>Number(elem)));
     },
     valueChanged(value){
       this.$store.commit('rhythm', value.split('/').map(elem=>Number(elem)));
