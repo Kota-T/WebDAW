@@ -3,7 +3,7 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler
 
-from model import Audio, Track, Team
+from model import Team
 
 
 class IndexHandler(RequestHandler):
@@ -58,18 +58,17 @@ class WebDAWHandler(WebSocketHandler):
                 member.write_message(message)
 
     def addTrack(self, trackData):
-        self.team.project.tracks.append(Track(trackData))
+        self.team.project.addTrack(trackData)
         self.write_message_to_other_members({'type': 'addTrack', 'trackData': trackData})
         print("トラックを追加")
 
     def removeTrack(self, index):
-        self.team.project.tracks.pop(index)
+        self.team.project.removeTrack(index)
         self.write_message_to_other_members({'type': 'removeTrack', 'index': index})
         print("トラックを消去")
 
     def shareAudio(self, audioDataArray):
-        for audioData in audioDataArray:
-            self.team.project.tracks[audioData['index']].audioStack.append(Audio(audioData['data']))
+        self.team.project.addAudio(audioDataArray)
         self.write_message_to_other_members({'type': 'audio', 'audioDataArray': audioDataArray})
         print("オーディオを共有")
 

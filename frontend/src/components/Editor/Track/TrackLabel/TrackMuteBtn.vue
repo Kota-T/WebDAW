@@ -28,7 +28,7 @@ export default {
   },
   watch: {
     isMuted(val){
-      this.muteNode.gain.value = val ? 1 : 0;
+      this.muteNode.gain.value = val ? 0 : 1;
     }
   }
 }

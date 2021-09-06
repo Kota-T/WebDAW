@@ -27,6 +27,9 @@ class Track:
             'audioStack': [audio.getData() for audio in self.audioStack]
         }
 
+    def addAudio(self, audioData):
+        self.audioStack.append(Audio(audioData))
+
 
 class Project:
     def __init__(self, projectData):
@@ -53,6 +56,19 @@ class Project:
 
     def setBeatInterval(self, value):
         self.beat_interval = value
+
+    def setNumberOfBars(self, value):
+        self.number_of_bars = value
+
+    def addTrack(self, trackData):
+        self.tracks.append(Track(trackData))
+
+    def removeTrack(self, index):
+        self.tracks.pop(index)
+
+    def addAudio(self, audioDataArray):
+        for audioData in audioDataArray:
+            self.tracks[audioData['index']].addAudio(audioData['data'])
 
 
 class Team:
