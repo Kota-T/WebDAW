@@ -13,9 +13,11 @@
 
 <style>
 #menu-btn{
+  width: 36px;
+  height: 36px;
   position: fixed;
-  top: 10px;
-  left: 10px;
+  top: 5px;
+  right: 5px;
   z-index: 500;
 }
 #menu-btn:hover{
@@ -30,7 +32,7 @@
   padding: 55px 10px 0 10px;
   position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   z-index: 400;
 }
 #side-menu a{

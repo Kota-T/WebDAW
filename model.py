@@ -13,7 +13,7 @@ class Audio:
 
 
 class Track:
-    def __init__(self, trackData=dict()):
+    def __init__(self, trackData):
         self.name = trackData['name']
         self.gain = trackData['gain']
         self.pan  = trackData['pan']
@@ -29,7 +29,7 @@ class Track:
 
 
 class Project:
-    def __init__(self, projectData=dict()):
+    def __init__(self, projectData):
         self.rhythm = projectData['rhythm']
         self.bpm = projectData['bpm']
         self.beat_interval = projectData['beat_interval']
@@ -53,9 +53,6 @@ class Project:
 
     def setBeatInterval(self, value):
         self.beat_interval = value
-
-    def addTrack(self, trackData):
-        self.tracks.append(Track(trackData))
 
 
 class Team:
