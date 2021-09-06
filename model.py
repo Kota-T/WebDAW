@@ -62,7 +62,7 @@ class Team:
     lastId = 0
     teams = []
     def __init__(self, projectData):
-        self.id = self.lastId
+        self.id = Team.lastId
         self.members = []
         self.project = Project(projectData)
         Team.teams.append(self)
