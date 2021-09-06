@@ -1,5 +1,11 @@
 <template>
-<img id="menu-btn" src="../assets/hamburger.png" @click="isShow=!isShow">
+<svg id="menu-btn" @click="isShow=!isShow">
+  <use
+  href="../assets/hamburger.svg#hamburger"
+  :fill="isShow ? '#323232' : 'white'"
+  :stroke="isShow ? '#323232' : 'white'"
+  />
+</svg>
 <div id="side-menu" v-show="isShow" @click.stop @keydown.stop>
   <slot></slot>
 </div>
@@ -7,8 +13,6 @@
 
 <style>
 #menu-btn{
-  width: 35px;
-  height: 35px;
   position: fixed;
   top: 10px;
   left: 10px;

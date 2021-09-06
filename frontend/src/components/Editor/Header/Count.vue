@@ -1,22 +1,21 @@
 <template>
-  <img id="metronome" src="../../../assets/metronome.png" :class="{white: !isMuted, red: isMuted}" @click="isMuted=!isMuted;">
+  <svg id="metronome" @click="isMuted=!isMuted;">
+    <use
+    href="../../../assets/metronome.svg#metronome"
+    :fill="isMuted ? 'red' : 'white'"
+    :stroke="isMuted ? 'red' : 'white'"
+    />
+  </svg>
   <div id="count">{{ number }}</div>
 </template>
 
 <style>
 #metronome{
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 30px;
+  height: 30px;
 }
 #metronome:hover{
   cursor: pointer;
-}
-.white{
-  background-color: white;
-}
-.red{
-  background-color: red;
 }
 #count{
   background-color: white;
