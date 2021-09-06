@@ -32,6 +32,7 @@
 #side-menu a{
   display: block;
   text-decoration: none;
+  margin-bottom: 10px;
 }
 #side-menu a:hover{
   cursor: pointer;
