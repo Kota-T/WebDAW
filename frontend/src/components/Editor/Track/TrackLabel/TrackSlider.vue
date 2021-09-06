@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="track-slider-container">
   <select v-model="selectedValue">
     <option selected title="Volume">V</option>
     <option title="Pan">P</option>
@@ -10,6 +10,12 @@
 </template>
 
 <style>
+.track-slider-container > *{
+  vertical-align: middle;
+}
+.track-slider-container select{
+  margin-right:5px;
+}
 </style>
 
 <script>

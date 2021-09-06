@@ -3,6 +3,7 @@
     <TrackLabel
     :gainNode="gainNode"
     :pannerNode="pannerNode"
+    :muteNode="muteNode"
     ref="label"
     @track-selected="select"
     @track-remove="$emit('track-remove')"
@@ -41,7 +42,8 @@ export default {
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 0.5;
     this.pannerNode = this.audioCtx.createStereoPanner();
-    this.gainNode.connect(this.pannerNode).connect(this.audioCtx.destination);
+    this.muteNode = this.audioCtx.createGain();
+    this.gainNode.connect(this.pannerNode).connect(this.muteNode).connect(this.audioCtx.destination);
   },
   mounted(){
     this.name = this.data.name?.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";

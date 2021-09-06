@@ -10,6 +10,7 @@
     <div>
       <InputElement length="10" default="新規トラック" ref="trackName"/>
       <TrackSlider :gainNode="gainNode" :pannerNode="pannerNode" ref="trackSlider"/>
+      <TrackMuteBtn :muteNode="muteNode"/>
     </div>
   </div>
   <ContextMenu ref="menu">
@@ -40,15 +41,16 @@
 <script>
 import InputElement from '../../../util/InputElement.vue';
 import TrackSlider from './TrackSlider.vue';
+import TrackMuteBtn from './TrackMuteBtn.vue';
 
 import ContextMenu from '../../../util/ContextMenu.vue';
 
 export default {
   name: 'TrackLabel',
-  props: ['gainNode', 'pannerNode'],
+  props: ['gainNode', 'pannerNode', "muteNode"],
   emits: ['track-selected', 'track-remove'],
   components: {
-    InputElement, TrackSlider, ContextMenu
+    InputElement, TrackSlider, TrackMuteBtn, ContextMenu
   },
   data(){
     return {
