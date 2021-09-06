@@ -51,7 +51,7 @@ export default {
       isSelected: false,
     }
   },
-  mounted(){
+  async mounted(){
     this.ctx = this.canvas.getContext('2d');
     this.x = this.initConfig.startPoint;
     this.diminished = this.initConfig.diminished || {left: 0, right: 0};
@@ -93,15 +93,13 @@ export default {
 
     this.drawdataprocessor = new DrawDataProcessor(this.audioCtx);
 
-    (async ()=>{
-      await this.loader.load();
-      this.canvas_width = this.data.buffer.duration * this.second_width;
-      if(this.canvas_width > this.$store.getters.ruler_width){
-        const state = this.$store.state;
-        const result = Math.ceil(this.data.buffer.duration * state.bpm / 60 / state.rhythm[0] * 4 / state.rhythm[1])
-        this.$store.commit('number_of_bars', result);
-      }
-    })();
+    await this.loader.load();
+    this.canvas_width = this.data.buffer.duration * this.second_width;
+    if(this.canvas_width > this.$store.getters.ruler_width){
+      const state = this.$store.state;
+      const result = Math.ceil(this.data.buffer.duration * state.bpm / 60 / state.rhythm[0] * 4 / state.rhythm[1]);
+      this.$store.commit('number_of_bars', result);
+    }
   },
   computed: {
     bpm(){

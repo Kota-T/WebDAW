@@ -62,6 +62,7 @@ export default {
     },
 
     removeAudioCanvas(index){
+      if(!window.confirm("選択されているオーディオを削除しますか？")) return;
       this.audioStack = [];
       this.audioParamStack.splice(index, 1);
     },
@@ -81,7 +82,7 @@ export default {
         }
         recordingId = requestAnimationFrame(loop);
       }
-      
+
       this.recorder.onstop = url=>{
         cancelAnimationFrame(recordingId);
         this.createAudioCanvas({startPoint: startPoint, url: url});

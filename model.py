@@ -1,7 +1,7 @@
 class Audio:
-    def __init__(self, audioData={}):
-        self.startPoint = audioData['startPoint'] or 0
-        self.diminished = audioData['diminished'] or {"left": 0, "right": 0}
+    def __init__(self, audioData):
+        self.startPoint = audioData['startPoint']
+        self.diminished = audioData['diminished']
         self.base64     = audioData['base64']
 
     def getData(self):
@@ -13,10 +13,10 @@ class Audio:
 
 
 class Track:
-    def __init__(self, trackData={}):
-        self.name = trackData['name'] or "新規トラック"
-        self.gain = trackData['gain'] or 0.5
-        self.pan  = trackData['pan'] or 0
+    def __init__(self, trackData=dict()):
+        self.name = trackData['name']
+        self.gain = trackData['gain']
+        self.pan  = trackData['pan']
         self.audioStack = [Audio(audioData) for audioData in trackData['audioStack']]
 
     def getData(self):
@@ -29,10 +29,7 @@ class Track:
 
 
 class Project:
-    def __init__(self, projectData):
-        self.init(projectData)
-
-    def init(self, projectData={}):
+    def __init__(self, projectData=dict()):
         self.rhythm = projectData['rhythm'] or [4, 4]
         self.bpm = projectData['bpm'] or 120
         self.beat_interval = projectData['beat_interval'] or 20
@@ -59,3 +56,14 @@ class Project:
 
     def addTrack(self, trackData):
         self.tracks.append(Track(trackData))
+
+
+class Team:
+    lastId = 0
+    teams = []
+    def __init__(self, projectData):
+        self.id = self.lastId
+        self.members = []
+        self.project = Project(projectData)
+        self.teams.append(self)
+        self.lastId += 1

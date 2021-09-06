@@ -9,7 +9,7 @@
     <Resizer ref="resizer"/>
   </div>
   <div id="label_field" ref="label_field">
-    <AddTrackBtn @add-track="addTrack"/>
+    <AddTrackBtn @add-track="addTrackByUser"/>
   </div>
   <div id="audio_field" ref="audio_field">
     <Pointer @move="onPointerMove" ref="pointer"/>
@@ -112,6 +112,7 @@ export default {
     Pointer,
     Track
   },
+  inject: ['provider'],
   data(){
     return {
       trackParams: [],
@@ -126,12 +127,6 @@ export default {
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   },
   mounted(){
-    window.onpopstate = e => e.preventDefault();
-    window.onbeforeunload = e=>{
-      e.preventDefault();
-      e.returnValue = 'ページを移動すると全てのデータが失われます。';
-    }
-
     const label_field = this.$refs.label_field;
     const audio_field = this.$refs.audio_field;
     label_field.onscroll = e=>audio_field.scrollTop = label_field.scrollTop;
@@ -221,7 +216,27 @@ export default {
       }
     },
 
-    async addTrack(trackData){
+    async getStream(){
+      this.stream = await navigator.mediaDevices
+        .getUserMedia(
+          {
+            video: false,
+            audio: {
+              autoGainControl: false,
+              channelCount: 2,
+              echoCancellation: false,
+              noiseSuppression: false,
+              sampleRate: 44100
+            }
+          }
+        )
+        .catch(err=>{
+          console.error(err);
+          window.alert("マイク入力を取得できません。");
+        });
+    },
+
+    async addTrack(trackData={}){
       switch(this.audioCtx.state){
         case "suspended":
         case "interrupted":
@@ -230,30 +245,31 @@ export default {
       }
 
       if(!this.stream){
-        this.stream = await navigator.mediaDevices
-          .getUserMedia(
-            {
-              video: false,
-              audio: {
-                autoGainControl: false,
-                channelCount: 2,
-                echoCancellation: false,
-                noiseSuppression: false,
-                sampleRate: 44100
-              }
-            }
-          )
-          .catch(err=>{
-            console.error(err);
-            window.alert("マイク入力を取得できません。");
-          });
+        await this.getStream();
         if(!this.stream){return;}
       }
 
       this.tracks = [];
-      if(!trackData){
-        trackData = {};
-      }
+      trackData.id = this.lastTrackId;
+      this.trackParams.push(trackData);
+      this.lastTrackId++;
+    },
+
+    async addTrackByUser(trackData){
+      await this.addTrack(trackData);
+      if(this.provider.socket.connected)
+        this.$nextTick(function(){this.sendTrackData();});
+    },
+
+    async sendTrackData(){
+      this.provider.socket.send(JSON.stringify({
+        state: "addTrack",
+        trackData: await this.tracks[this.tracks.length - 1].getUploadData()
+      }));
+    },
+
+    acceptTrack(trackData={}){
+      this.tracks = [];
       trackData.id = this.lastTrackId;
       this.trackParams.push(trackData);
       this.lastTrackId++;
@@ -265,6 +281,7 @@ export default {
     },
 
     removeSelectedTracks(){
+      if(!window.confirm("選択されているトラックを削除しますか？")) return;
       this.tracks
         .filter(track=>track.isSelected)
         .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
@@ -282,7 +299,7 @@ export default {
       }
     },
 
-    async startRecording(){
+    startRecording(){
       this.selectedTracks = this.tracks.filter(track=>track.isSelected);
       const notSelectedTracks = this.tracks.filter(track=>!track.isSelected);
       if(!this.selectedTracks.length){return;}
@@ -312,6 +329,8 @@ export default {
         this.$refs.bpm.disabled = false;
         this.$refs.resizer.disabled = false;
         this.selectedTracks.forEach(track=>track.stopRecording());
+        if(this.provider.socket.connected)
+          this.$nextTick(function(){this.sendAudioDataArray()});
       }
       this.pause();
     },
@@ -330,6 +349,31 @@ export default {
       this.$refs.count.stop();
       this.$refs.pointer.stop();
       this.state = null;
+    },
+
+    async sendAudioDataArray(){
+      const audioDataArray = await Promise.all(this.selectedTracks.map(async track=>{
+        const audioStack = track.$refs.container.audioStack;
+        return {
+          index: this.tracks.indexOf(track),
+          data: await audioStack[audioStack.length - 1].getUploadData()
+        };
+      }));
+
+      this.provider.socket.send(JSON.stringify({
+        state: "shareAudio",
+        audioDataArray: audioDataArray
+      }));
+    },
+
+    acceptAudioDataArray(audioDataArray){
+      audioDataArray.forEach(audioData=>{
+        this.tracks[audioData.index].$refs.container.createAudioCanvas({
+          startPoint: audioData.data.startPoint,
+          diminished: audioData.data.diminished,
+          url: WavHandler.Base642Wav(audioData.data.base64)
+        })
+      });
     },
 
     setDefaultOnkeydown(){
@@ -365,12 +409,11 @@ export default {
     },
 
     async loadAudioFile(file){
-      const src = window.URL.createObjectURL(file);
-      await this.addTrack({
+      await this.addTrackByUser({
         audioStack: [
           {
             startPoint: 0,
-            url: src
+            url: window.URL.createObjectURL(file)
           }
         ]
       });
@@ -487,17 +530,7 @@ export default {
 
     async setSharedTracksData(tracksData){
       for await(let trackData of tracksData){
-        trackData.audioStack.forEach(elem=>{
-          const byteString = atob(elem.base64.split( "," )[1]) ;
-          const mimeType = elem.base64.match( /(:)([a-z\/]+)(;)/ )[2] ;
-          const content = new Uint8Array(byteString.length);
-          for(let i = 0; i < byteString.length; i++){
-	          content[i] = byteString.charCodeAt(i);
-          }
-
-          const blob = new Blob([content], {type: mimeType}) ;
-          elem.url = URL.createObjectURL(blob);
-        });
+        trackData.audioStack.forEach(elem => elem.url = WavHandler.Base642Wav(elem.base64));
         await this.addTrack(trackData);
       }
     },

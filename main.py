@@ -3,17 +3,8 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler
 
-from model import Project
+from model import Audio, Track, Team
 
-class Team:
-    lastId = 0
-    teams = []
-    def __init__(self, projectData):
-        self.id = self.lastId
-        self.members = []
-        self.project = Project(projectData)
-        self.teams.append(self)
-        self.lastId += 1
 
 class IndexHandler(RequestHandler):
     def get(self):
@@ -30,6 +21,10 @@ class WebDAWHandler(WebSocketHandler):
             self.shareProject(data['project'])
         elif state == 'joinProject':
             self.joinProject(data['id'])
+        elif state == 'addTrack':
+            self.addTrack(data.get('trackData') or dict())
+        elif state == 'shareAudio':
+            self.shareAudio(data['audioDataArray'])
 
     def on_close(self):
         if not hasattr(self, "team"):
@@ -54,6 +49,21 @@ class WebDAWHandler(WebSocketHandler):
         except IndexError as e:
             print(e)
             self.write_message({'type': 'error', 'msg': 'invalid project id.'})
+
+    def addTrack(self, trackData):
+        self.team.project.tracks.append(Track(trackData))
+        for member in self.team.members:
+            if member != self:
+                member.write_message({'type': 'track', 'trackData': trackData})
+        print("トラックを追加")
+
+    def shareAudio(self, audioDataArray):
+        for audioData in audioDataArray:
+            self.team.project.tracks[audioData['index']].audioStack.append(Audio(audioData['data']))
+        for member in self.team.members:
+            if member != self:
+                member.write_message({'type': 'audio', 'audioDataArray': audioDataArray})
+        print("オーディオを共有")
 
 
 if __name__ == "__main__":

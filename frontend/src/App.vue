@@ -4,7 +4,7 @@
     <a @click="isShowPopup=true;popUpType='WriteRange';">選択範囲を書き出す</a>
     <template v-if="projectId === null">
       <a @click="shareProject">プロジェクトを共有</a>
-      <a>プロジェクトに参加:<textarea cols="2" rows="1" style="resize:none;text-align:right" @keydown.enter="joinProject" ref="projectIdField"></textarea></a>
+      <a>プロジェクトに参加:<textarea cols="2" rows="1" style="border:1px solid;resize:none;text-align:right" @keydown.enter="joinProject" ref="projectIdField"></textarea></a>
     </template>
     <a v-else-if="projectId === 'loading'">Loading...</a>
     <a v-else>プロジェクトID: {{ projectId }}</a>
@@ -25,6 +25,8 @@
 </style>
 
 <script>
+import WebDAWSocket from './socket.js';
+
 import SideMenu from './components/SideMenu.vue';
 import Popup from './components/Popup.vue';
 import WriteRange from './components/WriteRange.vue';
@@ -43,13 +45,38 @@ export default {
       isShowPopup: false,
       popUpType: null,
       projectId: null,
-      socket: null
+      provider: {
+        socket: null
+      }
     }
+  },
+  provide(){
+    return {
+      provider: this.provider
+    }
+  },
+  computed: {
+    socket: {
+      get: function(){return this.provider.socket;},
+      set: function(socket){this.provider.socket = socket;}
+    }
+  },
+  mounted(){
+    window.onpopstate = e => e.preventDefault();
+    window.onbeforeunload = e=>{
+      e.preventDefault();
+      e.returnValue = 'ページを移動すると全てのデータが失われます。';
+    }
+
+    this.socket = new WebDAWSocket({
+      acceptTrack: trackData=>this.$refs.editor.acceptTrack(trackData),
+      acceptAudioDataArray: array=>this.$refs.editor.acceptAudioDataArray(array)
+    });
   },
   methods: {
     shareProject(){
       this.projectId = "loading";
-      this.socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
+      this.socket.connect();
       this.socket.onerror = err=>{
         this.projectId = null;
         console.error(err);
@@ -63,20 +90,21 @@ export default {
         switch(data.type){
           case 'id':
             this.projectId = data.id;
-            console.log("shareProject" + this.projectId);
+            console.log("shareProject " + this.projectId);
             break;
           case 'error':
             this.projectId = null;
             console.log(data.msg);
             break;
         }
+        this.socket.setDefault();
       }
     },
 
     joinProject(){
       this.projectId = "loading";
       const id = this.$refs.projectIdField.value;
-      this.socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
+      this.socket.connect();
       this.socket.onerror = err=>{
         this.projectId = null;
         console.error(err);
@@ -98,6 +126,7 @@ export default {
             console.log(data.msg);
             break;
         }
+        this.socket.setDefault();
       }
     }
   }
