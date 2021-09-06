@@ -276,12 +276,12 @@ export default {
     },
 
     removeTrack(index){
+      if(!window.confirm("選択されているトラックを削除しますか？")) return;
       this.tracks = [];
       this.trackParams.splice(index, 1);
     },
 
     removeSelectedTracks(){
-      if(!window.confirm("選択されているトラックを削除しますか？")) return;
       this.tracks
         .filter(track=>track.isSelected)
         .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))

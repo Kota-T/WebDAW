@@ -30,10 +30,10 @@ class Track:
 
 class Project:
     def __init__(self, projectData=dict()):
-        self.rhythm = projectData['rhythm'] or [4, 4]
-        self.bpm = projectData['bpm'] or 120
-        self.beat_interval = projectData['beat_interval'] or 20
-        self.number_of_bars = projectData['number_of_bars'] or 30
+        self.rhythm = projectData['rhythm']
+        self.bpm = projectData['bpm']
+        self.beat_interval = projectData['beat_interval']
+        self.number_of_bars = projectData['number_of_bars']
         self.tracks = [Track(trackData) for trackData in projectData['tracks']]
 
     def getData(self):
@@ -65,5 +65,5 @@ class Team:
         self.id = self.lastId
         self.members = []
         self.project = Project(projectData)
-        self.teams.append(self)
-        self.lastId += 1
+        Team.teams.append(self)
+        Team.lastId += 1

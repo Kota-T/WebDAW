@@ -6,7 +6,6 @@ export default class WebDAWSocket {
   connect(){
     this.socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
     this.connected = true;
-    this.setDefault();
   }
 
   setDefault(){
