@@ -67,11 +67,8 @@ export default {
       e.preventDefault();
       e.returnValue = 'ページを移動すると全てのデータが失われます。';
     }
-    window.onorientationchange = ()=>{
-      const angle = window.screen?.orientaion?.angle || window.orientation;
-      if(window.screen.width < 550 && angle === 0)
-        alert("画面を横向きにしてください。")
-    }
+    window.onorientationchange = this.alertScreenOrientation;
+    window.onload = this.alertScreenOrientation;
 
     this.socket = new WebDAWSocket({
       acceptTrack: trackData=>this.$refs.editor.acceptTrack(trackData),
@@ -80,6 +77,12 @@ export default {
     });
   },
   methods: {
+    alertScreenOrientation(){
+      const angle = window.screen?.orientaion?.angle || window.orientation;
+      if(window.screen.width < 550 && angle === 0)
+        alert("画面を横向きにしてください。")
+    },
+
     shareProject(){
       this.projectId = "loading";
       this.socket.connect();
