@@ -23,6 +23,7 @@
   :stream="stream"
   :pointer="$refs.pointer"
   :ref="setTrackRef"
+  @track-solo="val=>makeTracksSolo(val)"
   @track-remove="removeTrackByUser(index)"
   />
 </template>
@@ -300,6 +301,14 @@ export default {
         .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
         .sort((a, b) => b - a)
         .forEach(index=>this.removeTrackByUser(index));
+    },
+
+    makeTracksSolo(val){
+      this.tracks.forEach(track=>{
+        if(!track.$refs.label.$refs.trackSoloBtn.isSolo){
+          track.soloNode.gain.value = val ? 0 : 1;
+        }
+      });
     },
 
     onPointerMove(x){

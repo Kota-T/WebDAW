@@ -6,6 +6,7 @@
     :muteNode="muteNode"
     ref="label"
     @track-selected="select"
+    @track-solo="val=>$emit('track-solo', val)"
     @track-remove="$emit('track-remove')"
     />
   </teleport>
@@ -43,7 +44,8 @@ export default {
     this.gainNode.gain.value = 0.5;
     this.pannerNode = this.audioCtx.createStereoPanner();
     this.muteNode = this.audioCtx.createGain();
-    this.gainNode.connect(this.pannerNode).connect(this.muteNode).connect(this.audioCtx.destination);
+    this.soloNode = this.audioCtx.createGain();
+    this.gainNode.connect(this.pannerNode).connect(this.muteNode).connect(this.soloNode).connect(this.audioCtx.destination);
   },
   mounted(){
     this.name = this.data.name?.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";
