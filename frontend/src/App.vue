@@ -70,6 +70,7 @@ export default {
 
     this.socket = new WebDAWSocket({
       acceptTrack: trackData=>this.$refs.editor.acceptTrack(trackData),
+      removeTrack: index=>this.$refs.editor.removeTrack(index),
       acceptAudioDataArray: array=>this.$refs.editor.acceptAudioDataArray(array)
     });
   },

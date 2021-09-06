@@ -23,7 +23,7 @@
   :stream="stream"
   :pointer="$refs.pointer"
   :ref="setTrackRef"
-  @track-remove="removeTrack(index)"
+  @track-remove="removeTrackByUser(index)"
   />
 </template>
 
@@ -257,15 +257,15 @@ export default {
 
     async addTrackByUser(trackData){
       await this.addTrack(trackData);
-      if(this.provider.socket.connected)
-        this.$nextTick(function(){this.sendTrackData();});
-    },
 
-    async sendTrackData(){
-      this.provider.socket.send(JSON.stringify({
-        state: "addTrack",
-        trackData: await this.tracks[this.tracks.length - 1].getUploadData()
-      }));
+      if(this.provider.socket.connected){
+        this.$nextTick(async function(){
+          this.provider.socket.send(JSON.stringify({
+            state: "addTrack",
+            trackData: await this.tracks[this.tracks.length - 1].getUploadData()
+          }));
+        });
+      }
     },
 
     acceptTrack(trackData={}){
@@ -276,9 +276,22 @@ export default {
     },
 
     removeTrack(index){
-      if(!window.confirm("選択されているトラックを削除しますか？")) return;
       this.tracks = [];
       this.trackParams.splice(index, 1);
+    },
+
+    removeTrackByUser(index){
+      if(!window.confirm("選択されているトラックを削除しますか？")) return;
+      this.removeTrack(index);
+
+      if(this.provider.socket.connected){
+        this.$nextTick(function(){
+          this.provider.socket.send(JSON.stringify({
+            state: "removeTrack",
+            index: index
+          }));
+        });
+      }
     },
 
     removeSelectedTracks(){
@@ -286,7 +299,7 @@ export default {
         .filter(track=>track.isSelected)
         .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
         .sort((a, b) => b - a)
-        .forEach(index=>this.removeTrack(index));
+        .forEach(index=>this.removeTrackByUser(index));
     },
 
     onPointerMove(x){

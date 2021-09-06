@@ -23,6 +23,8 @@ class WebDAWHandler(WebSocketHandler):
             self.joinProject(data['id'])
         elif state == 'addTrack':
             self.addTrack(data.get('trackData') or dict())
+        elif state == 'removeTrack':
+            self.removeTrack(data['index'])
         elif state == 'shareAudio':
             self.shareAudio(data['audioDataArray'])
 
@@ -50,19 +52,25 @@ class WebDAWHandler(WebSocketHandler):
             print(e)
             self.write_message({'type': 'error', 'msg': 'invalid project id.'})
 
-    def addTrack(self, trackData):
-        self.team.project.tracks.append(Track(trackData))
+    def write_message_to_other_members(self, message):
         for member in self.team.members:
             if member != self:
-                member.write_message({'type': 'track', 'trackData': trackData})
+                member.write_message(message)
+
+    def addTrack(self, trackData):
+        self.team.project.tracks.append(Track(trackData))
+        self.write_message_to_other_members({'type': 'addTrack', 'trackData': trackData})
         print("トラックを追加")
+
+    def removeTrack(self, index):
+        self.team.project.tracks.pop(index)
+        self.write_message_to_other_members({'type': 'removeTrack', 'index': index})
+        print("トラックを消去")
 
     def shareAudio(self, audioDataArray):
         for audioData in audioDataArray:
             self.team.project.tracks[audioData['index']].audioStack.append(Audio(audioData['data']))
-        for member in self.team.members:
-            if member != self:
-                member.write_message({'type': 'audio', 'audioDataArray': audioDataArray})
+        self.write_message_to_other_members({'type': 'audio', 'audioDataArray': audioDataArray})
         print("オーディオを共有")
 
 

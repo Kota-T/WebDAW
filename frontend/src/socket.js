@@ -15,8 +15,11 @@ export default class WebDAWSocket {
   defaultOnmessage(e){
     const data = JSON.parse(e.data);
     switch(data.type){
-      case 'track':
+      case 'addTrack':
         this.funcObj.acceptTrack(data.trackData);
+        break;
+      case 'removeTrack':
+        this.funcObj.removeTrack(data.index);
         break;
       case 'audio':
         this.funcObj.acceptAudioDataArray(data.audioDataArray);
