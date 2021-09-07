@@ -10,6 +10,13 @@ class IndexHandler(RequestHandler):
     def get(self):
         self.render("frontend/dist/index.html")
 
+class DocsHandler(RequestHandler):
+    def get(self, title):
+        if title == '':
+            self.redirect("/docs/explain-parts")
+            return
+        self.render(f"docs/templates/{title}.html")
+
 class WebDAWHandler(WebSocketHandler):
     def open(self):
         print("opened")
@@ -79,6 +86,7 @@ if __name__ == "__main__":
     application = Application([
         (r"/", IndexHandler),
         (r"/websocket", WebDAWHandler),
+        (r"/docs/(.*)", DocsHandler),
         (r"/(.*)", StaticFileHandler, {"path": "frontend/dist/"})
     ])
     application.listen(int(os.environ.get('PORT', 8888)))

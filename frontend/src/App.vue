@@ -8,6 +8,7 @@
     </template>
     <a v-else-if="projectId === 'loading'">Loading...</a>
     <a v-else>プロジェクトID: {{ projectId }}</a>
+    <a href="/docs/" target="_blank">ヘルプ</a>
   </SideMenu>
   <Popup v-show="isShowPopup">
     <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="$refs.editor.writeProjectAudio"/>
