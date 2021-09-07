@@ -32,7 +32,7 @@ export default {
     TrackLabel, TrackAudioContainer
   },
   props: ['data', 'audioCtx', 'stream', 'pointer'],
-  emits: ['track-remove'],
+  emits: ['track-solo', 'track-remove'],
   data(){
     return {
       gainNode: null,

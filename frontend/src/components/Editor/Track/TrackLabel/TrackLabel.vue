@@ -12,7 +12,7 @@
       <TrackSlider :gainNode="gainNode" :pannerNode="pannerNode" ref="trackSlider"/>
       <div class="track-btn-container">
         <TrackMuteBtn :muteNode="muteNode" ref="trackMuteBtn"/>
-        <TrackSoloBtn @track-solo="val=>$emit('track-solo', val)"/>
+        <TrackSoloBtn @track-solo="val=>$emit('track-solo', val)" ref="trackSoloBtn"/>
       </div>
     </div>
   </div>
@@ -36,9 +36,27 @@
 .track-label:hover{
   cursor: pointer;
 }
+.track-label-inner-container > *{
+  margin-bottom: 5px;
+}
+.track-label-inner-container > *:last-child{
+  margin-bottom: 0;
+}
+.track-btn-container{
+  margin-top: 10px;
+}
+.track-btn-container > *{
+  margin-right: 10px;
+}
+.track-btn-container > *:last-child{
+  margin-right: 0;
+}
 .track-btn{
   background-color: white;
+  width: 34px;
+  height: 26px;
   border-radius: 5px;
+  vertical-align: middle;
 }
 .isTrackLabelSelected{
   background-color: #606060;
@@ -56,7 +74,7 @@ import ContextMenu from '../../../util/ContextMenu.vue';
 export default {
   name: 'TrackLabel',
   props: ['gainNode', 'pannerNode', "muteNode"],
-  emits: ['track-selected', 'track-remove'],
+  emits: ['track-selected', 'track-solo', 'track-remove'],
   components: {
     InputElement, TrackSlider, TrackMuteBtn, TrackSoloBtn, ContextMenu
   },
