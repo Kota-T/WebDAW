@@ -305,9 +305,7 @@ export default {
 
     makeTracksSolo(val){
       this.tracks.forEach(track=>{
-        if(!track.$refs.label.$refs.trackSoloBtn.isSolo){
-          track.soloNode.gain.value = val ? 0 : 1;
-        }
+        track.soloNode.gain.value = track.$refs.label.$refs.trackSoloBtn.isSolo ? 1 : val ? 0 : 1;
       });
     },
 
