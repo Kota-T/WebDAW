@@ -7,7 +7,7 @@
   <style media="screen">
     :root{
       --sidebar-top: 120px;
-      --sidebar-width: 240px;
+      --sidebar-width: 220px;
     }
     *{
       margin: 0;
@@ -32,9 +32,11 @@
       width: var(--sidebar-width);
       height: calc(100vh - var(--sidebar-top) - 40px);
       border-right: 1px solid #323232;
-      padding-top: 10px;
+      padding: 10px 0;
       position: fixed;
       top: var(--sidebar-top);
+      left: 0;
+      z-index: 1;
       overflow-y: scroll;
     }
     #sidebar > *{
@@ -60,20 +62,21 @@
       color: black;
     }
     #sidebar details > details{
-      margin: 10px 0 10px 12px;
+      margin: 10px 0 10px 13px;
     }
     #main{
       width: calc(100vw - var(--sidebar-width));
       padding: 0 80px;
       position: absolute;
       top: var(--sidebar-top);
-      left: var(--sidebar-width);
+      right: 0;
     }
     #main h1{
       font-size: 35px;
     }
-    #main > pre{
+    #main > p{
       font-size: 15px;
+      margin: 10px 0;
     }
   </style>
 </head>
