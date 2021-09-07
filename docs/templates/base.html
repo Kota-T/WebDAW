@@ -9,7 +9,6 @@
       --header-height: 80px;
       --sidebar-margin: 40px;
       --sidebar-width: 210px;
-      --arrow-size: 24px;
     }
     *{
       margin: 0;
@@ -20,7 +19,8 @@
     .index-arrow{
       display: none;
       position: fixed;
-      bottom: calc((100vh - var(--header-height) - var(--arrow-size)) / 2);
+      bottom: calc((100vh - var(--header-height)) / 2);
+      transform: translateY(-50%);
     }
     header{
       width: 100vw;
@@ -34,6 +34,9 @@
       font-size: 35px;
       line-height: var(--header-height);
       margin-left: 22px;
+    }
+    header h1:hover{
+      cursor: pointer;
     }
     #sidebar{
       background-color: white;
@@ -74,13 +77,14 @@
     }
     #close-index{
       margin: 0;
-      left: calc(var(--sidebar-width) - var(--arrow-size));
+      left: var(--sidebar-width);
+      transform: translateX(-100%);
     }
     #main{
-      width: calc(100vw - var(--sidebar-width));
       padding: 0 80px 10px;
       position: absolute;
       top: calc(var(--header-height) + var(--sidebar-margin));
+      left: var(--sidebar-width);
       right: 0;
     }
     #main h1{
@@ -98,7 +102,7 @@
         display: none;
       }
       #main{
-        width: 100vw;
+        left: 0;
       }
       #close-index{
         display: block;
@@ -111,7 +115,7 @@
 </head>
 <body>
 <header>
-  <h1>WebDAW</h1>
+  <h1 onclick="location.href='/docs/'">WebDAW</h1>
 </header>
 <div id="sidebar">
   <details open>
