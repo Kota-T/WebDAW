@@ -19,6 +19,7 @@ export class Player{
 
   pause(){
     this.source.stop();
+    this.source.disconnect();
   }
 }
 

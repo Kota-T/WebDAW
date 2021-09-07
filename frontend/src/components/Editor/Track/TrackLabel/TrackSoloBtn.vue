@@ -13,7 +13,6 @@ export default {
     return {
       isSolo: false,
       styles: {
-        color: "black",
         backgroundColor: "white"
       }
     }
@@ -21,8 +20,7 @@ export default {
   watch:{
     isSolo(val){
       this.$emit('track-solo', val);
-      this.styles.color = val ? "white" : "black";
-      this.styles.backgroundColor = val ? "blue" : "white";
+      this.styles.backgroundColor = val ? "gold" : "white";
     }
   }
 }

@@ -36,12 +36,6 @@
 .track-label:hover{
   cursor: pointer;
 }
-.track-label-inner-container > *{
-  margin-bottom: 5px;
-}
-.track-label-inner-container > *:last-child{
-  margin-bottom: 0;
-}
 .track-btn-container{
   margin-top: 10px;
 }
