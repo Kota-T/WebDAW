@@ -6,8 +6,10 @@
   <title>{% block title %}{% end %}</title>
   <style media="screen">
     :root{
-      --sidebar-top: 120px;
-      --sidebar-width: 220px;
+      --header-height: 80px;
+      --sidebar-margin: 40px;
+      --sidebar-width: 210px;
+      --arrow-size: 24px;
     }
     *{
       margin: 0;
@@ -15,9 +17,14 @@
       border: 0;
       box-sizing: border-box;
     }
+    .index-arrow{
+      display: none;
+      position: fixed;
+      bottom: calc((100vh - var(--header-height) - var(--arrow-size)) / 2);
+    }
     header{
       width: 100vw;
-      height: 80px;
+      height: var(--header-height);
       background-color: #323232;
       position: fixed;
       z-index: 1;
@@ -25,16 +32,17 @@
     header h1{
       color: white;
       font-size: 35px;
-      line-height: 80px;
+      line-height: var(--header-height);
       margin-left: 22px;
     }
     #sidebar{
+      background-color: white;
       width: var(--sidebar-width);
-      height: calc(100vh - var(--sidebar-top) - 40px);
       border-right: 1px solid #323232;
       padding: 10px 0;
       position: fixed;
-      top: var(--sidebar-top);
+      top: calc(var(--header-height) + var(--sidebar-margin));
+      bottom: var(--sidebar-margin);
       left: 0;
       z-index: 1;
       overflow-y: scroll;
@@ -64,11 +72,15 @@
     #sidebar details > details{
       margin: 10px 0 10px 13px;
     }
+    #close-index{
+      margin: 0;
+      left: calc(var(--sidebar-width) - var(--arrow-size));
+    }
     #main{
       width: calc(100vw - var(--sidebar-width));
-      padding: 0 80px;
+      padding: 0 80px 10px;
       position: absolute;
-      top: var(--sidebar-top);
+      top: calc(var(--header-height) + var(--sidebar-margin));
       right: 0;
     }
     #main h1{
@@ -77,6 +89,23 @@
     #main > p{
       font-size: 15px;
       margin: 10px 0;
+    }
+    #open-index{
+      left: 0;
+    }
+    @media screen and (max-width: 600px) {
+      #sidebar{
+        display: none;
+      }
+      #main{
+        width: 100vw;
+      }
+      #close-index{
+        display: block;
+      }
+      #open-index{
+        display: block;
+      }
     }
   </style>
 </head>
@@ -121,11 +150,21 @@
       </ul>
     </details>
   </details>
+  <svg id="close-index" class="index-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
 </div>
 <div id="main">
   <h1>{% block title %}{% end %}</h1>
   {% block content %}
   {% end %}
+  <svg id="open-index" class="index-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
 </div>
+<script>
+document.getElementById('open-index').onclick = e => {
+  document.getElementById('sidebar').style.display = 'block';
+}
+document.getElementById('close-index').onclick = e => {
+  document.getElementById('sidebar').style.display = 'none';
+}
+</script>
 </body>
 </html>
