@@ -64,6 +64,7 @@ export default {
 
     stop(){
       clearInterval(this.countId);
+      this.pauseMetronome();
     },
 
     count(){
@@ -82,6 +83,11 @@ export default {
       this.source.buffer = this.bufferContainer.buffer;
       this.source.connect(this.audioCtx.destination);
       this.source.start();
+    },
+
+    pauseMetronome(){
+      this.source.stop();
+      this.source.disconnect();
     },
 
     setNumberFromPointerX(x){

@@ -11,7 +11,6 @@
 
 <style>
 .track-slider-container > *{
-  height: 20px;
   vertical-align: middle;
 }
 .track-slider-container select{

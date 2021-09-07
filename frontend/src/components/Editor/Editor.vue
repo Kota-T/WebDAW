@@ -237,7 +237,7 @@ export default {
         });
     },
 
-    async addTrack(trackData={}){
+    async init(){
       switch(this.audioCtx.state){
         case "suspended":
         case "interrupted":
@@ -247,8 +247,12 @@ export default {
 
       if(!this.stream){
         await this.getStream();
-        if(!this.stream){return;}
       }
+    },
+
+    async addTrack(trackData={}){
+      await this.init();
+      if(!this.stream){return;}
 
       this.tracks = [];
       trackData.id = this.lastTrackId;
@@ -319,7 +323,8 @@ export default {
       }
     },
 
-    startRecording(){
+    async startRecording(){
+      await this.init();
       this.selectedTracks = this.tracks.filter(track=>track.isSelected);
       const notSelectedTracks = this.tracks.filter(track=>!track.isSelected);
       if(!this.selectedTracks.length){return;}
@@ -355,7 +360,8 @@ export default {
       this.pause();
     },
 
-    play(){
+    async play(){
+      await this.init();
       this.tracks.forEach(track=>track.play());
       const remain_interval = this.scale_interval - this.$refs.pointer.x % this.scale_interval;
       const start_time = this.getTimeOfDistance(remain_interval);
