@@ -37,11 +37,15 @@
 }
 #side-menu a{
   display: block;
+  color: black;
   text-decoration: none;
   margin-bottom: 10px;
 }
 #side-menu a:hover{
   cursor: pointer;
+}
+#side-menu a:visited{
+  color: black;
 }
 #side-menu a > textarea{
   border:1px solid;
