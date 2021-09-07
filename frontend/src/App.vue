@@ -4,7 +4,7 @@
     <a @click="isShowPopup=true;popUpType='WriteRange';">選択範囲を書き出す</a>
     <template v-if="projectId === null">
       <a @click="shareProject">プロジェクトを共有</a>
-      <a>プロジェクトに参加:<textarea cols="2" rows="1" style="border:1px solid;resize:none;text-align:right" @keydown.enter="joinProject" ref="projectIdField"></textarea></a>
+      <a>プロジェクトに参加:<textarea cols="2" rows="1" @keydown.enter="joinProject" ref="projectIdField"></textarea></a>
     </template>
     <a v-else-if="projectId === 'loading'">Loading...</a>
     <a v-else>プロジェクトID: {{ projectId }}</a>
@@ -12,7 +12,7 @@
   <Popup v-show="isShowPopup">
     <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="$refs.editor.writeProjectAudio"/>
   </Popup>
-  <Editor ref="editor"/>
+  <Editor :socket="socket" ref="editor"/>
 </template>
 
 <style>
@@ -45,21 +45,11 @@ export default {
       isShowPopup: false,
       popUpType: null,
       projectId: null,
-      provider: {
-        socket: null
-      }
+      socket: null
     }
   },
-  provide(){
-    return {
-      provider: this.provider
-    }
-  },
-  computed: {
-    socket: {
-      get: function(){return this.provider.socket;},
-      set: function(socket){this.provider.socket = socket;}
-    }
+  created(){
+    this.socket = new WebDAWSocket();
   },
   mounted(){
     window.onpopstate = e => e.preventDefault();
@@ -70,7 +60,7 @@ export default {
     window.onorientationchange = this.alertScreenOrientation;
     window.onload = this.alertScreenOrientation;
 
-    this.socket = new WebDAWSocket({
+    this.socket.init({
       acceptTrack: trackData=>this.$refs.editor.acceptTrack(trackData),
       removeTrack: index=>this.$refs.editor.removeTrack(index),
       acceptAudioDataArray: array=>this.$refs.editor.acceptAudioDataArray(array)

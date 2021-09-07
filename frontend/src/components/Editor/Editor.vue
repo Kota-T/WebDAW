@@ -113,7 +113,7 @@ export default {
     Pointer,
     Track
   },
-  inject: ['provider'],
+  props: ['socket'],
   data(){
     return {
       trackParams: [],
@@ -250,34 +250,31 @@ export default {
       }
     },
 
-    async addTrack(trackData={}){
-      await this.init();
-      if(!this.stream){return;}
-
-      this.tracks = [];
-      trackData.id = this.lastTrackId;
-      this.trackParams.push(trackData);
-      this.lastTrackId++;
-    },
-
-    async addTrackByUser(trackData){
-      await this.addTrack(trackData);
-
-      if(this.provider.socket.connected){
-        this.$nextTick(async function(){
-          this.provider.socket.send(JSON.stringify({
-            state: "addTrack",
-            trackData: await this.tracks[this.tracks.length - 1].getUploadData()
-          }));
-        });
-      }
-    },
-
     acceptTrack(trackData={}){
       this.tracks = [];
       trackData.id = this.lastTrackId;
       this.trackParams.push(trackData);
       this.lastTrackId++;
+    },
+
+    async addTrack(trackData={}){
+      await this.init();
+      if(!this.stream){return;}
+
+      this.acceptTrack(trackData);
+    },
+
+    async addTrackByUser(trackData){
+      await this.addTrack(trackData);
+
+      if(this.socket.connected){
+        this.$nextTick(async function(){
+          this.socket.send(JSON.stringify({
+            state: "addTrack",
+            trackData: await this.tracks[this.tracks.length - 1].getUploadData()
+          }));
+        });
+      }
     },
 
     removeTrack(index){
@@ -289,9 +286,9 @@ export default {
       if(!window.confirm("選択されているトラックを削除しますか？")) return;
       this.removeTrack(index);
 
-      if(this.provider.socket.connected){
+      if(this.socket.connected){
         this.$nextTick(function(){
-          this.provider.socket.send(JSON.stringify({
+          this.socket.send(JSON.stringify({
             state: "removeTrack",
             index: index
           }));
@@ -354,7 +351,7 @@ export default {
         this.$refs.bpm.disabled = false;
         this.$refs.resizer.disabled = false;
         this.selectedTracks.forEach(track=>track.stopRecording());
-        if(this.provider.socket.connected)
+        if(this.socket.connected)
           this.$nextTick(function(){this.sendAudioDataArray()});
       }
       this.pause();
@@ -386,7 +383,7 @@ export default {
         };
       }));
 
-      this.provider.socket.send(JSON.stringify({
+      this.socket.send(JSON.stringify({
         state: "shareAudio",
         audioDataArray: audioDataArray
       }));

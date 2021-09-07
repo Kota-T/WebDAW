@@ -20,12 +20,13 @@ export class AudioRecorder{
   constructor(audioCtx, stream){
     this.audioCtx = audioCtx;
     this.source = this.audioCtx.createMediaStreamSource(stream);
+    this.pannerNode = this.audioCtx.createStereoPanner();
     this.sp = this.audioCtx.createScriptProcessor(0, 2, 2);
     this.audioData = [];
   }
 
   start(){
-    this.source.connect(this.sp).connect(this.audioCtx.destination);
+    this.source.connect(this.pannerNode).connect(this.sp).connect(this.audioCtx.destination);
     this.sp.onaudioprocess = e=>this.audioData.push(WavHandler.AudioBuffer2WavData(e.inputBuffer));
     this.onstart();
   }

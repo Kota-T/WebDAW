@@ -6,6 +6,7 @@
 
 <style>
 #add_track_btn{
+  display: table-cell;
   position: -webkit-sticky;
   position: sticky;
   top: 0;
@@ -13,10 +14,10 @@
   width: 200px;
   height: 30px;
   text-align: center;
+  vertical-align: middle;
 }
 #add_track_btn img{
   height: 20px;
-  vertical-align: middle;
 }
 #add_track_btn:hover{
   cursor: pointer;

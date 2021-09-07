@@ -33,8 +33,10 @@ class WebDAWHandler(WebSocketHandler):
             print("self.team is None")
             return
         self.team.members.remove(self)
+        print("グループから退出")
         if self.team.members == []:
             Team.teams.remove(self.team)
+            print("グループを終了")
 
     def shareProject(self, projectData):
         self.team = Team(projectData)

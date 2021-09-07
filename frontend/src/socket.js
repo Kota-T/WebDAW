@@ -1,5 +1,5 @@
 export default class WebDAWSocket {
-  constructor(funcObj){
+  init(funcObj){
     this.funcObj = funcObj;
   }
 
