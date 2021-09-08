@@ -88,7 +88,7 @@ header h1:hover{
   width: 100%;
   overflow-x: scroll;
 }
-#main > p > img{
+#main > p > img, #main > p > video{
   width: 100%;
   border: 1px solid skyblue;
 }
