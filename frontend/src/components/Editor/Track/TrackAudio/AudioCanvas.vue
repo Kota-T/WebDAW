@@ -197,25 +197,25 @@ export default {
       this.x += e.offsetX - initX;
     },
 
+    resizeProcess(init, tmp, which){
+      let dif = Math.floor(tmp - init);
+      if(-this.diminished[which] > dif){
+        dif = -this.diminished[which];
+      }
+      if(which === "left"){this.x += dif;}
+      this.diminished[which] += dif;
+      this.canvas_width -= dif;
+    },
+
     resize(initLeft, initRight, e){
       if(this.canvas_width <= 0) return;
       const left = e.offsetX;
       const right = this.canvas_width - left;
 
-      const process = (init, tmp, which) => {
-        let dif = Math.floor(tmp - init);
-        if(-this.diminished[which] > dif){
-          dif = -this.diminished[which];
-        }
-        if(which === "left"){this.x += dif;}
-        this.diminished[which] += dif;
-        this.canvas_width -= dif;
-      }
-
       if(initLeft <= 30){
-        process(initLeft, left, "left");
+        this.resizeProcess(initLeft, left, "left");
       }else if(initRight <= 30){
-        process(initRight, right, "right");
+        this.resizeProcess(initRight, right, "right");
       }
     },
 

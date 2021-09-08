@@ -86,8 +86,9 @@ if __name__ == "__main__":
     application = Application([
         (r"/", IndexHandler),
         (r"/websocket", WebDAWHandler),
+        (r"/docs/static/(.*)", StaticFileHandler, {"path": "docs/static/"}),
         (r"/docs/(.*)", DocsHandler),
-        (r"/(.*)", StaticFileHandler, {"path": "frontend/dist/"})
+        (r"/(.*)", StaticFileHandler, {"path": "frontend/dist/"}),
     ])
     application.listen(int(os.environ.get('PORT', 8888)))
     IOLoop.current().start()
