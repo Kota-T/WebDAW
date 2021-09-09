@@ -22,9 +22,8 @@ export default {
   },
   mounted(){
     this.ctx = this.canvas.getContext('2d');
-    this.canvas.height = window.innerHeight - 80;
-    this.ctx.fillStyle = "#f0f0f0";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.draw();
+    window.onresize = () => this.draw();
   },
   computed: {
     beat_interval(){return this.$store.state.beat_interval;},
@@ -50,6 +49,11 @@ export default {
     }
   },
   methods: {
+    draw(){
+      this.canvas.height = window.innerHeight - 80;
+      this.ctx.fillStyle = "#f0f0f0";
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    },
     start(){
       let loop = ()=>{
         this.move();
