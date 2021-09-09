@@ -9,6 +9,9 @@
   border: 0;
   box-sizing: border-box;
 }
+body{
+  touch-action: none;
+}
 header{
   width: 100vw;
   height: var(--header-height);
@@ -46,6 +49,7 @@ header h1:hover{
   left: 0;
   z-index: 1;
   overflow-y: scroll;
+  touch-action: pan-y;
 }
 #sidebar > *{
   margin-left: 30px;
@@ -83,6 +87,7 @@ header h1:hover{
   top: calc(var(--header-height) + var(--sidebar-margin));
   left: var(--sidebar-width);
   right: 0;
+  touch-action: pan-y;
 }
 #main > h1{
   font-size: 35px;
