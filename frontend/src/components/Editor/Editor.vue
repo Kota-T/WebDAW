@@ -41,6 +41,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  touch-action: none;
 }
 #header > *{
   margin: 0 10px;
@@ -73,6 +74,7 @@
   overflow-y: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  touch-action: pan-y;
 }
 #label_field::-webkit-scrollbar {
   display:none;
@@ -87,6 +89,7 @@
   overflow: scroll;
   overscroll-behavior: none;
   font-size: 0;
+  touch-action: manipulation;
 }
 </style>
 
