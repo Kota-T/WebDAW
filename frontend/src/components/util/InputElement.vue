@@ -10,11 +10,9 @@
   cursor: pointer;
 }
 .input p{
-  font-size: 1rem;
   color: #f0f0f0;
 }
 .input textarea{
-  font-size: 1rem;
   color: black;
   overflow: hidden;
   text-align: center;

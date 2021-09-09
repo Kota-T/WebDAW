@@ -41,7 +41,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  touch-action: none;
 }
 #header > *{
   margin: 0 10px;
@@ -74,7 +73,6 @@
   overflow-y: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  touch-action: auto;
 }
 #label_field::-webkit-scrollbar {
   display:none;

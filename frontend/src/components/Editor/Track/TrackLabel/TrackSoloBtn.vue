@@ -1,8 +1,11 @@
 <template>
-<button type="button" class="track-btn" :style="styles" @click="isSolo=!isSolo">Solo</button>
+<button type="button" class="track-btn track-solo-btn" :style="styles" @click="isSolo=!isSolo">Solo</button>
 </template>
 
 <style>
+.track-solo-btn{
+  font-size: 14px;
+}
 </style>
 
 <script>

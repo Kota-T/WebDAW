@@ -18,6 +18,7 @@
 
 <style>
 *{
+  font-size: 1rem;
   margin: 0;
   border: 0;
   padding: 0;

@@ -27,7 +27,6 @@
   text-align: center;
 }
 #write-range-container input{
-  font-size: 15px;
   width: 50px;
   height: 20px;
   border: 1px solid;
