@@ -10,7 +10,7 @@
     <a v-else>プロジェクトID: {{ projectId }}</a>
     <a href="/docs/" target="_blank">ヘルプ</a>
   </SideMenu>
-  <Popup v-show="isShowPopup">
+  <Popup v-show="isShowPopup" @hide-popup="isShowPopup=false">
     <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="$refs.editor.writeProjectAudio"/>
   </Popup>
   <Editor :socket="socket" ref="editor"/>

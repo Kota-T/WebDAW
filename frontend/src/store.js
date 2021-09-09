@@ -13,17 +13,20 @@ export const store = createStore({
     animation_width: state => {
       return state.bpm / 60 * state.beat_interval / 60;
     },
+    second_width: (state, getters) => {
+      return state.bpm / 60 * state.beat_interval;
+    },
+    scale_interval: state => {
+      return state.beat_interval * 4 / state.rhythm[1];
+    },
     bar_width: (state, getters) => {
       return getters.scale_interval * state.rhythm[0];
-    },
-    getTimeOfDistance: state => distance => {
-      return  60 / state.bpm * distance / state.beat_interval;
     },
     ruler_width: (state, getters) => {
       return getters.bar_width * state.number_of_bars;
     },
-    scale_interval: state => {
-      return state.beat_interval * 4 / state.rhythm[1];
+    getTimeOfDistance: state => distance => {
+      return  60 / state.bpm * distance / state.beat_interval;
     },
   },
   mutations: {

@@ -4,10 +4,9 @@
 
 <style>
 #ruler{
-  position: -webkit-sticky;
+  display: block;
   position: sticky;
   top: 0;
-  left: 0;
   z-index: 2;
 }
 </style>

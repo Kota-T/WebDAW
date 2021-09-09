@@ -1,6 +1,6 @@
 <template>
-<div id="popup-background" @click.stop @keydown.stop>
-  <div id="popup">
+<div id="popup-background" @click.stop="$emit('hide-popup')" @keydown.stop>
+  <div id="popup" @click.stop>
     <slot></slot>
   </div>
 </div>
@@ -11,7 +11,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(200,200,200,0.6);
+  background-color: rgba(0, 0, 0, 0.6);
   width: 100vw;
   height: 100vh;
   position: fixed;
@@ -32,6 +32,7 @@
 
 <script>
 export default {
-  name: 'Popup'
+  name: 'Popup',
+  emits: ['hide-popup']
 }
 </script>

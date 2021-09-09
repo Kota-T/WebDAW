@@ -12,8 +12,8 @@
     <AddTrackBtn @add-track="addTrackByUser"/>
   </div>
   <div id="audio_field" ref="audio_field">
-    <Pointer @move="onPointerMove" ref="pointer"/>
     <Ruler ref="ruler"/>
+    <Pointer @move="onPointerMove" ref="pointer"/>
   </div>
   <Track
   v-for="(data, index) in trackParams"
@@ -29,10 +29,14 @@
 </template>
 
 <style>
+:root{
+  --header-height: 80px;
+  --label-field-width: 200px;
+}
 #header{
   background-color: #323232;
   width: 100vw;
-  height: 80px;
+  height: var(--header-height);
   border-bottom: 1px solid white;
   display: flex;
   justify-content: center;
@@ -61,10 +65,10 @@
   cursor: pointer;
 }
 #label_field{
-  width: 200px;
-  height: calc(100vh - 80px);
+  width: var(--label-field-width);
   position: absolute;
-  top: 80px;
+  top: var(--header-height);
+  bottom: 0;
   left: 0;
   overflow-y: scroll;
   -ms-overflow-style: none;
@@ -75,11 +79,11 @@
 }
 #audio_field{
   background-color: #323232;
-  width: calc(100vw - 200px);
-  height: calc(100vh - 80px);
   position: absolute;
-  top: 80px;
-  left: 200px;
+  top: var(--header-height);
+  right: 0;
+  bottom: 0;
+  left: var(--label-field-width);
   overflow: scroll;
   overscroll-behavior: none;
   font-size: 0;
@@ -201,16 +205,7 @@ export default {
 
     this.setDefaultOnkeydown();
   },
-  computed: {
-    scale_interval(){
-      return this.$store.getters.scale_interval;
-    }
-  },
   methods: {
-    getTimeOfDistance(distance){
-      return this.$store.getters.getTimeOfDistance(distance);
-    },
-
     setTrackRef(el){
       if(el && !this.tracks.includes(el)){
         this.tracks.push(el);
@@ -343,7 +338,7 @@ export default {
         this.$refs.bpm.disabled = true;
         this.$refs.resizer.disabled = true;
         this.selectedTracks.forEach(track=>track.startRecording());
-      }, this.getTimeOfDistance(this.$store.getters.bar_width) * 1000);
+      }, this.$store.getters.getTimeOfDistance(this.$store.getters.bar_width) * 1000);
     },
 
     stopRecording(){
@@ -360,8 +355,9 @@ export default {
     async play(){
       await this.init();
       this.tracks.forEach(track=>track.play());
-      const remain_interval = this.scale_interval - this.$refs.pointer.x % this.scale_interval;
-      const start_time = this.getTimeOfDistance(remain_interval);
+      const scale_interval = this.$store.getters.scale_interval;
+      const remain_interval = scale_interval - this.$refs.pointer.x % scale_interval;
+      const start_time = this.$store.getters.getTimeOfDistance(remain_interval);
       this.$refs.count.start(start_time);
       this.$refs.pointer.start();
       this.state = "playing";
@@ -519,22 +515,19 @@ export default {
       }
     },
 
-    getStartAndStopTime(data){
-      const getTime = obj=>{
-        const state = this.$store.state;
-        return (obj.bar * state.rhythm[0] + obj.beat - 1) * 4 / state.rhythm[1] * 60 / state.bpm;
-      }
-      return {
-        start_time : getTime(data.start),
-        stop_time  : getTime(data.stop)
-      };
+    getTimeFromBarAndBeat(bar_and_beat){
+      const state = this.$store.state;
+      const num_of_scales = bar_and_beat.bar * state.rhythm[0] + bar_and_beat.beat - 1;
+      const distance = num_of_scales * this.$store.getters.scale_interval;
+      return this.$store.getters.getTimeOfDistance(distance);
     },
 
     writeProjectAudio(data){
-      const { start_time, stop_time } = this.getStartAndStopTime(data);
-      const length = (stop_time - start_time) * this.audioCtx.sampleRate;
+      const startRecordingTime = this.getTimeFromBarAndBeat(data.start);
+      const stopRecordingTime = this.getTimeFromBarAndBeat(data.stop);
+      const length = (stopRecordingTime - startRecordingTime) * this.audioCtx.sampleRate;
       const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, length, this.audioCtx.sampleRate);
-      this.tracks.forEach(track=>track.createOffline(offlineCtx, start_time, stop_time));
+      this.tracks.forEach(track=>track.createOffline(offlineCtx, startRecordingTime, stopRecordingTime));
       offlineCtx.startRendering()
         .then(buffer=>this.download(WavHandler.AudioBuffer2WavFile(buffer), 'project.wav'))
         .catch(console.error);

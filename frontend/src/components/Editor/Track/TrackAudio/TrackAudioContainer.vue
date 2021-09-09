@@ -132,8 +132,8 @@ export default {
       return this.audioStack.map(audioCanvas=>audioCanvas.getUploadData());
     },
 
-    createOffline(offlineCtx, gainNode, start_time, stop_time){
-      this.audioStack.forEach(audioCanvas=>audioCanvas.createOfflineSource(offlineCtx, gainNode, start_time, stop_time));
+    createOffline(offlineCtx, nextNode, startRecordingTime, stopRecordingTime){
+      this.audioStack.forEach(audioCanvas=>audioCanvas.createOfflineSource(offlineCtx, nextNode, startRecordingTime, stopRecordingTime));
     }
   }
 }

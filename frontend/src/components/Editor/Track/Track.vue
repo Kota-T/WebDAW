@@ -128,7 +128,7 @@ export default {
       };
     },
 
-    createOffline(offlineCtx, start_time, stop_time){
+    createOffline(offlineCtx, startRecordingTime, stopRecordingTime){
       const gainNode = offlineCtx.createGain();
       gainNode.gain.value = this.gain;
       const pannerNode = offlineCtx.createStereoPanner();
@@ -136,7 +136,7 @@ export default {
       gainNode.connect(pannerNode);
       pannerNode.connect(offlineCtx.destination);
 
-      this.$refs.container.createOffline(offlineCtx, gainNode, start_time, stop_time);
+      this.$refs.container.createOffline(offlineCtx, gainNode, startRecordingTime, stopRecordingTime);
     }
   }
 }
