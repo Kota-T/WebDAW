@@ -23,9 +23,6 @@
   padding: 0;
   box-sizing: border-box;
 }
-body{
-  touch-action: none;
-}
 </style>
 
 <script>
@@ -63,19 +60,6 @@ export default {
     }
     window.onorientationchange = this.alertScreenOrientation;
     window.onload = this.alertScreenOrientation;
-
-    /*document.ontouchstart = e=>{
-      if(e.touches.length >= 2)
-        e.preventDefault();
-    }
-
-    let t = 0;
-    document.ontouchend = e=>{
-      const now = new Date().getTime();
-      if((now - t) < 350)
-        e.preventDefault();
-      t = now;
-    }*/
 
     this.socket.init({
       acceptTrack: trackData=>this.$refs.editor.acceptTrack(trackData),

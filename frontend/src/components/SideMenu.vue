@@ -37,6 +37,7 @@
 }
 #side-menu a{
   display: block;
+  font-size: 1rem;
   color: black;
   text-decoration: none;
   margin-bottom: 10px;
@@ -48,6 +49,7 @@
   color: black;
 }
 #side-menu a > textarea{
+  font-size: 1rem;
   border:1px solid;
   padding: 3px;
   resize:none;
