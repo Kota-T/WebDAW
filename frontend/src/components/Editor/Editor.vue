@@ -74,7 +74,7 @@
   overflow-y: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 #label_field::-webkit-scrollbar {
   display:none;
