@@ -16,11 +16,11 @@
 <style>
 .context-menu{
   background-color: white;
-  padding: 5px 0;
   font-size: 12px;
-  text-align: center;
-  border-radius: 10px;
   width: 100px;
+  padding: 5px 0;
+  border-radius: 10px;
+  text-align: center;
   position: fixed;
   z-index: 4;
 }

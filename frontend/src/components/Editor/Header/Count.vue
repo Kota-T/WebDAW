@@ -37,12 +37,10 @@ export default {
       number: 1
     }
   },
-  mounted(){
+  async mounted(){
     this.bufferContainer = { buffer: null };
-
     this.loader = new Loader(this.audioCtx, "/metronome.wav", this.bufferContainer);
-
-    (async () => await this.loader.load())();
+    await this.loader.load();
   },
   computed: {
     rhythm(){
@@ -86,13 +84,14 @@ export default {
     },
 
     pauseMetronome(){
+      if(!this.source) return;
       this.source.stop();
       this.source.disconnect();
     },
 
     setNumberFromPointerX(x){
-      const scale_interval = this.$store.state.beat_interval * 4 / this.rhythm[1];
-      this.number = Math.ceil(x % (scale_interval * this.rhythm[0]) / scale_interval);
+      const getters = this.$store.getters;
+      this.number = Math.ceil(x % getters.bar_width / getters.scale_interval);
       if(this.number < 0){
         this.number += this.rhythm[0];
       }

@@ -5,7 +5,6 @@
 <style>
 .draft-canvas{
   position: absolute;
-  top: 0;
   z-index: 1;
 }
 </style>

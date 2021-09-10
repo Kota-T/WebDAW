@@ -32,15 +32,15 @@ export default {
   },
   methods: {
     draw(){
-      const num = this.rhythm[0];
-      const scale_interval = this.$store.getters.scale_interval;
-      this.canvas.width = scale_interval * num * this.number_of_bars;
+      this.canvas.width = this.$store.getters.ruler_width;
       this.ctx.fillStyle = "#323232";
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
       this.ctx.strokeStyle = this.ctx.fillStyle = "#f0f0f0";
+      const num = this.rhythm[0];
+      const scale_interval = this.$store.getters.scale_interval;
       for(let i = 0; i < this.canvas.width / scale_interval; i++){
-        let x = i * scale_interval;
+        const x = i * scale_interval;
         this.ctx.beginPath();
         if(i%num === 0){
           this.ctx.fillText(`${Math.floor(i/num)}`, x, 12);

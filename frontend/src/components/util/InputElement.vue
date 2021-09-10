@@ -1,18 +1,18 @@
 <template>
-<div class="input">
+<div class="input-element">
   <p v-if="!isInputing" @dblclick="if(!disabled){isInputing = true;}">{{ value }}</p>
   <textarea rows="1" :cols="length" v-else v-model="value" @keydown.enter.stop="finishInput" @keydown.stop></textarea>
 </div>
 </template>
 
 <style>
-.input:hover{
+.input-element:hover{
   cursor: pointer;
 }
-.input p{
+.input-element p{
   color: #f0f0f0;
 }
-.input textarea{
+.input-element textarea{
   color: black;
   overflow: hidden;
   text-align: center;

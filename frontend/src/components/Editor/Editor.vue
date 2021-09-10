@@ -135,11 +135,11 @@ export default {
   mounted(){
     const label_field = this.$refs.label_field;
     const audio_field = this.$refs.audio_field;
-    
+
     label_field.onscroll = e=>audio_field.scrollTop = label_field.scrollTop;
     audio_field.onscroll = e=>{
       label_field.scrollTop = audio_field.scrollTop;
-      this.$refs.pointer.y = audio_field.scrollTop;
+      //this.$refs.pointer.y = audio_field.scrollTop;
     }
 
     audio_field.onclick = e=>{

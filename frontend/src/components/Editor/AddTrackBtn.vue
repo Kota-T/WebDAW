@@ -1,5 +1,5 @@
 <template>
-  <div id="add_track_btn" title="トラックを追加" @click="$emit('add-track')">
+  <div id="add_track_btn" title="トラックを追加" @click.stop="$emit('add-track')">
     <img src="../../assets/plus_icon.png">
   </div>
 </template>
@@ -12,6 +12,7 @@
   position: sticky;
   top: 0;
   text-align: center;
+  touch-action: none;
 }
 #add_track_btn img{
   height: 20px;
