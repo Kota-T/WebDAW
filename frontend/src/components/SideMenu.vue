@@ -18,7 +18,7 @@
   position: fixed;
   top: 5px;
   right: 5px;
-  z-index: 500;
+  z-index: 5;
 }
 #menu-btn:hover{
   cursor: pointer;
@@ -28,12 +28,12 @@
   color: #323232;
   text-align: center;
   width: 200px;
-  height: 100vh;
   padding: 55px 10px 0 10px;
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 400;
+  bottom: 0;
+  z-index: 4;
 }
 #side-menu a{
   display: block;

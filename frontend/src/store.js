@@ -25,6 +25,11 @@ export const store = createStore({
     ruler_width: (state, getters) => {
       return getters.bar_width * state.number_of_bars;
     },
+    getNumberOfBarsFromDuration: state => duration => {
+      const beat_per_bar = state.rhythm[0] * 4 / state.rhythm[1];
+      const beat_per_second = state.bpm / 60;
+      return Math.ceil(duration * beat_per_second / beat_per_bar);
+    },
     getTimeOfDistance: state => distance => {
       return  60 / state.bpm * distance / state.beat_interval;
     },

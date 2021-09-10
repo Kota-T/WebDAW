@@ -135,6 +135,7 @@ export default {
   mounted(){
     const label_field = this.$refs.label_field;
     const audio_field = this.$refs.audio_field;
+    
     label_field.onscroll = e=>audio_field.scrollTop = label_field.scrollTop;
     audio_field.onscroll = e=>{
       label_field.scrollTop = audio_field.scrollTop;
@@ -145,6 +146,10 @@ export default {
       if(this.state === "recording") return;
       this.$refs.pointer.x = e.clientX - 200 + e.currentTarget.scrollLeft;
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
+      if(this.state === "playing"){
+        this.pause();
+        this.play();
+      }
     }
 
     let oldDiff;
@@ -163,21 +168,20 @@ export default {
     audio_field.ontouchmove = e=>{
       if(this.state === "recording" || e.touches.length !== 2) return;
       e.preventDefault();
-      const state = this.$store.state;
       const curDiff = getDiff(e.touches);
-      const newVal = Math.round(state.beat_interval * curDiff / oldDiff);
+      const newVal = Math.round(this.$store.state.beat_interval * curDiff / oldDiff);
       if(newVal < 10 || newVal > 100) return;
       this.$refs.resizer.value = newVal;
       this.$store.commit('beat_interval', newVal);
       oldDiff = curDiff;
     }
 
-    audio_field.ondragover = e=>{
+    document.ondragover = e=>{
       e.stopPropagation();
       e.preventDefault();
     }
 
-    audio_field.ondrop = async e=>{
+    document.ondrop = async e=>{
       e.stopPropagation();
       e.preventDefault();
 
@@ -204,7 +208,31 @@ export default {
       }
     }
 
-    this.setDefaultOnkeydown();
+    document.onkeydown = e=>{
+      switch(e.key){
+        case "r":
+          this.state !== "recording" ? this.startRecording() : undefined;
+          break;
+        case "Backspace":
+          this.state !== "recording" ? this.removeSelectedTracks() : undefined;
+          break;
+        case " ":
+          e.preventDefault();
+          switch(this.state){
+            case "preparing":
+            case "recording":
+              this.stopRecording();
+              break;
+            case "playing":
+              this.pause();
+              break;
+            default:
+              this.play();
+              break;
+          }
+          break;
+      }
+    }
   },
   methods: {
     setTrackRef(el){
@@ -394,34 +422,6 @@ export default {
           url: WavHandler.Base642Wav(audioData.data.base64)
         })
       });
-    },
-
-    setDefaultOnkeydown(){
-      document.onkeydown = e=>{
-        switch(e.key){
-          case "r":
-            this.state !== "recording" ? this.startRecording() : undefined;
-            break;
-          case "Backspace":
-            this.state !== "recording" ? this.removeSelectedTracks() : undefined;
-            break;
-          case " ":
-            e.preventDefault();
-            switch(this.state){
-              case "preparing":
-              case "recording":
-                this.stopRecording();
-                break;
-              case "playing":
-                this.pause();
-                break;
-              default:
-                this.play();
-                break;
-            }
-            break;
-        }
-      }
     },
 
     isAudioFile(file){

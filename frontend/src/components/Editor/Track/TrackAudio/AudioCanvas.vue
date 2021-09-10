@@ -66,23 +66,36 @@ export default {
       e.stopPropagation();
       this.canvas.focus();
       this.$emit('track-selected');
-      const initLeft = e.offsetX;
-      const initRight = this.width - initLeft;
-      if(initLeft <= 30 || initRight <= 30){
-        this.canvas.onpointermove = this.resize.bind(this, initLeft, initRight);
+
+      const startX = e.offsetX;
+      if(startX <= 30){
+        this.canvas.onpointermove = e=>this.resizeLeft(startX, e.offsetX);
+      }else if(this.width - startX <= 30){
+        let preX = startX;
+        this.canvas.onpointermove = e=>{
+          this.resizeRight(preX, e.offsetX);
+          preX = e.offsetX;
+        }
       }else{
-        this.canvas.onpointermove = this.move.bind(this, initLeft);
+        this.canvas.onpointermove = e=>this.move(startX, e.offsetX);
       }
     }
 
-    this.canvas.ontouchend = e=>e.preventDefault();
-
-    this.canvas.onpointerup = this.canvas.onpointerout = e=>{
+    this.canvas.ontouchend = e=>{
       e.preventDefault();
+      e.stopPropagation();
+    }
+
+    this.canvas.onpointerup = this.canvas.pointerout = e=>{
+      e.preventDefault();
+      e.stopPropagation();
       this.canvas.onpointermove = null;
     }
 
-    this.canvas.onclick = e=>e.preventDefault();
+    this.canvas.onclick = e=>{
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
     this.data = { buffer: null };
 
@@ -97,9 +110,7 @@ export default {
     await this.loader.load();
     this.width = this.data.buffer.duration * this.$store.getters.second_width;
     if(this.width > this.$store.getters.ruler_width){
-      const state = this.$store.state;
-      const result = Math.ceil(this.data.buffer.duration * state.bpm / 60 / state.rhythm[0] * 4 / state.rhythm[1]);
-      this.$store.commit('number_of_bars', result);
+      this.$store.commit('number_of_bars', this.$store.getters.getNumberOfBarsFromDuration(this.data.buffer.duration));
     }
   },
   computed: {
@@ -225,30 +236,62 @@ export default {
       this.width *= ratio;
     },
 
-    move(initX, e){
-      this.x += e.offsetX - initX;
+    move(initX, tmpX){
+      this.x += tmpX - initX;
     },
 
-    resizeProcess(init, tmp, which){
-      let dif = Math.floor(tmp - init);
-      if(-this.diminished[which] > dif){
-        dif = -this.diminished[which];
+    resizeLeft(startX, tmpX){
+      if(tmpX < startX){
+        this.lengthenLeft(startX, tmpX);
+      }else{
+        this.shortenLeft(startX, tmpX);
       }
-      if(which === "left"){this.x += dif;}
-      this.diminished[which] += dif;
+    },
+
+    lengthenLeft(startX, tmpX){
+      let dif = Math.floor(startX - tmpX);
+      if(this.diminished.left < dif){
+        dif = this.diminished.left;
+      }
+      this.x -= dif;
+      this.width += dif;
+      this.diminished.left -= dif;
+    },
+
+    shortenLeft(startX, tmpX){
+      let dif = Math.floor(tmpX - startX);
+      if(this.width - dif < 60){
+        dif = this.width - 60;
+      }
+      this.x += dif;
       this.width -= dif;
+      this.diminished.left += dif;
     },
 
-    resize(initLeft, initRight, e){
-      if(this.width <= 0) return;
-      const left = e.offsetX;
-      const right = this.width - left;
-
-      if(initLeft <= 30){
-        this.resizeProcess(initLeft, left, "left");
-      }else if(initRight <= 30){
-        this.resizeProcess(initRight, right, "right");
+    resizeRight(preX, tmpX){
+      if(preX < tmpX){
+        this.lengthenRight(preX, tmpX);
+      }else{
+        this.shortenRight(preX, tmpX);
       }
+    },
+
+    lengthenRight(preX, tmpX){
+      let dif = Math.floor(tmpX - preX);
+      if(this.diminished.right < dif){
+        dif = this.diminished.right;
+      }
+      this.width += dif;
+      this.diminished.right -= dif;
+    },
+
+    shortenRight(preX, tmpX){
+      let dif = Math.floor(preX - tmpX);
+      if(this.width - dif < 60){
+        dif = this.width - 60;
+      }
+      this.width -= dif;
+      this.diminished.right += dif;
     },
 
     downloadAudioFile(){
@@ -292,7 +335,7 @@ export default {
       const source = offlineCtx.createBufferSource();
       source.buffer = this.data.buffer;
       source.connect(nextNode);
-      
+
       //when: 録音を開始する時間, offset: このAudioCanvasの音声ファイルのどの時点から再生を始めるか, duration: どれくらいの時間録音するか
       let when, offset, duration;
 

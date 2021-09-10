@@ -24,6 +24,9 @@
   padding: 0;
   box-sizing: border-box;
 }
+body{
+  overflow: hidden;
+}
 </style>
 
 <script>
@@ -61,6 +64,8 @@ export default {
     }
     window.onorientationchange = this.alertScreenOrientation;
     window.onload = this.alertScreenOrientation;
+
+    window.ontouchmove = e=>e.preventDefault();
 
     this.socket.init({
       acceptTrack: trackData=>this.$refs.editor.acceptTrack(trackData),

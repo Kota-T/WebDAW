@@ -18,6 +18,7 @@ export class Player{
   }
 
   pause(){
+    if(!this.source) return;
     this.source.stop();
     this.source.disconnect();
   }
