@@ -139,7 +139,7 @@ export default {
     label_field.onscroll = e=>audio_field.scrollTop = label_field.scrollTop;
     audio_field.onscroll = e=>{
       label_field.scrollTop = audio_field.scrollTop;
-      //this.$refs.pointer.y = audio_field.scrollTop;
+      this.$refs.pointer.y = audio_field.scrollTop;
     }
 
     audio_field.onclick = e=>{
@@ -193,9 +193,12 @@ export default {
 
         if(entry.isFile){
           entry.file(
-            file=>{
+            async file=>{
               if(this.isAudioFile(file)){
                 this.loadAudioFile(file);
+              }else if(file.type === 'application/zip'){
+                const data = await this.readProjectZip(file);
+                await this.loadProject(data["project"]);
               }
             },
             console.error
@@ -466,6 +469,30 @@ export default {
         tracks: await Promise.all(this.tracks.map((track, index)=>track.getDownloadData(root, index)))
       });
       root.file("config.json", new Blob([json], {type: "application/json"}));
+    },
+
+    async readProjectZip(file){
+      const data = {};
+      const promises = [];
+      const zip = await JSZip.loadAsync(file);
+      zip.forEach((path, file)=>{
+        if(file.name === "project/config.json"){
+          promises.push(zip.file(file.name).async("string").then(content => data["project"]["config.json"] = JSON.parse(content)));
+        }else if(!file.dir){
+          let lastDir = data;
+          const dirs = file.name.split('/');
+          const filename = dirs.pop();
+          dirs.forEach(name=>{
+            if(!lastDir[name]){
+              lastDir[name] = {};
+            }
+            lastDir = lastDir[name];
+          });
+          promises.push(zip.file(file.name).async("blob").then(blob => lastDir[filename] = URL.createObjectURL(blob)));
+        }
+      });
+      await Promise.all(promises);
+      return data;
     },
 
     readProjectDirectory(entry, parent, resolve){
