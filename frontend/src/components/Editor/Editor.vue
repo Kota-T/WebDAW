@@ -459,6 +459,15 @@ export default {
         .then(blob=>this.download(URL.createObjectURL(blob), 'project.zip'));
     },
 
+    async getDownloadData(){
+      const jszip = new JSZip();
+      const root = jszip.folder("project");
+
+      await this.createConfigBlob(root);
+
+      return jszip.generateAsync({type: "blob"});
+    },
+
     async createConfigBlob(root){
       const state = this.$store.state;
       const json = JSON.stringify({
@@ -482,11 +491,11 @@ export default {
           let lastDir = data;
           const dirs = file.name.split('/');
           const filename = dirs.pop();
-          dirs.forEach(name=>{
-            if(!lastDir[name]){
-              lastDir[name] = {};
+          dirs.forEach(dir=>{
+            if(!lastDir[dir]){
+              lastDir[dir] = {};
             }
-            lastDir = lastDir[name];
+            lastDir = lastDir[dir];
           });
           promises.push(zip.file(file.name).async("blob").then(blob => lastDir[filename] = URL.createObjectURL(blob)));
         }

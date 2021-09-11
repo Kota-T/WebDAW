@@ -91,6 +91,7 @@ export default {
         state: "shareProject",
         project: await this.$refs.editor.getUploadData()
       }));
+      //this.socket.onopen = async () => this.socket.send(await this.$refs.editor.getDownloadData());
       this.socket.onmessage = e=>{
         const data = JSON.parse(e.data);
         switch(data.type){

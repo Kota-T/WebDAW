@@ -1,4 +1,5 @@
-import os, json
+import os, json, io
+from zipfile import ZipFile
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler
@@ -22,18 +23,38 @@ class WebDAWHandler(WebSocketHandler):
         print("opened")
 
     def on_message(self, msg):
-        data = json.loads(msg)
-        state = data['state']
-        if state == 'shareProject':
-            self.shareProject(data['project'])
-        elif state == 'joinProject':
-            self.joinProject(data['id'])
-        elif state == 'addTrack':
-            self.addTrack(data.get('trackData') or dict())
-        elif state == 'removeTrack':
-            self.removeTrack(data['index'])
-        elif state == 'shareAudio':
-            self.shareAudio(data['audioDataArray'])
+        if isinstance(msg, str):
+            data = json.loads(msg)
+            state = data['state']
+            if state == 'shareProject':
+                self.shareProject(data['project'])
+            elif state == 'joinProject':
+                self.joinProject(data['id'])
+            elif state == 'addTrack':
+                self.addTrack(data.get('trackData') or dict())
+            elif state == 'removeTrack':
+                self.removeTrack(data['index'])
+            elif state == 'shareAudio':
+                self.shareAudio(data['audioDataArray'])
+
+        elif isinstance(msg, bytes):
+            with ZipFile(io.BytesIO(msg)) as zip:
+                data = {}
+                for info in zip.infolist():
+                    if info.filename == 'project/config.json':
+                        with zip.open(info.filename) as jsonFile:
+                            data['project']['config.json'] = json.load(jsonFile)
+                    elif not info.is_dir():
+                        lastDir = data;
+                        dirs = info.filename.split('/');
+                        filename = dirs.pop();
+                        for dir in dirs:
+                            if lastDir.get(dir) is None:
+                                lastDir[dir] = {}
+                            lastDir = lastDir[dir]
+                        lastDir[filename] = zip.open(info.filename)
+                print(data)
+
 
     def on_close(self):
         if not hasattr(self, "team"):
@@ -50,6 +71,9 @@ class WebDAWHandler(WebSocketHandler):
         self.team.members.append(self)
         self.write_message({'type': "id", 'id': self.team.id})
         print("プロジェクトを共有")
+
+    def shareProjectZip(self):
+        pass
 
     def joinProject(self, id):
         try:
