@@ -96,6 +96,9 @@ export default class WebDAWSocket {
         return;
       }
       fn(data);
+      if(data.type === 'closed'){
+        console.log(data.msg);
+      }
     }
   }
 

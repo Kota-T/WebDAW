@@ -64,7 +64,7 @@ class WebDAWHandler(WebSocketHandler):
         return data
 
     def open(self):
-        print("opened")
+        print("接続")
         self.buffer = {}
 
     def on_message(self, msg):
@@ -108,6 +108,7 @@ class WebDAWHandler(WebSocketHandler):
         self.shareProject(projectData)
 
     def on_close(self):
+        self.write_message_to_other_members({'type': 'closed', 'msg': 'メンバーが退出しました。'})
         if not hasattr(self, "team"):
             print("self.team is None")
             return
