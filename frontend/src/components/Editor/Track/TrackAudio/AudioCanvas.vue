@@ -53,6 +53,13 @@ export default {
     }
   },
   async mounted(){
+    /*
+    initConfig: {
+      startPoint: double,
+      diminished: Object,
+      url: base64
+    }
+    */
     this.ctx = this.canvas.getContext('2d');
     this.x = this.initConfig.startPoint;
     this.initDiminished(this.initConfig.diminished);
@@ -314,7 +321,7 @@ export default {
     },
 
     async getUploadData(){
-      const base64 = await fetch(this.loader.url)
+      const url = await fetch(this.loader.url)
       .then(res=>res.blob())
       .then(res=>new Promise(resolve=>{
         const reader = new FileReader();
@@ -326,7 +333,7 @@ export default {
       return {
         startPoint: this.startPoint,
         diminished: this.diminished.getData(),
-        base64    : base64
+        url       : url
       };
     },
 

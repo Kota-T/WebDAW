@@ -1,13 +1,14 @@
 export default class WavHandler{
   static Base642Wav(base64){
-    const byteString = atob(base64.split(",")[1]);
-    const mimeType = base64.match(/(:)([a-z\/]+)(;)/)[2];
+    const array = base64.split(',');
+    const mimeType = array[0].slice(5, -7);
+    const byteString = atob(array[1]);
     const content = new Uint8Array(byteString.length);
     for(let i = 0; i < byteString.length; i++){
       content[i] = byteString.charCodeAt(i);
     }
 
-    const blob = new Blob([content], {type: mimeType});
+    const blob = new Blob([content], {type: mimeType[1]});
     const url = URL.createObjectURL(blob);
 
     return url;

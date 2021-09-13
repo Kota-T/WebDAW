@@ -2,13 +2,19 @@ class Audio:
     def __init__(self, audioData):
         self.startPoint = audioData['startPoint']
         self.diminished = audioData['diminished']
-        self.base64     = audioData['base64']
+        self.url        = audioData.get('url')
+        self.file       = audioData.get('file')
+
+    def __del__(self):
+        if self.file is not None:
+            self.file.close()
 
     def getData(self):
         return {
             'startPoint': self.startPoint,
             'diminished': self.diminished,
-            'base64': self.base64
+            'url'       : self.url,
+            'file'      : self.file
         }
 
 

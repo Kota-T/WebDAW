@@ -198,7 +198,7 @@ export default {
                 this.loadAudioFile(file);
               }else if(file.type === 'application/zip'){
                 const data = await this.readProjectZip(file);
-                await this.loadProject(data["project"]);
+                await this.loadProject(data);
               }
             },
             console.error
@@ -206,7 +206,7 @@ export default {
         }else{
           const data = {};
           await new Promise(resolve => this.readProjectDirectory(entry, data, resolve));
-          await this.loadProject(data["project"]);
+          await this.loadProject(Object.values(data)[0]);
         }
       }
     }
@@ -296,10 +296,10 @@ export default {
 
       if(this.socket.connected){
         this.$nextTick(async function(){
-          this.socket.send(JSON.stringify({
+          this.socket.send({
             state: "addTrack",
             trackData: await this.tracks[this.tracks.length - 1].getUploadData()
-          }));
+          });
         });
       }
     },
@@ -315,10 +315,10 @@ export default {
 
       if(this.socket.connected){
         this.$nextTick(function(){
-          this.socket.send(JSON.stringify({
+          this.socket.send({
             state: "removeTrack",
             index: index
-          }));
+          });
         });
       }
     },
@@ -411,10 +411,10 @@ export default {
         };
       }));
 
-      this.socket.send(JSON.stringify({
+      this.socket.send({
         state: "shareAudio",
         audioDataArray: audioDataArray
-      }));
+      });
     },
 
     acceptAudioDataArray(audioDataArray){
@@ -422,7 +422,7 @@ export default {
         this.tracks[audioData.index].$refs.container.createAudioCanvas({
           startPoint: audioData.data.startPoint,
           diminished: audioData.data.diminished,
-          url: WavHandler.Base642Wav(audioData.data.base64)
+          url: WavHandler.Base642Wav(audioData.data.url)
         })
       });
     },
@@ -449,22 +449,14 @@ export default {
       link.click();
     },
 
-    async downloadProject(){
-      const jszip = new JSZip();
-      const root = jszip.folder("project");
-
-      await this.createConfigBlob(root);
-
-      jszip.generateAsync({type: "blob"})
+    downloadProject(){
+      this.getDownloadData()
         .then(blob=>this.download(URL.createObjectURL(blob), 'project.zip'));
     },
 
     async getDownloadData(){
       const jszip = new JSZip();
-      const root = jszip.folder("project");
-
-      await this.createConfigBlob(root);
-
+      await this.createConfigBlob(jszip);
       return jszip.generateAsync({type: "blob"});
     },
 
@@ -485,8 +477,8 @@ export default {
       const promises = [];
       const zip = await JSZip.loadAsync(file);
       zip.forEach((path, file)=>{
-        if(file.name === "project/config.json"){
-          promises.push(zip.file(file.name).async("string").then(content => data["project"]["config.json"] = JSON.parse(content)));
+        if(file.name === "config.json"){
+          promises.push(zip.file(file.name).async("string").then(content => data["config.json"] = JSON.parse(content)));
         }else if(!file.dir){
           let lastDir = data;
           const dirs = file.name.split('/');
@@ -583,7 +575,7 @@ export default {
 
     async setSharedTracksData(tracksData){
       for await(let trackData of tracksData){
-        trackData.audioStack.forEach(elem => elem.url = WavHandler.Base642Wav(elem.base64));
+        trackData.audioStack.forEach(elem => elem.url = WavHandler.Base642Wav(elem.url));
         await this.addTrack(trackData);
       }
     },

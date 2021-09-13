@@ -87,13 +87,11 @@ export default {
         this.projectId = null;
         console.error(err);
       }
-      this.socket.onopen = async () => this.socket.send(JSON.stringify({
+      this.socket.onopen = async () => this.socket.send({
         state: "shareProject",
         project: await this.$refs.editor.getUploadData()
-      }));
-      //this.socket.onopen = async () => this.socket.send(await this.$refs.editor.getDownloadData());
-      this.socket.onmessage = e=>{
-        const data = JSON.parse(e.data);
+      });
+      this.socket.onmessage = data=>{
         switch(data.type){
           case 'id':
             this.projectId = data.id;
@@ -116,16 +114,15 @@ export default {
         this.projectId = null;
         console.error(err);
       }
-      this.socket.onopen = async () => this.socket.send(JSON.stringify({
+      this.socket.onopen = async () => this.socket.send({
         state: "joinProject",
         id: id
-      }));
-      this.socket.onmessage = async e=>{
-        const data = JSON.parse(e.data);
+      });
+      this.socket.onmessage = async data=>{
         switch(data.type){
           case 'project':
             this.projectId = id;
-            this.$refs.editor.loadSharedProject(data.project);
+            await this.$refs.editor.loadSharedProject(data.project);
             console.log("joinProject " + this.projectId);
             break;
           case 'error':
