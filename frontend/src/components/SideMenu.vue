@@ -50,8 +50,9 @@
 #side-menu a > textarea{
   border:1px solid;
   padding: 3px;
-  resize:none;
   text-align:right;
+  vertical-align: middle;
+  resize:none;
 }
 </style>
 
