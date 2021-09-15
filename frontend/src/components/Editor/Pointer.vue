@@ -33,12 +33,14 @@ export default {
     canvas(){
       return this.$refs.canvas;
     },
+    layerX: {
+      get: function(){return this.styles.left.slice(0, -2) - 0;},
+      set: function(_layerX){this.styles.left = _layerX + "px";}
+    },
     x: {
-      get: function(){return this.styles.left.slice(0, -2) - this.margin;},
-      set: function(_x){
-        this.styles.left = _x + this.margin + "px";
-      }
-    }
+      get: function(){return this.layerX - this.margin;},
+      set: function(_x){this.layerX = _x + this.margin;}
+    },
   },
   watch: {
     beat_interval(newVal, oldVal){
@@ -61,11 +63,15 @@ export default {
     prepareRecording(){
       const rhythm = this.$store.state.rhythm;
       const scale_interval = this.$store.getters.scale_interval;
-      this.x = (Math.floor(this.x / scale_interval) - rhythm[0]) * scale_interval;
+      if(this.x >= 0){
+        this.x = (Math.floor(this.x / scale_interval) - rhythm[0]) * scale_interval;
+      }else{
+        this.x = -rhythm[0] * scale_interval;
+      }
     },
 
     move(){
-      this.$emit('move', this.x);
+      this.$emit('move', { layerX: this.layerX, x: this.x });
       this.x += this.$store.getters.animation_width;
     }
   }

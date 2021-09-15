@@ -62,7 +62,10 @@ export default class WebDAWSocket {
   }
 
   set onopen(fn){
-    this.socket.onopen = fn;
+    this.socket.onopen = e=>{
+      fn(e);
+      console.info("接続しました。");
+    }
   }
 
   set onmessage(fn){
@@ -95,10 +98,16 @@ export default class WebDAWSocket {
   }
 
   set onclose(fn){
-    this.socket.onclose = fn;
+    this.socket.onclose = e=>{
+      fn(e);
+      console.info("接続が閉じられました。");
+    }
   }
 
   set onerror(fn){
-    this.socket.onerror = fn;
+    this.socket.onerror = e=>{
+      fn(e);
+      console.error(e);
+    }
   }
 }

@@ -91,8 +91,8 @@ export default {
 
     setNumberFromPointerX(x){
       const getters = this.$store.getters;
-      this.number = Math.ceil(x % getters.bar_width / getters.scale_interval);
-      if(this.number < 0){
+      this.number = Math.floor(x % getters.bar_width / getters.scale_interval) + 1;
+      if(this.number <= 0){
         this.number += this.rhythm[0];
       }
     }

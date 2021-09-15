@@ -94,14 +94,8 @@ export default {
     shareProject(){
       this.projectId = "loading";
       this.socket.connect();
-      this.socket.onclose = e=>{
-        this.projectId = null;
-        console.info("接続が閉じられました。");
-      }
-      this.socket.onerror = err=>{
-        this.projectId = null;
-        console.error(err);
-      }
+      this.socket.onclose = e=>this.projectId = null;
+      this.socket.onerror = e=>this.projectId = null;
       this.socket.onopen = async () => this.socket.send({
         type: "shareProject",
         project: await this.$refs.editor.getUploadData()
@@ -119,14 +113,8 @@ export default {
       this.projectId = "loading";
       const id = this.$refs.projectIdField.value;
       this.socket.connect();
-      this.socket.onclose = e=>{
-        this.projectId = null;
-        console.info("接続が閉じられました。");
-      }
-      this.socket.onerror = err=>{
-        this.projectId = null;
-        console.error(err);
-      }
+      this.socket.onclose = e=>this.projectId = null;
+      this.socket.onerror = e=>this.projectId = null;
       this.socket.onopen = async () => this.socket.send({
         type: "joinProject",
         id: id

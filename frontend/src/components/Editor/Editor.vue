@@ -12,7 +12,7 @@
     <AddTrackBtn @add-track="addTrackByUser"/>
   </div>
   <div id="pointer_layer" class="no-scroll-bar" ref="pointer_layer">
-    <Pointer :margin="20" @move="onPointerMove" ref="pointer"/>
+    <Pointer :margin="pointer_margin" @move="onPointerMove" ref="pointer"/>
     <div id="ruler_layer" class="no-scroll-bar" ref="ruler_layer">
       <Ruler ref="ruler"/>
     </div>
@@ -137,6 +137,7 @@ export default {
   props: ['socket'],
   data(){
     return {
+      pointer_margin: 20,
       trackParams: [],
       lastTrackId: 0,
       tracks: [],
@@ -156,9 +157,10 @@ export default {
     label_field.onscroll = e=>ruler_layer.scrollTop = label_field.scrollTop;
     ruler_layer.onscroll = e=>label_field.scrollTop = ruler_layer.scrollTop;
 
+    const label_field_width = 200;
     pointer_layer.onclick = e=>{
       if(this.state === "recording") return;
-      this.$refs.pointer.x = e.clientX - 200 + pointer_layer.scrollLeft;
+      this.$refs.pointer.layerX = e.clientX - label_field_width + pointer_layer.scrollLeft;
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
       if(this.state === "playing"){
         this.pause();
@@ -347,9 +349,9 @@ export default {
       });
     },
 
-    onPointerMove(x){
+    onPointerMove({ layerX, x }){
       const pointer_layer = this.$refs.pointer_layer;
-      if(this.state === "recording" && x - pointer_layer.scrollLeft > pointer_layer.offsetWidth){
+      if(this.state === "recording" && layerX - pointer_layer.scrollLeft > pointer_layer.offsetWidth){
         pointer_layer.scrollLeft += pointer_layer.offsetWidth;
       }
       if(x >= this.$store.getters.ruler_width){
@@ -368,6 +370,7 @@ export default {
       }
 
       this.$refs.pointer.prepareRecording();
+      this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
       this.$refs.count.start();
       this.$refs.pointer.start();
       notSelectedTracks.forEach(track=>track.play());
@@ -398,7 +401,8 @@ export default {
       await this.init();
       this.tracks.forEach(track=>track.play());
       const scale_interval = this.$store.getters.scale_interval;
-      const remain_interval = scale_interval - this.$refs.pointer.x % scale_interval;
+      const x = this.$refs.pointer.x;
+      const remain_interval = x > 0 ? scale_interval - x % scale_interval : -(x % scale_interval);
       const start_time = this.$store.getters.getTimeOfDistance(remain_interval);
       this.$refs.count.start(start_time);
       this.$refs.pointer.start();
