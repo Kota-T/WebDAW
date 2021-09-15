@@ -24,6 +24,7 @@
   justify-content: center;
   align-items: center;
   background-color: #fff;
+  padding: 20px 40px;
 }
 </style>
 

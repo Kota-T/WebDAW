@@ -29,6 +29,10 @@ header h1{
 header h1:hover{
   cursor: pointer;
 }
+header a{
+  color: white;
+  line-height: var(--header-height);
+}
 .index-arrow{
   display: none;
   position: fixed;
