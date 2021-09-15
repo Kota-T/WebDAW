@@ -12,7 +12,7 @@
     <AddTrackBtn @add-track="addTrackByUser"/>
   </div>
   <div id="pointer_layer" class="no-scroll-bar" ref="pointer_layer">
-    <Pointer :margin="pointer_margin" @move="onPointerMove" ref="pointer"/>
+    <Pointer :margin="20" @move="onPointerMove" ref="pointer"/>
     <div id="ruler_layer" class="no-scroll-bar" ref="ruler_layer">
       <Ruler ref="ruler"/>
     </div>
@@ -137,7 +137,6 @@ export default {
   props: ['socket'],
   data(){
     return {
-      pointer_margin: 20,
       trackParams: [],
       lastTrackId: 0,
       tracks: [],

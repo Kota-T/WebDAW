@@ -20,7 +20,10 @@
 </template>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto&family=Sawarabi+Gothic&display=swap');
 *{
+  font-family: 'Roboto', 'Sawarabi Gothic', sans-serif;
+  font-weight: normal;
   font-size: 1rem;
   margin: 0;
   border: 0;
