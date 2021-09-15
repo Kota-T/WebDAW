@@ -57,6 +57,10 @@ export default class WebDAWSocket {
     }
   }
 
+  close(){
+    this.socket?.close();
+  }
+
   set onopen(fn){
     this.socket.onopen = fn;
   }
@@ -88,6 +92,10 @@ export default class WebDAWSocket {
           fn(data);
       }
     }
+  }
+
+  set onclose(fn){
+    this.socket.onclose = fn;
   }
 
   set onerror(fn){

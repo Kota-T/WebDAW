@@ -7,7 +7,10 @@
       <a>プロジェクトに参加:<textarea cols="2" rows="1" @keydown.enter="joinProject" ref="projectIdField"></textarea></a>
     </template>
     <a v-else-if="projectId === 'loading'">Loading...</a>
-    <a v-else>プロジェクトID: {{ projectId }}</a>
+    <template v-else>
+      <a>プロジェクトID: {{ projectId }}</a>
+      <a @click="socket.close()">共有を停止する</a>
+    </template>
     <a href="/docs/" target="_blank">ヘルプ</a>
   </SideMenu>
   <Popup v-show="isShowPopup" @hide-popup="isShowPopup=false">
@@ -91,6 +94,10 @@ export default {
     shareProject(){
       this.projectId = "loading";
       this.socket.connect();
+      this.socket.onclose = e=>{
+        this.projectId = null;
+        console.info("接続が閉じられました。");
+      }
       this.socket.onerror = err=>{
         this.projectId = null;
         console.error(err);
@@ -112,6 +119,10 @@ export default {
       this.projectId = "loading";
       const id = this.$refs.projectIdField.value;
       this.socket.connect();
+      this.socket.onclose = e=>{
+        this.projectId = null;
+        console.info("接続が閉じられました。");
+      }
       this.socket.onerror = err=>{
         this.projectId = null;
         console.error(err);
