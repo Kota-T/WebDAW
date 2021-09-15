@@ -11,12 +11,14 @@
   height: 30px;
   position: sticky;
   top: 0;
-  text-align: center;
   touch-action: none;
 }
 #add_track_btn img{
   height: 20px;
-  vertical-align: middle;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
 }
 #add_track_btn:hover{
   cursor: pointer;

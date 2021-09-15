@@ -16,6 +16,8 @@
   color: black;
   overflow: hidden;
   text-align: center;
+  height: 1.5rem;
+  line-height: 1.5rem;
   resize: none;
 }
 </style>
