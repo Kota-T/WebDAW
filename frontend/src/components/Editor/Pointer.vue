@@ -12,18 +12,21 @@
 <script>
 export default {
   name: 'Pointer',
+  props: {
+    margin: Number
+  },
   data(){
     return {
       styles: {
-        top: "0px",
-        left: "0px"
+        left: this.margin + "px"
       }
     }
   },
   mounted(){
+    this.canvas.height = window.innerHeight - 80;
     this.ctx = this.canvas.getContext('2d');
-    this.draw();
-    window.onresize = () => this.draw();
+    this.ctx.fillStyle = "#f0f0f0";
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   },
   computed: {
     beat_interval(){return this.$store.state.beat_interval;},
@@ -31,15 +34,9 @@ export default {
       return this.$refs.canvas;
     },
     x: {
-      get: function(){return this.styles.left.slice(0, -2) - 0;},
+      get: function(){return this.styles.left.slice(0, -2) - this.margin;},
       set: function(_x){
-        this.styles.left = _x + "px"
-      }
-    },
-    y: {
-      get: function(){return this.styles.top.slice(0, -2) - 0;},
-      set: function(_y){
-        this.styles.top = _y + "px"
+        this.styles.left = _x + this.margin + "px";
       }
     }
   },
@@ -49,11 +46,6 @@ export default {
     }
   },
   methods: {
-    draw(){
-      this.canvas.height = window.innerHeight - 80;
-      this.ctx.fillStyle = "#f0f0f0";
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    },
     start(){
       let loop = ()=>{
         this.move();

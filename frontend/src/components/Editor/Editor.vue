@@ -8,12 +8,14 @@
     <Bpm ref="bpm"/>
     <Resizer ref="resizer"/>
   </div>
-  <div id="label_field" ref="label_field">
+  <div id="label_field" class="no-scroll-bar" ref="label_field">
     <AddTrackBtn @add-track="addTrackByUser"/>
   </div>
-  <div id="audio_field" ref="audio_field">
-    <Ruler ref="ruler"/>
-    <Pointer @move="onPointerMove" ref="pointer"/>
+  <div id="pointer_layer" class="no-scroll-bar" ref="pointer_layer">
+    <Pointer :margin="20" @move="onPointerMove" ref="pointer"/>
+    <div id="ruler_layer" class="no-scroll-bar" ref="ruler_layer">
+      <Ruler ref="ruler"/>
+    </div>
   </div>
   <Track
   v-for="(data, index) in trackParams"
@@ -32,6 +34,7 @@
 :root{
   --header-height: 80px;
   --label-field-width: 200px;
+  --pointer-margin: 20px;
 }
 #header{
   background-color: #323232;
@@ -64,6 +67,13 @@
 #start:hover{
   cursor: pointer;
 }
+.no-scroll-bar{
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scroll-bar::-webkit-scrollbar{
+  display: none;
+}
 #label_field{
   width: var(--label-field-width);
   position: absolute;
@@ -71,21 +81,27 @@
   bottom: 0;
   left: 0;
   overflow-y: scroll;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
-#label_field::-webkit-scrollbar {
-  display:none;
-}
-#audio_field{
+#pointer_layer{
   background-color: #323232;
   position: absolute;
   top: var(--header-height);
   right: 0;
   bottom: 0;
   left: var(--label-field-width);
-  overflow: scroll;
-  overscroll-behavior: none;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  font-size: 0;
+  touch-action: manipulation;
+}
+#ruler_layer{
+  background-color: #323232;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--pointer-margin);
+  overflow-x: visible;
+  overflow-y: scroll;
   font-size: 0;
   touch-action: manipulation;
 }
@@ -134,17 +150,15 @@ export default {
   },
   mounted(){
     const label_field = this.$refs.label_field;
-    const audio_field = this.$refs.audio_field;
+    const pointer_layer = this.$refs.pointer_layer;
+    const ruler_layer = this.$refs.ruler_layer;
 
-    label_field.onscroll = e=>audio_field.scrollTop = label_field.scrollTop;
-    audio_field.onscroll = e=>{
-      label_field.scrollTop = audio_field.scrollTop;
-      this.$refs.pointer.y = audio_field.scrollTop;
-    }
+    label_field.onscroll = e=>ruler_layer.scrollTop = label_field.scrollTop;
+    ruler_layer.onscroll = e=>label_field.scrollTop = ruler_layer.scrollTop;
 
-    audio_field.onclick = e=>{
+    pointer_layer.onclick = e=>{
       if(this.state === "recording") return;
-      this.$refs.pointer.x = e.clientX - 200 + e.currentTarget.scrollLeft;
+      this.$refs.pointer.x = e.clientX - 200 + pointer_layer.scrollLeft;
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
       if(this.state === "playing"){
         this.pause();
@@ -161,11 +175,11 @@ export default {
       const y2 = touches[1].clientY;
       return Math.sqrt(Math.pow(x2 - x1, 2), Math.pow(y2 - y1));
     }
-    audio_field.ontouchstart = e=>{
+    ruler_layer.ontouchstart = e=>{
       if(this.state === "recording" || e.touches.length !== 2) return;
       oldDiff = getDiff(e.touches);
     }
-    audio_field.ontouchmove = e=>{
+    ruler_layer.ontouchmove = e=>{
       if(this.state === "recording" || e.touches.length !== 2) return;
       e.preventDefault();
       const curDiff = getDiff(e.touches);
@@ -334,9 +348,9 @@ export default {
     },
 
     onPointerMove(x){
-      const audio_field = this.$refs.audio_field;
-      if(this.state === "recording" && x - audio_field.scrollLeft > audio_field.offsetWidth){
-        audio_field.scrollLeft += audio_field.offsetWidth;
+      const pointer_layer = this.$refs.pointer_layer;
+      if(this.state === "recording" && x - pointer_layer.scrollLeft > pointer_layer.offsetWidth){
+        pointer_layer.scrollLeft += pointer_layer.offsetWidth;
       }
       if(x >= this.$store.getters.ruler_width){
         this.$store.commit('addNumberOfBars', 30);

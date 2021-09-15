@@ -10,7 +10,7 @@
     @track-remove="$emit('track-remove')"
     />
   </teleport>
-  <teleport to="#audio_field">
+  <teleport to="#ruler_layer">
     <TrackAudioContainer
     :audioCtx="audioCtx"
     :audioNode="gainNode"
