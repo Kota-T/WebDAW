@@ -67,10 +67,18 @@ export default {
 
     window.ontouchmove = e=>e.preventDefault();
 
-    this.socket.init({
-      acceptTrack: trackData=>this.$refs.editor.acceptTrack(trackData),
-      removeTrack: index=>this.$refs.editor.removeTrack(index),
-      acceptAudioDataArray: array=>this.$refs.editor.acceptAudioDataArray(array)
+    this.socket.init(data=>{
+      switch(data.type){
+        case 'addTrack':
+          this.$refs.editor.addTrack(data.trackData);
+          break;
+        case 'removeTrack':
+          this.$refs.editor.removeTrack(data.index);
+          break;
+        case 'audio':
+          this.$refs.editor.acceptAudioDataArray(data.audioDataArray);
+          break;
+      }
     });
   },
   methods: {
@@ -88,19 +96,13 @@ export default {
         console.error(err);
       }
       this.socket.onopen = async () => this.socket.send({
-        state: "shareProject",
+        type: "shareProject",
         project: await this.$refs.editor.getUploadData()
       });
       this.socket.onmessage = data=>{
-        switch(data.type){
-          case 'id':
-            this.projectId = data.id;
-            console.log("shareProject " + this.projectId);
-            break;
-          case 'error':
-            this.projectId = null;
-            console.log(data.msg);
-            break;
+        if(data.type === 'id'){
+          this.projectId = data.id;
+          console.info("プロジェクトを共有しました。id: " + this.projectId);
         }
         this.socket.setDefault();
       }
@@ -115,20 +117,14 @@ export default {
         console.error(err);
       }
       this.socket.onopen = async () => this.socket.send({
-        state: "joinProject",
+        type: "joinProject",
         id: id
       });
       this.socket.onmessage = async data=>{
-        switch(data.type){
-          case 'project':
+        if(data.type === 'project'){
             this.projectId = id;
             await this.$refs.editor.loadSharedProject(data.project);
-            console.log("joinProject " + this.projectId);
-            break;
-          case 'error':
-            this.projectId = null;
-            console.log(data.msg);
-            break;
+            console.info("プロジェクトに参加しました。id: " + this.projectId);
         }
         this.socket.setDefault();
       }

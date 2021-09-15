@@ -1,5 +1,5 @@
 <template>
-<svg id="menu-btn" @click="isShow=!isShow">
+<svg id="menu-btn" @click.stop="isShow=!isShow">
   <use
   href="../assets/hamburger.svg#hamburger"
   :fill="isShow ? '#323232' : 'white'"
@@ -63,6 +63,9 @@ export default {
     return {
       isShow: false
     }
+  },
+  mounted(){
+    document.onclick = e => this.isShow = false;
   }
 }
 </script>

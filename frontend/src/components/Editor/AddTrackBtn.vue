@@ -1,5 +1,5 @@
 <template>
-  <div id="add_track_btn" title="トラックを追加" @click.stop="$emit('add-track')">
+  <div id="add_track_btn" title="トラックを追加" @click="$emit('add-track')">
     <img src="../../assets/plus_icon.png">
   </div>
 </template>

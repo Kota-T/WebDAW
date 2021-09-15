@@ -57,7 +57,7 @@ export default {
     initConfig: {
       startPoint: double,
       diminished: Object,
-      url: base64
+      url: objectURL | dataURL
     }
     */
     this.ctx = this.canvas.getContext('2d');

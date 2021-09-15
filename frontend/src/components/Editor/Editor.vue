@@ -170,10 +170,11 @@ export default {
       e.preventDefault();
       const curDiff = getDiff(e.touches);
       const newVal = Math.round(this.$store.state.beat_interval * curDiff / oldDiff);
-      if(newVal < 10 || newVal > 100) return;
-      this.$refs.resizer.value = newVal;
-      this.$store.commit('beat_interval', newVal);
-      oldDiff = curDiff;
+      if(10 < newVal && newVal < 100){
+        this.$refs.resizer.value = newVal;
+        this.$store.commit('beat_interval', newVal);
+        oldDiff = curDiff;
+      }
     }
 
     document.ondragover = e=>{
@@ -203,10 +204,9 @@ export default {
             },
             console.error
           );
-        }else{
-          const data = {};
-          await new Promise(resolve => this.readProjectDirectory(entry, data, resolve));
-          await this.loadProject(Object.values(data)[0]);
+        }else if(entry.isDirectory){
+          const data = await this.readProjectDirectory(entry);
+          await this.loadProject(data);
         }
       }
     }
@@ -277,18 +277,14 @@ export default {
       }
     },
 
-    acceptTrack(trackData={}){
-      this.tracks = [];
-      trackData.id = this.lastTrackId;
-      this.trackParams.push(trackData);
-      this.lastTrackId++;
-    },
-
     async addTrack(trackData={}){
       await this.init();
       if(!this.stream){return;}
 
-      this.acceptTrack(trackData);
+      this.tracks = [];
+      trackData.id = this.lastTrackId;
+      this.trackParams.push(trackData);
+      this.lastTrackId++;
     },
 
     async addTrackByUser(trackData){
@@ -297,7 +293,7 @@ export default {
       if(this.socket.connected){
         this.$nextTick(async function(){
           this.socket.send({
-            state: "addTrack",
+            type: "addTrack",
             trackData: await this.tracks[this.tracks.length - 1].getUploadData()
           });
         });
@@ -316,7 +312,7 @@ export default {
       if(this.socket.connected){
         this.$nextTick(function(){
           this.socket.send({
-            state: "removeTrack",
+            type: "removeTrack",
             index: index
           });
         });
@@ -412,18 +408,14 @@ export default {
       }));
 
       this.socket.send({
-        state: "shareAudio",
+        type: "shareAudio",
         audioDataArray: audioDataArray
       });
     },
 
     acceptAudioDataArray(audioDataArray){
       audioDataArray.forEach(audioData=>{
-        this.tracks[audioData.index].$refs.container.createAudioCanvas({
-          startPoint: audioData.data.startPoint,
-          diminished: audioData.data.diminished,
-          url: WavHandler.Base642Wav(audioData.data.url)
-        })
+        this.tracks[audioData.index].$refs.container.createAudioCanvas(audioData.data);
       });
     },
 
@@ -454,22 +446,31 @@ export default {
         .then(blob=>this.download(URL.createObjectURL(blob), 'project.zip'));
     },
 
-    async getDownloadData(){
-      const jszip = new JSZip();
-      await this.createConfigBlob(jszip);
-      return jszip.generateAsync({type: "blob"});
-    },
-
-    async createConfigBlob(root){
+    getProjectConfig(){
       const state = this.$store.state;
-      const json = JSON.stringify({
+      return {
         rhythm: state.rhythm,
         bpm: state.bpm,
         beat_interval: state.beat_interval,
-        number_of_bars: state.number_of_bars,
-        tracks: await Promise.all(this.tracks.map((track, index)=>track.getDownloadData(root, index)))
+        number_of_bars: state.number_of_bars
+      };
+    },
+
+    setProjectConfig(json){
+      this.$refs.rhythm.init(json.rhythm);
+      this.$refs.bpm.init(json.bpm);
+      this.$refs.resizer.init(json.beat_interval);
+      this.$store.commit('number_of_bars', Number(json.number_of_bars));
+    },
+
+    async getDownloadData(){
+      const jszip = new JSZip();
+      const json = JSON.stringify({
+        ...this.getProjectConfig(),
+        tracks: await Promise.all(this.tracks.map((track, index)=>track.getDownloadData(jszip, index)))
       });
-      root.file("config.json", new Blob([json], {type: "application/json"}));
+      jszip.file("config.json", new Blob([json], {type: "application/json"}));
+      return jszip.generateAsync({type: "blob"});
     },
 
     async readProjectZip(file){
@@ -496,50 +497,57 @@ export default {
       return data;
     },
 
-    readProjectDirectory(entry, parent, resolve){
-      if(entry.isFile){
-        entry.file(
-          file=>{
-            if(file.name === "config.json"){
-              const reader = new FileReader();
-              reader.onload = e => {
-                parent[file.name] = JSON.parse(reader.result);
-                resolve();
-              };
-              reader.readAsText(file);
-            }else{
-              parent[file.name] = window.URL.createObjectURL(file);
-            }
-          },
-          console.error
-        );
-      }else if(entry.isDirectory){
-        parent[entry.name] = {};
-        entry.createReader().readEntries(
-          entries=>entries.forEach(innerEntry=>this.readProjectDirectory(innerEntry, parent[entry.name], resolve)),
-          console.error
-        );
-      }
+    async readProjectDirectory(entry){
+      const data = {};
+      await new Promise(resolve=>(function inner(entry, parent, resolve){
+        if(entry.isFile){
+          entry.file(
+            file=>{
+              if(file.name === "config.json"){
+                const reader = new FileReader();
+                reader.onload = e => {
+                  parent["config.json"] = JSON.parse(reader.result);
+                  resolve();
+                };
+                reader.readAsText(file);
+              }else{
+                parent[file.name] = URL.createObjectURL(file);
+              }
+            },
+            console.error
+          );
+        }else if(entry.isDirectory){
+          parent[entry.name] = {};
+          entry.createReader().readEntries(
+            entries=>entries.forEach(innerEntry=>inner(innerEntry, parent[entry.name], resolve)),
+            console.error
+          );
+        }
+      })(entry, data, resolve));
+      return Object.values(data)[0];
     },
 
     async loadProject(data){
       const config = data["config.json"];
-      this.setConfig(config);
-      await this.setTracksData(config.tracks, data);
-    },
-
-    setConfig(json){
-      this.$refs.rhythm.init(json.rhythm);
-      this.$refs.bpm.init(json.bpm);
-      this.$refs.resizer.init(json.beat_interval);
-      this.$store.commit('number_of_bars', Number(json.number_of_bars));
-    },
-
-    async setTracksData(tracksData, data){
-      for await(let trackData of tracksData){
+      this.setProjectConfig(config);
+      for await(let trackData of config.tracks){
         trackData.audioStack.forEach((elem, i)=>{
           elem.url = data[trackData.name][i+".wav"];
         });
+        await this.addTrackByUser(trackData);
+      }
+    },
+
+    async getUploadData(){
+      return {
+        ...this.getProjectConfig(),
+        tracks: await Promise.all(this.tracks.map(track=>track.getUploadData()))
+      };
+    },
+
+    async loadSharedProject(project){
+      this.setProjectConfig(project);
+      for await(let trackData of project.tracks){
         await this.addTrack(trackData);
       }
     },
@@ -560,29 +568,6 @@ export default {
       offlineCtx.startRendering()
         .then(buffer=>this.download(WavHandler.AudioBuffer2WavFile(buffer), 'project.wav'))
         .catch(console.error);
-    },
-
-    async getUploadData(){
-      const state = this.$store.state;
-      return {
-        rhythm: state.rhythm,
-        bpm: state.bpm,
-        beat_interval: state.beat_interval,
-        number_of_bars: state.number_of_bars,
-        tracks: await Promise.all(this.tracks.map(track=>track.getUploadData()))
-      };
-    },
-
-    async setSharedTracksData(tracksData){
-      for await(let trackData of tracksData){
-        trackData.audioStack.forEach(elem => elem.url = WavHandler.Base642Wav(elem.url));
-        await this.addTrack(trackData);
-      }
-    },
-
-    async loadSharedProject(project){
-      this.setConfig(project);
-      await this.setSharedTracksData(project.tracks);
     }
   }
 }

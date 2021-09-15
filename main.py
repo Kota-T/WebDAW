@@ -48,7 +48,7 @@ class WebDAWHandler(WebSocketHandler):
             super().write_message(jsonDict)
 
     def collectPackets(self, data):
-        if data['state'] == 'packet':
+        if data['type'] == 'packet':
             if self.buffer.get(data['packetId']) is None:
                 self.buffer[data['packetId']] = [None for i in range(data['numOfPackets'])]
             self.buffer[data['packetId']][data['index']] = data;
@@ -68,18 +68,19 @@ class WebDAWHandler(WebSocketHandler):
         self.buffer = {}
 
     def on_message(self, msg):
+        print("メッセージを受信")
         data = self.collectPackets(json.loads(msg))
-        state = data['state']
+        type = data['type']
 
-        if state == 'shareProject':
+        if type == 'shareProject':
             self.shareProject(data['project'])
-        elif state == 'joinProject':
+        elif type == 'joinProject':
             self.joinProject(data['id'])
-        elif state == 'addTrack':
+        elif type == 'addTrack':
             self.addTrack(data.get('trackData') or dict())
-        elif state == 'removeTrack':
+        elif type == 'removeTrack':
             self.removeTrack(data['index'])
-        elif state == 'shareAudio':
+        elif type == 'shareAudio':
             self.shareAudio(data['audioDataArray'])
 
     def readProjectZip(self, msg):
@@ -131,8 +132,8 @@ class WebDAWHandler(WebSocketHandler):
             self.write_message({'type': 'project', 'project': self.team.project.getData()})
             print("プロジェクトに参加")
         except IndexError as e:
-            print(e)
-            self.write_message({'type': 'error', 'msg': 'invalid project id.'})
+            self.write_message({'type': 'error', 'msg': f'無効なIDです。id: {id}'})
+            print("プロジェクトに参加失敗")
 
     def write_message_to_other_members(self, message):
         for member in self.team.members:

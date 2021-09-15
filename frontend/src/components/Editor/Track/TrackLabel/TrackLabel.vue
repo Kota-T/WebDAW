@@ -52,6 +52,9 @@
   border-radius: 5px;
   vertical-align: middle;
 }
+.track-btn:hover{
+  cursor: pointer;
+}
 .isTrackLabelSelected{
   background-color: #606060;
 }
