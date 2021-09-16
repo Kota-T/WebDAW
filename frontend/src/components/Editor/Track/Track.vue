@@ -40,10 +40,15 @@ export default {
     }
   },
   created(){
-    this.gainNode = new GainNode(this.audioCtx, {gain: 0.5});
-    this.pannerNode = new StereoPannerNode(this.audioCtx);
-    this.muteNode = new GainNode(this.audioCtx);
-    this.soloNode = new GainNode(this.audioCtx);
+    options = {
+      channelCount: 2,
+      channelCountMode: "explicit",
+      channelInterpretation: "speakers"
+    };
+    this.gainNode = new GainNode(this.audioCtx, {gain: 0.5, ...options});
+    this.pannerNode = new StereoPannerNode(this.audioCtx, options);
+    this.muteNode = new GainNode(this.audioCtx, options);
+    this.soloNode = new GainNode(this.audioCtx, options);
     this.gainNode.connect(this.pannerNode).connect(this.muteNode).connect(this.soloNode).connect(this.audioCtx.destination);
   },
   mounted(){
