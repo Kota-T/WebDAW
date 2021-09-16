@@ -41,7 +41,7 @@ export default {
   components: {
     ContextMenu
   },
-  props: ['initConfig', 'audioCtx', 'audioNode'],
+  props: ['initConfig', 'audioCtx', 'nextNode'],
   emits: ['track-selected', 'remove'],
   data(){
     return {
@@ -108,7 +108,7 @@ export default {
 
     this.loader = new Loader(this.audioCtx, this.initConfig.url, this.data);
 
-    this.player = new Player(this.audioCtx, this.audioNode, this.data);
+    this.player = new Player(this.audioCtx, this.nextNode, this.data);
 
     this.drawer = new Drawer(this.canvas, this.ctx, this.data);
 

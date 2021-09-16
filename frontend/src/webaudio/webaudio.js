@@ -17,15 +17,16 @@ export class Loader{
 }
 
 export class AudioRecorder{
-  constructor(audioCtx, stream){
+  constructor(audioCtx, stream, nextNode){
     this.audioCtx = audioCtx;
     this.source = this.audioCtx.createMediaStreamSource(stream);
     this.sp = this.audioCtx.createScriptProcessor(0, 1, 2);
+    this.nextNode = nextNode;
     this.audioData = [];
   }
 
   start(){
-    this.source.connect(this.sp).connect(this.audioCtx.destination);
+    this.source.connect(this.sp).connect(this.nextNode);
     this.sp.onaudioprocess = e=>{
       for(let channel = 0; channel < e.outputBuffer.numberOfChannels; channel++) {
         const inputData = e.inputBuffer.getChannelData(0);
@@ -51,7 +52,7 @@ export class AudioRecorder{
     this.audioData = [];
   }
 
-  mergeBuffers(audioData) {
+  mergeBuffers(audioData){
     let sampleLength = 0;
     for (let i = 0; i < audioData.length; i++) {
       sampleLength += audioData[i].length;
@@ -65,5 +66,5 @@ export class AudioRecorder{
       }
     }
     return samples;
-  };
+  }
 }

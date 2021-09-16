@@ -13,7 +13,7 @@
   <teleport to="#ruler_layer">
     <TrackAudioContainer
     :audioCtx="audioCtx"
-    :audioNode="gainNode"
+    :nextNode="gainNode"
     :stream="stream"
     :pointer="pointer"
     ref="container"

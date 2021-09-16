@@ -9,7 +9,7 @@
     :key="initConfig.id"
     :initConfig="initConfig"
     :audioCtx="audioCtx"
-    :audioNode="audioNode"
+    :nextNode="nextNode"
     :ref="setAudioRef"
     @track-selected="$emit('track-selected')"
     @remove="removeAudioCanvas(index)"
@@ -35,7 +35,7 @@ export default {
   components: {
     DraftCanvas, AudioCanvas
   },
-  props: ['audioCtx', 'audioNode', 'stream', 'pointer'],
+  props: ['audioCtx', 'nextNode', 'stream', 'pointer'],
   emits: ['track-selected'],
   data(){
     return {
@@ -68,7 +68,7 @@ export default {
     },
 
     initRecorder(){
-      this.recorder = new AudioRecorder(this.audioCtx, this.stream);
+      this.recorder = new AudioRecorder(this.audioCtx, this.stream, this.nextNode);
 
       let startPoint;
       let recordingId;
