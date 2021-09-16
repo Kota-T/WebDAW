@@ -2,8 +2,9 @@
   <div
   class="track_audio_container"
   @pointerdown="$emit('track-selected')"
-  ref="domElement">
-    <DraftCanvas :audioCtx="audioCtx" :stream="stream" ref="draftCanvas"/>
+  ref="domElement"
+  >
+    <DraftCanvas :audioCtx="audioCtx" :sourceNode="sourceNode" ref="draftCanvas"/>
     <AudioCanvas
     v-for="(initConfig, index) in audioParamStack"
     :key="initConfig.id"
@@ -45,6 +46,7 @@ export default {
     }
   },
   created(){
+    this.sourceNode = this.audioCtx.createMediaStreamSource(this.stream);
     this.initRecorder();
   },
   methods: {
@@ -68,7 +70,7 @@ export default {
     },
 
     initRecorder(){
-      this.recorder = new AudioRecorder(this.audioCtx, this.stream, this.nextNode);
+      this.recorder = new AudioRecorder(this.audioCtx, this.sourceNode, this.nextNode);
 
       let startPoint;
       let recordingId;

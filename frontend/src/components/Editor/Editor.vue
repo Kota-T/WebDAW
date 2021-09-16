@@ -145,8 +145,12 @@ export default {
       state: null//"playing" or "preparing" or "recording" or null
     }
   },
-  created(){
+  async created(){
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    this.audioCtx.onstatechange = async ()=>{
+      if(this.audioCtx.state !== 'running')
+        await this.audioCtx.resume();
+    }
   },
   mounted(){
     const label_field = this.$refs.label_field;
@@ -282,7 +286,7 @@ export default {
       switch(this.audioCtx.state){
         case "suspended":
         case "interrupted":
-          this.audioCtx.resume();
+          await this.audioCtx.resume();
           break;
       }
 

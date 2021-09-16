@@ -33,12 +33,6 @@ export default {
   },
   props: ['data', 'audioCtx', 'stream', 'pointer'],
   emits: ['track-solo', 'track-remove'],
-  data(){
-    return {
-      gainNode: null,
-      pannerNode: null
-    }
-  },
   created(){
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 0.5;

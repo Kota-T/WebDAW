@@ -12,7 +12,7 @@
 <script>
 export default {
   name: 'DraftCanvas',
-  props: ['audioCtx', 'stream'],
+  props: ['audioCtx', 'sourceNode'],
   data(){
     return {
       styles: {
@@ -22,10 +22,10 @@ export default {
     }
   },
   created(){
-    this.analyser = this.audioCtx.createAnalyser();
-    this.audioCtx.createMediaStreamSource(this.stream).connect(this.analyser);
-    this.analyser.fftSize = 1024;
-    this.dataArray = new Uint8Array(this.analyser.fftSize);
+    this.analyserNode = this.audioCtx.createAnalyser();
+    this.analyserNode.fftSize = 1024;
+    this.sourceNode.connect(this.analyserNode);
+    this.dataArray = new Uint8Array(this.analyserNode.fftSize);
     this.drawPoint = 0;
   },
   mounted(){
@@ -33,11 +33,11 @@ export default {
     this.initCtxStyle();
   },
   computed: {
-    slice_width(){
-      return this.$store.getters.animation_width / this.dataArray.length;
-    },
     canvas(){
       return this.$refs.canvas;
+    },
+    slice_width(){
+      return this.$store.getters.animation_width / this.dataArray.length;
     }
   },
   methods: {
@@ -64,7 +64,7 @@ export default {
         this.resize();
       }
 
-      this.analyser.getByteTimeDomainData(this.dataArray);
+      this.analyserNode.getByteTimeDomainData(this.dataArray);
 
       this.ctx.fillRect(
         this.drawPoint,
