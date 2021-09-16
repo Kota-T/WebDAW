@@ -40,7 +40,7 @@ export default {
     }
   },
   created(){
-    options = {
+    const options = {
       channelCount: 2,
       channelCountMode: "explicit",
       channelInterpretation: "speakers"
