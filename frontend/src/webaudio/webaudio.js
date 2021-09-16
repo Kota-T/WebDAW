@@ -20,13 +20,22 @@ export class AudioRecorder{
   constructor(audioCtx, stream){
     this.audioCtx = audioCtx;
     this.source = this.audioCtx.createMediaStreamSource(stream);
-    this.sp = this.audioCtx.createScriptProcessor(0, 2, 2);
+    this.sp = this.audioCtx.createScriptProcessor(0, 1, 2);
     this.audioData = [];
   }
 
   start(){
     this.source.connect(this.sp).connect(this.audioCtx.destination);
-    this.sp.onaudioprocess = e=>this.audioData.push(WavHandler.AudioBuffer2WavData(e.inputBuffer));
+    this.sp.onaudioprocess = e=>{
+      for(let channel = 0; channel < e.outputBuffer.numberOfChannels; channel++) {
+        const inputData = e.inputBuffer.getChannelData(0);
+        const outputData = e.outputBuffer.getChannelData(channel);
+        for(let sample = 0; sample < e.inputBuffer.length; sample++) {
+          outputData[sample] = inputData[sample];
+        }
+      }
+      this.audioData.push(WavHandler.AudioBuffer2WavData(e.outputBuffer));
+    }
     this.onstart();
   }
 

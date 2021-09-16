@@ -266,7 +266,6 @@ export default {
             video: false,
             audio: {
               autoGainControl: false,
-              channelCount: 2,
               echoCancellation: false,
               noiseSuppression: false,
               sampleRate: 44100

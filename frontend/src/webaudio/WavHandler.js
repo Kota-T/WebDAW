@@ -23,15 +23,13 @@ export default class WavHandler{
   }
 
   static AudioBuffer2WavData(buffer){
-    const left  = buffer.getChannelData(0);
+    const left = buffer.getChannelData(0);
     const right = buffer.getChannelData(1);
-
     const array = new Float32Array(buffer.length * 2);
     for(let i = 0; i < buffer.length; i++){
       array[i * 2] = left[i];
       array[i * 2 + 1] = right[i];
     }
-
     return array;
   }
 
