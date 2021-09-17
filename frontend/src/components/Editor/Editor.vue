@@ -146,7 +146,7 @@ export default {
       state: null//"playing" or "preparing" or "recording" or null
     }
   },
-  async created(){
+  created(){
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     this.audioCtx.onstatechange = () => {
       if(this.audioCtx.state !== 'running')
@@ -285,7 +285,7 @@ export default {
     },
 
     async init(){
-      if(!this.stream){
+      if(!this.stream?.active){
         await this.getStream();
       }
     },

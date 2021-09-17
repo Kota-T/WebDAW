@@ -1,10 +1,13 @@
 <template>
-<button type="button" class="track-btn track-solo-btn" :style="styles" @click="isSolo=!isSolo">Solo</button>
+<button type="button" class="track-btn track-solo-btn" :class="{active: isSolo}" @click="isSolo=!isSolo">Solo</button>
 </template>
 
 <style>
 .track-solo-btn{
   font-size: 14px;
+}
+.track-solo-btn.active{
+  background-color: gold;
 }
 </style>
 
@@ -14,16 +17,12 @@ export default {
   emits: ['track-solo'],
   data(){
     return {
-      isSolo: false,
-      styles: {
-        backgroundColor: "white"
-      }
+      isSolo: false
     }
   },
   watch:{
     isSolo(val){
       this.$emit('track-solo');
-      this.styles.backgroundColor = val ? "gold" : "white";
     }
   }
 }

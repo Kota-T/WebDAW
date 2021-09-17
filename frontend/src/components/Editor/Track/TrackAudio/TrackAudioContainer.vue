@@ -1,7 +1,7 @@
 <template>
   <div
   class="track_audio_container"
-  @pointerdown="$emit('track-selected')"
+  @pointerdown="e=>$emit('track-selected', e.shiftKey)"
   ref="domElement"
   >
     <DraftCanvas :audioCtx="audioCtx" :sourceNode="sourceNode" ref="draftCanvas"/>
@@ -12,7 +12,7 @@
     :audioCtx="audioCtx"
     :nextNode="nextNode"
     :ref="setAudioRef"
-    @track-selected="$emit('track-selected')"
+    @track-selected="shiftKey=>$emit('track-selected', shiftKey)"
     @remove="removeAudioCanvas(index)"
     />
   </div>
@@ -34,7 +34,8 @@ import AudioCanvas from './AudioCanvas.vue';
 export default {
   name: 'TrackAudioContainer',
   components: {
-    DraftCanvas, AudioCanvas
+    DraftCanvas,
+    AudioCanvas
   },
   props: ['audioCtx', 'nextNode', 'sourceNode', 'pointer'],
   emits: ['track-selected'],

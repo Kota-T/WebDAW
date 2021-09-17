@@ -72,7 +72,7 @@ export default {
     this.canvas.onpointerdown = e => {
       e.stopPropagation();
       this.canvas.focus();
-      this.$emit('track-selected');
+      this.$emit('track-selected', e.shiftKey);
 
       const startX = e.offsetX;
       if(startX <= 30){

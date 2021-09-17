@@ -2,7 +2,7 @@
   <div
   class="track-label"
   :class="{isTrackLabelSelected: isSelected}"
-  @pointerdown="$emit('track-selected')"
+  @pointerdown="e=>$emit('track-selected', e.shiftKey)"
   @contextmenu="$refs.menu.show"
   @touchstart="$refs.menu.show"
   ref="domElement"
@@ -11,6 +11,7 @@
       <InputElement length="10" default="新規トラック" ref="trackName"/>
       <TrackSlider :gainNode="gainNode" :pannerNode="pannerNode" ref="trackSlider"/>
       <div class="track-btn-container">
+        <TrackRecordBtn :recordNode="recordNode" ref="trackRecordBtn"/>
         <TrackMuteBtn :muteNode="muteNode" ref="trackMuteBtn"/>
         <TrackSoloBtn @track-solo="$emit('track-solo')" ref="trackSoloBtn"/>
       </div>
@@ -48,7 +49,7 @@
 .track-btn{
   background-color: white;
   width: 34px;
-  height: 26px;
+  height: 25px;
   border-radius: 5px;
   vertical-align: middle;
 }
@@ -63,6 +64,7 @@
 <script>
 import InputElement from '../../../util/InputElement.vue';
 import TrackSlider from './TrackSlider.vue';
+import TrackRecordBtn from './TrackRecordBtn.vue';
 import TrackMuteBtn from './TrackMuteBtn.vue';
 import TrackSoloBtn from './TrackSoloBtn.vue';
 
@@ -70,10 +72,15 @@ import ContextMenu from '../../../util/ContextMenu.vue';
 
 export default {
   name: 'TrackLabel',
-  props: ['gainNode', 'pannerNode', "muteNode"],
+  props: ['recordNode', 'gainNode', 'pannerNode', "muteNode"],
   emits: ['track-selected', 'track-solo', 'track-remove'],
   components: {
-    InputElement, TrackSlider, TrackMuteBtn, TrackSoloBtn, ContextMenu
+    InputElement,
+    TrackSlider,
+    TrackRecordBtn,
+    TrackMuteBtn,
+    TrackSoloBtn,
+    ContextMenu
   },
   data(){
     return {
