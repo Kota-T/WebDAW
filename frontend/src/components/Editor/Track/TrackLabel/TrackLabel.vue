@@ -11,7 +11,7 @@
       <InputElement length="10" default="新規トラック" ref="trackName"/>
       <TrackSlider :gainNode="gainNode" :pannerNode="pannerNode" ref="trackSlider"/>
       <div class="track-btn-container">
-        <TrackRecordBtn :recordNode="recordNode" ref="trackRecordBtn"/>
+        <TrackRecordBtn ref="trackRecordBtn"/>
         <TrackMuteBtn :muteNode="muteNode" ref="trackMuteBtn"/>
         <TrackSoloBtn @track-solo="$emit('track-solo')" ref="trackSoloBtn"/>
       </div>

@@ -1,7 +1,6 @@
 <template>
   <teleport to="#label_field">
     <TrackLabel
-    :recordNode="recordNode"
     :gainNode="gainNode"
     :pannerNode="pannerNode"
     :muteNode="muteNode"
@@ -36,15 +35,12 @@ export default {
   props: ['data', 'audioCtx', 'sourceNode', 'pointer'],
   emits: ['track-solo', 'track-remove'],
   created(){
-    this.recordNode = this.audioCtx.createGain();
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 0.5;
     this.pannerNode = this.audioCtx.createStereoPanner();
     this.muteNode = this.audioCtx.createGain();
     this.soloNode = this.audioCtx.createGain();
-    this.sourceNode
-      .connect(this.recordNode)
-      .connect(this.gainNode)
+    this.gainNode
       .connect(this.pannerNode)
       .connect(this.muteNode)
       .connect(this.soloNode)
@@ -112,10 +108,14 @@ export default {
         this.$parent.tracks.forEach(track=>{
           track.isSelected = false;
           track.isRecording = false;
+          try{
+            track.sourceNode.disconnect(track.gainNode);
+          }catch(e){}
         });
       }
       this.isSelected = true;
       this.isRecording = true;
+      this.sourceNode.connect(this.gainNode);
     },
 
     startRecording(){

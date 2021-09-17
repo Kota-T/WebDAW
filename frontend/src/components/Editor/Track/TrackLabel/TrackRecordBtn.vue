@@ -16,15 +16,9 @@
 <script>
 export default {
   name: 'TrackRecordBtn',
-  props: ['recordNode'],
   data(){
     return {
       isRecording: true
-    }
-  },
-  watch:{
-    isRecording(val){
-      this.recordNode.gain.value = val ? 1 : 0;
     }
   }
 }
