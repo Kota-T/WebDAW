@@ -31,6 +31,7 @@
 </style>
 
 <script>
+import WavHandler from '../../../../webaudio/WavHandler.js';
 import { Loader } from '../../../../webaudio/webaudio.js';
 import { Player, DrawDataProcessor, Drawer } from './AudioCanvas.js';
 
@@ -76,14 +77,17 @@ export default {
 
       const startX = e.offsetX;
       if(startX <= 30){
+        this.styles.cursor = 'col-resize';
         this.canvas.onpointermove = e=>this.resizeLeft(startX, e.offsetX);
       }else if(this.width - startX <= 30){
+        this.styles.cursor = 'col-resize';
         let preX = startX;
         this.canvas.onpointermove = e=>{
           this.resizeRight(preX, e.offsetX);
           preX = e.offsetX;
         }
       }else{
+        this.styles.cursor = 'grabbing';
         this.canvas.onpointermove = e=>this.move(startX, e.offsetX);
       }
     }
@@ -96,6 +100,7 @@ export default {
     this.canvas.onpointerup = this.canvas.pointerout = e=>{
       e.preventDefault();
       e.stopPropagation();
+      delete this.styles.cursor;
       this.canvas.onpointermove = null;
     }
 
@@ -302,10 +307,19 @@ export default {
     },
 
     downloadAudioFile(){
-      const link = document.createElement('a');
-      link.href = this.loader.url;
-      link.download = "audio.wav";
-      link.click();
+      const length = this.duration * this.audioCtx.sampleRate;
+      const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, length, this.audioCtx.sampleRate);
+      const source = offlineCtx.createBufferSource();
+      source.buffer = this.data.buffer;
+      source.connect(offlineCtx.destination);
+      source.start(0, this.diminished.leftTime, this.duration);
+      offlineCtx.startRendering().then(buffer=>{
+        const url = WavHandler.AudioBuffer2WavFile(buffer);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = "audio.wav";
+        link.click();
+      }).catch(console.error);
     },
 
     async getDownloadData(folder, index){

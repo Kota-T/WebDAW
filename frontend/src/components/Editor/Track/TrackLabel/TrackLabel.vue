@@ -37,6 +37,9 @@
 .track-label:hover{
   cursor: pointer;
 }
+.isTrackLabelSelected{
+  background-color: #606060;
+}
 .track-btn-container{
   margin-top: 10px;
 }
@@ -55,9 +58,6 @@
 }
 .track-btn:hover{
   cursor: pointer;
-}
-.isTrackLabelSelected{
-  background-color: #606060;
 }
 </style>
 
