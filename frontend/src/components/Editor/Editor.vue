@@ -141,7 +141,6 @@ export default {
       lastTrackId: 0,
       tracks: [],
       audioCtx: null,
-      stream: null,
       sourceNode: null,
       state: null//"playing" or "preparing" or "recording" or null
     }
@@ -265,7 +264,7 @@ export default {
     },
 
     async getStream(){
-      this.stream = await navigator.mediaDevices
+      await navigator.mediaDevices
         .getUserMedia(
           {
             video: false,
@@ -277,22 +276,21 @@ export default {
             }
           }
         )
-        .catch(err=>{
-          console.error(err);
-          window.alert("マイク入力を取得できません。");
-        });
-      this.sourceNode = this.audioCtx.createMediaStreamSource(this.stream);
+        .then(stream=>{
+          this.sourceNode = this.audioCtx.createMediaStreamSource(stream);
+        })
+        .catch(err=>window.alert("マイク入力を取得できません。"));
     },
 
     async init(){
-      if(!this.stream?.active){
+      if(!this.sourceNode?.mediaStream?.active){
         await this.getStream();
       }
     },
 
     async addTrack(trackData={}){
       await this.init();
-      if(!this.stream){return;}
+      if(!this.sourceNode?.mediaStream?.active){return;}
 
       this.tracks = [];
       trackData.id = this.lastTrackId;

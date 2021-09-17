@@ -1,5 +1,5 @@
 <template>
-  <InputElement length="5" default="120" @value-changed="valueChanged" ref="inputElement"/>
+  <InputElement type="number" size="3" default="120" @value-changed="valueChanged" ref="inputElement"/>
 </template>
 
 <script>

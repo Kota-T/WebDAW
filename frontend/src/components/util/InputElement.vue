@@ -1,7 +1,7 @@
 <template>
 <div class="input-element">
   <p v-if="!isInputing" @dblclick="if(!disabled){isInputing = true;}">{{ value }}</p>
-  <textarea rows="1" :cols="length" v-else v-model="value" @keydown.enter.stop="finishInput" @keydown.stop></textarea>
+  <input :type="type" :style="{width: size + 'rem'}" v-else v-model="value" @keydown.enter.stop="finishInput" @keydown.stop>
 </div>
 </template>
 
@@ -12,20 +12,19 @@
 .input-element p{
   color: #f0f0f0;
 }
-.input-element textarea{
+.input-element input{
   color: black;
   overflow: hidden;
   text-align: center;
   height: 1.5rem;
   line-height: 1.5rem;
-  resize: none;
 }
 </style>
 
 <script>
 export default {
   name: 'InputElement',
-  props: ['length', 'default'],
+  props: ['type', 'size', 'default'],
   data(){
     return {
       isInputing: false,
