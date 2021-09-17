@@ -6,7 +6,7 @@
     :muteNode="muteNode"
     ref="label"
     @track-selected="select"
-    @track-solo="val=>$emit('track-solo', val)"
+    @track-solo="$emit('track-solo')"
     @track-remove="$emit('track-remove')"
     />
   </teleport>
@@ -14,7 +14,7 @@
     <TrackAudioContainer
     :audioCtx="audioCtx"
     :nextNode="gainNode"
-    :stream="stream"
+    :sourceNode="sourceNode"
     :pointer="pointer"
     ref="container"
     @track-selected="select"
@@ -31,7 +31,7 @@ export default {
   components: {
     TrackLabel, TrackAudioContainer
   },
-  props: ['data', 'audioCtx', 'stream', 'pointer'],
+  props: ['data', 'audioCtx', 'sourceNode', 'pointer'],
   emits: ['track-solo', 'track-remove'],
   created(){
     this.gainNode = this.audioCtx.createGain();
@@ -39,13 +39,22 @@ export default {
     this.pannerNode = this.audioCtx.createStereoPanner();
     this.muteNode = this.audioCtx.createGain();
     this.soloNode = this.audioCtx.createGain();
-    this.gainNode.connect(this.pannerNode).connect(this.muteNode).connect(this.soloNode).connect(this.audioCtx.destination);
+    this.sourceNode
+      .connect(this.gainNode)
+      .connect(this.pannerNode)
+      .connect(this.muteNode)
+      .connect(this.soloNode)
+      .connect(this.audioCtx.destination);
   },
   mounted(){
     this.name = this.data.name?.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";
     this.gain = this.data.gain || 0.5;
     this.pan = this.data.pan || 0;
     this.data.audioStack?.forEach(elem=>this.$refs.container.createAudioCanvas(elem));
+  },
+  unmounted(){
+    this.sourceNode.disconnect(this.gainNode);
+    this.soloNode.disconnect();
   },
   computed: {
     name: {
@@ -79,6 +88,9 @@ export default {
       set: function(value){
         this.$refs.label.isSelected = value;
       }
+    },
+    isSolo(){
+      return this.$refs.label.$refs.trackSoloBtn.isSolo;
     }
   },
   methods: {

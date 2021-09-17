@@ -28,6 +28,9 @@ export default {
     this.dataArray = new Uint8Array(this.analyserNode.fftSize);
     this.drawPoint = 0;
   },
+  unmounted(){
+    this.sourceNode.disconnect(this.analyserNode);
+  },
   mounted(){
     this.ctx = this.canvas.getContext('2d');
     this.initCtxStyle();

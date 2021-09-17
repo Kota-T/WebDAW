@@ -22,7 +22,7 @@ export default {
   },
   watch:{
     isSolo(val){
-      this.$emit('track-solo', val);
+      this.$emit('track-solo');
       this.styles.backgroundColor = val ? "gold" : "white";
     }
   }

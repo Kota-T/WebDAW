@@ -36,7 +36,7 @@ export default {
   components: {
     DraftCanvas, AudioCanvas
   },
-  props: ['audioCtx', 'nextNode', 'stream', 'pointer'],
+  props: ['audioCtx', 'nextNode', 'sourceNode', 'pointer'],
   emits: ['track-selected'],
   data(){
     return {
@@ -46,7 +46,6 @@ export default {
     }
   },
   created(){
-    this.sourceNode = this.audioCtx.createMediaStreamSource(this.stream);
     this.initRecorder();
   },
   methods: {
@@ -70,7 +69,7 @@ export default {
     },
 
     initRecorder(){
-      this.recorder = new AudioRecorder(this.audioCtx, this.sourceNode, this.nextNode);
+      this.recorder = new AudioRecorder(this.audioCtx, this.sourceNode);
 
       let startPoint;
       let recordingId;

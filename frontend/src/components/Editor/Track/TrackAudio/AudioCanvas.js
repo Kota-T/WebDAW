@@ -1,14 +1,14 @@
 export class Player{
-  constructor(audioCtx, audioNode, data){
+  constructor(audioCtx, nextNode, data){
     this.audioCtx = audioCtx;
-    this.audioNode = audioNode;
+    this.nextNode = nextNode;
     this.data = data;
   }
 
   createSource(){
     this.source = this.audioCtx.createBufferSource();
     this.source.buffer = this.data.buffer;
-    this.source.connect(this.audioNode);
+    this.source.connect(this.nextNode);
   }
 
   play(start, end, onended){

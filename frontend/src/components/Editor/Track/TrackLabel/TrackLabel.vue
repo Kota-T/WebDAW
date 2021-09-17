@@ -12,7 +12,7 @@
       <TrackSlider :gainNode="gainNode" :pannerNode="pannerNode" ref="trackSlider"/>
       <div class="track-btn-container">
         <TrackMuteBtn :muteNode="muteNode" ref="trackMuteBtn"/>
-        <TrackSoloBtn @track-solo="val=>$emit('track-solo', val)" ref="trackSoloBtn"/>
+        <TrackSoloBtn @track-solo="$emit('track-solo')" ref="trackSoloBtn"/>
       </div>
     </div>
   </div>

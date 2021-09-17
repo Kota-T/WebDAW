@@ -22,10 +22,10 @@
   :key="data.id"
   :data="data"
   :audioCtx="audioCtx"
-  :stream="stream"
+  :sourceNode="sourceNode"
   :pointer="$refs.pointer"
   :ref="setTrackRef"
-  @track-solo="val=>makeTracksSolo(val)"
+  @track-solo="makeTracksSolo"
   @track-remove="removeTrackByUser(index)"
   />
 </template>
@@ -142,14 +142,15 @@ export default {
       tracks: [],
       audioCtx: null,
       stream: null,
+      sourceNode: null,
       state: null//"playing" or "preparing" or "recording" or null
     }
   },
   async created(){
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    this.audioCtx.onstatechange = async ()=>{
+    this.audioCtx.onstatechange = () => {
       if(this.audioCtx.state !== 'running')
-        await this.audioCtx.resume();
+        this.audioCtx.resume();
     }
   },
   mounted(){
@@ -280,16 +281,10 @@ export default {
           console.error(err);
           window.alert("マイク入力を取得できません。");
         });
+      this.sourceNode = this.audioCtx.createMediaStreamSource(this.stream);
     },
 
     async init(){
-      switch(this.audioCtx.state){
-        case "suspended":
-        case "interrupted":
-          await this.audioCtx.resume();
-          break;
-      }
-
       if(!this.stream){
         await this.getStream();
       }
@@ -345,10 +340,12 @@ export default {
         .forEach(index=>this.removeTrackByUser(index));
     },
 
-    makeTracksSolo(val){
-      this.tracks.forEach(track=>{
-        track.soloNode.gain.value = track.$refs.label.$refs.trackSoloBtn.isSolo ? 1 : val ? 0 : 1;
-      });
+    makeTracksSolo(){
+      if(this.tracks.every(track => track.isSolo === false)){
+        this.tracks.forEach(track => track.soloNode.gain.value = 1);
+      }else{
+        this.tracks.forEach(track=>track.soloNode.gain.value = track.isSolo ? 1 : 0);
+      }
     },
 
     onPointerMove({ layerX, x }){
