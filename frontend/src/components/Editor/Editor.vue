@@ -218,14 +218,14 @@ export default {
                 this.loadAudioFile(file);
               }else if(file.type === 'application/zip'){
                 const data = await this.readProjectZip(file);
-                await this.loadProject(data);
+                this.loadProject(data);
               }
             },
             console.error
           );
         }else if(entry.isDirectory){
           const data = await this.readProjectDirectory(entry);
-          await this.loadProject(data);
+          this.loadProject(data);
         }
       }
     }
@@ -542,15 +542,18 @@ export default {
       return Object.values(data)[0];
     },
 
-    async loadProject(data){
-      const config = data["config.json"];
-      this.setProjectConfig(config);
-      for await(let trackData of config.tracks){
-        trackData.audioStack.forEach((elem, i)=>{
-          elem.url = data[trackData.name][i+".wav"];
-        });
-        await this.addTrackByUser(trackData);
-      }
+    loadProject(data){
+      this.trackParams = [];
+      this.$nextTick(async ()=>{
+        const config = data["config.json"];
+        this.setProjectConfig(config);
+        for await(let trackData of config.tracks){
+          trackData.audioStack.forEach((elem, i)=>{
+            elem.url = data[trackData.name][i+".wav"];
+          });
+          await this.addTrackByUser(trackData);
+        }
+      });
     },
 
     async getUploadData(){

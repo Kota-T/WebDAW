@@ -54,7 +54,9 @@ export default {
     this.select();
   },
   unmounted(){
-    this.sourceNode.disconnect(this.gainNode);
+    try{
+      this.sourceNode.disconnect(this.gainNode);
+    }catch(e){}
     this.soloNode.disconnect();
   },
   computed: {
