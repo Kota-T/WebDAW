@@ -423,7 +423,7 @@ export default {
       }));
 
       this.socket.send({
-        type: "shareAudio",
+        type: "addAudio",
         audioDataArray: audioDataArray
       });
     },

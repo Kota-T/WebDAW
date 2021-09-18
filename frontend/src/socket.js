@@ -1,4 +1,6 @@
 export default class WebDAWSocket {
+  static MAX_DATA_SIZE = 10000000;
+
   init(defaultOnmessage){
     this.defaultOnmessage = defaultOnmessage;
     this.buffer = {};
@@ -13,7 +15,7 @@ export default class WebDAWSocket {
     this.onmessage = data=>this.defaultOnmessage(data);
   }
 
-  generatePacketId(){
+  generatePacketId(length){
     const ch_list = [];
     for(let i = 0; i < 26; i++)
       ch_list.push(String.fromCharCode("a".charCodeAt(0)+i));
@@ -22,11 +24,9 @@ export default class WebDAWSocket {
     for(let i = 0; i < 10; i++)
       ch_list.push(String(i));
 
-    const result_list = [];
-    for(let i = 0; i < 8; i++)
-      result_list.push(ch_list[Math.floor(Math.random() * ch_list.length)]);
-
-    const packetId = result_list.join('');
+    let packetId = "";
+    for(let i = 0; i < length; i++)
+      packetId += ch_list[Math.floor(Math.random() * ch_list.length)];
 
     if(this.buffer.hasOwnProperty(packetId))
       return this.generatePacketId();
@@ -35,17 +35,18 @@ export default class WebDAWSocket {
 
   send(jsonObj){
     const jsonStr = JSON.stringify(jsonObj);
-    if(jsonStr.length > 10000000){
-      const packetId = this.generatePacketId();
-      const numOfPackets = Math.ceil(jsonStr.length / 10000000);
+    if(jsonStr.length > WebDAWSocket.MAX_DATA_SIZE){
+      const packetId = this.generatePacketId(8);
+      const numOfPackets = Math.ceil(jsonStr.length / WebDAWSocket.MAX_DATA_SIZE);
       for(let i = 0; i < numOfPackets; i++){
-        const start = i * 10000000;
-        let end = start + 10000000;
+        const start = i * WebDAWSocket.MAX_DATA_SIZE;
+        let end = start + WebDAWSocket.MAX_DATA_SIZE;
         if(end > jsonStr.length){
           end = jsonStr.length;
         }
         this.socket.send(JSON.stringify({
           type: 'packet',
+          target: jsonObj.target,
           packetId: packetId,
           numOfPackets: numOfPackets,
           index: i,
@@ -86,6 +87,8 @@ export default class WebDAWSocket {
             fn(result);
             delete this.buffer[data.packetId];
           }
+          break;
+        case 'packet_id_overlapped_error':
           break;
         case 'closed':
         case 'error':
