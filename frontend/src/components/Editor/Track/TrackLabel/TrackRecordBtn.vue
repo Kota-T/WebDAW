@@ -1,5 +1,5 @@
 <template>
-<button type="button" class="track-btn track-record-btn" :class="{active: isRecording}" disabled>R</button>
+<button type="button" class="track-btn track-record-btn" :class="{active: isRecording}" @click="isRecording=!isRecording">R</button>
 </template>
 
 <style>
@@ -18,7 +18,7 @@ export default {
   name: 'TrackRecordBtn',
   data(){
     return {
-      isRecording: true
+      isRecording: false
     }
   }
 }

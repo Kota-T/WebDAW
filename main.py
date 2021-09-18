@@ -40,7 +40,7 @@ class WebDAWHandler(WebSocketHandler):
             #被っていた時はエラーメッセージを送信する
             for member in self.team.members:
                 if member != self and member.packetIds.get(packetId) is not None:
-                    self.write_message({'type': 'packet_id_overlapped_error', 'msg': 'packetId overlapped.'})
+                    self.write_message({'type': 'packet_id_overlapped_error'})
                     return
 
             #self.packetIdsにpacketIdをキーにし、送られてくるpacketの合計数をvalueとして保存し、

@@ -36,6 +36,9 @@ export default class WebDAWSocket {
   send(jsonObj){
     const jsonStr = JSON.stringify(jsonObj);
     if(jsonStr.length > WebDAWSocket.MAX_DATA_SIZE){
+      if(this.lastSendDataBlobURL)
+        URL.revokeObjectURL(this.lastSendDataBlobURL);
+      this.lastSendDataBlobURL = URL.createObjectURL(new Blob([jsonStr], {type: 'application/json'}));
       const packetId = this.generatePacketId(8);
       const numOfPackets = Math.ceil(jsonStr.length / WebDAWSocket.MAX_DATA_SIZE);
       for(let i = 0; i < numOfPackets; i++){
@@ -89,6 +92,9 @@ export default class WebDAWSocket {
           }
           break;
         case 'packet_id_overlapped_error':
+          const reader = new FileReader();
+          reader.onload(()=>this.send(JSON.parse(reader.result)));
+          reader.readAsText(this.lastSendDataBlobURL);
           break;
         case 'closed':
         case 'error':

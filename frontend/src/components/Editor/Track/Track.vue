@@ -51,6 +51,15 @@ export default {
     this.gain = this.data.gain || 0.5;
     this.pan = this.data.pan || 0;
     this.data.audioStack?.forEach(elem=>this.$refs.container.createAudioCanvas(elem));
+    this.$watch('isRecording', value=>{
+      if(value){
+        this.sourceNode.connect(this.gainNode);
+      }else{
+        try{
+          this.sourceNode.disconnect(this.gainNode);
+        }catch(e){}
+      }
+    });
     this.select();
   },
   unmounted(){
@@ -109,15 +118,9 @@ export default {
       if(!shiftKey){
         this.$parent.tracks.forEach(track=>{
           track.isSelected = false;
-          track.isRecording = false;
-          try{
-            track.sourceNode.disconnect(track.gainNode);
-          }catch(e){}
         });
       }
       this.isSelected = true;
-      this.isRecording = true;
-      this.sourceNode.connect(this.gainNode);
     },
 
     startRecording(){
