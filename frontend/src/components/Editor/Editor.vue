@@ -563,11 +563,15 @@ export default {
       };
     },
 
-    async loadSharedProject(project){
-      this.setProjectConfig(project);
-      for await(let trackData of project.tracks){
-        await this.addTrack(trackData);
-      }
+    loadSharedProject(project){
+      this.trackParams = [];
+      this.$nextTick(async ()=>{
+        this.setProjectConfig(project);
+        for await(let trackData of project.tracks){
+          await this.addTrack(trackData);
+        }
+        console.info("プロジェクトに参加しました。");
+      });
     },
 
     getTimeFromBarAndBeat(bar_and_beat){

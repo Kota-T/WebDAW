@@ -126,11 +126,10 @@ export default {
         type: "joinProject",
         id: id
       });
-      this.socket.onmessage = async data=>{
+      this.socket.onmessage = data=>{
         if(data.type === 'shareProject'){
             this.projectId = id;
-            await this.$refs.editor.loadSharedProject(data.projectData);
-            console.info("プロジェクトに参加しました。id: " + this.projectId);
+            this.$refs.editor.loadSharedProject(data.projectData);
         }
         this.socket.setDefault();
       }

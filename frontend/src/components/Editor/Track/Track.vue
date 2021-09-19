@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import TrackLabel from './TrackLabel/TrackLabel.vue';
+import TrackLabel from './TrackLabel.vue';
 import TrackAudioContainer from './TrackAudio/TrackAudioContainer.vue';
 
 export default {
@@ -51,7 +51,7 @@ export default {
     this.gain = this.data.gain || 0.5;
     this.pan = this.data.pan || 0;
     this.data.audioStack?.forEach(elem=>this.$refs.container.createAudioCanvas(elem));
-    this.$watch('isInputed', value=>{
+    this.$watch('isMonitoring', value=>{
       if(value){
         this.sourceNode.connect(this.gainNode);
       }else{
@@ -82,7 +82,7 @@ export default {
         return this.gainNode.gain.value;
       },
       set: function(value){
-        this.$refs.label.$refs.trackSlider.gainValue = value;
+        this.$refs.label.gainValue = value;
       }
     },
     pan: {
@@ -90,7 +90,7 @@ export default {
         return this.pannerNode.pan.value;
       },
       set: function(value){
-        this.$refs.label.$refs.trackSlider.panValue = value;
+        this.$refs.label.panValue = value;
       }
     },
     isSelected: {
@@ -101,16 +101,16 @@ export default {
         this.$refs.label.isSelected = value;
       }
     },
-    isInputed: {
+    isMonitoring: {
       get: function(){
-        return this.$refs.label.$refs.trackInputBtn.isInputed;
+        return this.$refs.label.isMonitoring;
       },
       set: function(value){
-        this.$refs.label.$refs.trackInputBtn.isInputed = value;
+        this.$refs.label.isMonitoring = value;
       }
     },
     isSolo(){
-      return this.$refs.label.$refs.trackSoloBtn.isSolo;
+      return this.$refs.label.isSolo;
     }
   },
   methods: {

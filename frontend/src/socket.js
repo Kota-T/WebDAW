@@ -76,11 +76,12 @@ export default class WebDAWSocket {
   set onmessage(fn){
     this.socket.onmessage = e=>{
       const data = JSON.parse(e.data);
+      if(data.type === 'pong'){
+        this.socket.send(JSON.stringify({type: 'ping'}));
+        return;
+      }
       console.log(data);
       switch(data.type){
-        case 'pong':
-          this.socket.send(JSON.stringify({type: 'ping'}));
-          break;
         case 'packet':
           if(!this.buffer.hasOwnProperty(data.packetId)){
             this.buffer[data.packetId] = [];
