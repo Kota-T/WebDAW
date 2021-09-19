@@ -161,7 +161,7 @@ export default {
     ruler_layer.onscroll = e=>label_field.scrollTop = ruler_layer.scrollTop;
 
     const label_field_width = 200;
-    ruler.onclick = e=>{
+    pointer_layer.onclick = e=>{
       if(this.state === "recording") return;
       this.$refs.pointer.layerX = e.clientX - label_field_width + pointer_layer.scrollLeft;
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
@@ -352,7 +352,11 @@ export default {
         pointer_layer.scrollLeft += pointer_layer.offsetWidth;
       }
       if(x >= this.$store.getters.ruler_width){
-        this.$store.commit('addNumberOfBars', 30);
+        if(this.state === "recording"){
+          this.$store.commit('addNumberOfBars', 30);
+        }else if(this.state === "playing"){
+          this.pause();
+        }
       }
     },
 
