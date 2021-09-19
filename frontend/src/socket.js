@@ -67,7 +67,7 @@ export default class WebDAWSocket {
 
   set onopen(fn){
     this.socket.onopen = e=>{
-      this.intervalId = setInterval(()=>this.socket.send(JSON.parse({type: 'ping'})), 1000);
+      this.socket.send(JSON.parse({type: 'ping'}));
       console.info("接続しました。");
       fn(e);
     }
@@ -78,6 +78,9 @@ export default class WebDAWSocket {
       const data = JSON.parse(e.data);
       console.log(data);
       switch(data.type){
+        case 'pong':
+          this.socket.send(JSON.parse({type: 'ping'}));
+          break;
         case 'packet':
           if(!this.buffer.hasOwnProperty(data.packetId)){
             this.buffer[data.packetId] = [];
@@ -110,7 +113,6 @@ export default class WebDAWSocket {
   set onclose(fn){
     this.socket.onclose = e=>{
       fn(e);
-      clearInterval(this.intervalId);
       console.info("接続が閉じられました。");
     }
   }
