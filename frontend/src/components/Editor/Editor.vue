@@ -352,11 +352,7 @@ export default {
         pointer_layer.scrollLeft += pointer_layer.offsetWidth;
       }
       if(x >= this.$store.getters.ruler_width){
-        if(this.state === "recording"){
-          this.$store.commit('addNumberOfBars', 30);
-        }else if(this.state === "playing"){
-          this.pause();
-        }
+        this.$store.commit('addNumberOfBars', 30);
       }
     },
 

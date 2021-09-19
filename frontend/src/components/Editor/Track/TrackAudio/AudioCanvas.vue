@@ -82,10 +82,14 @@ export default {
 
       const startX = e.offsetX;
       if(startX <= 30){
-        this.canvas.onpointermove = e=>this.resizeLeft(startX, e.offsetX);
+        this.canvas.onpointermove = e=>{
+          this.decideCursor(e.offsetX);
+          this.resizeLeft(startX, e.offsetX);
+        }
       }else if(this.width - startX <= 30){
         let preX = startX;
         this.canvas.onpointermove = e=>{
+          this.decideCursor(e.offsetX);
           this.resizeRight(preX, e.offsetX);
           preX = e.offsetX;
         }
@@ -206,9 +210,9 @@ export default {
   methods: {
     decideCursor(x){
       if(x <= 30){
-        this.styles.cursor = 'col-resize';
+        this.styles.cursor = this.diminished.left === 0 ? 'e-resize' : 'ew-resize';
       }else if(this.width - x <= 30){
-        this.styles.cursor = 'col-resize';
+        this.styles.cursor = this.diminished.right === 0 ? 'w-resize' : 'ew-resize';
       }else{
         this.styles.cursor = 'grab';
       }
