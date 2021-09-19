@@ -1,5 +1,5 @@
 <template>
-<button type="button" class="track-btn track-solo-btn" :class="{active: isSolo}" @click="isSolo=!isSolo">Solo</button>
+<button type="button" class="track-btn track-solo-btn" :class="{active: isSolo}" @click="isSolo=!isSolo" title="ソロ再生">Solo</button>
 </template>
 
 <style>

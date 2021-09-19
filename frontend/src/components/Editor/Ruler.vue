@@ -9,6 +9,9 @@
   top: 0;
   z-index: 2;
 }
+#ruler:hover{
+  cursor: ew-resize;
+}
 </style>
 
 <script>

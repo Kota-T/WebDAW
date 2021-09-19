@@ -161,7 +161,7 @@ export default {
     ruler_layer.onscroll = e=>label_field.scrollTop = ruler_layer.scrollTop;
 
     const label_field_width = 200;
-    pointer_layer.onclick = e=>{
+    ruler.onclick = e=>{
       if(this.state === "recording") return;
       this.$refs.pointer.layerX = e.clientX - label_field_width + pointer_layer.scrollLeft;
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);

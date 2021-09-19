@@ -1,7 +1,7 @@
 <template>
   <div
   class="track-label"
-  :class="{isTrackLabelSelected: isSelected}"
+  :class="{'is-selected': isSelected}"
   @pointerdown="e=>$emit('track-selected', e.shiftKey)"
   @contextmenu="$refs.menu.show"
   @touchstart="$refs.menu.show"
@@ -11,7 +11,7 @@
       <InputElement type="text" size="8" default="新規トラック" ref="trackName"/>
       <TrackSlider :gainNode="gainNode" :pannerNode="pannerNode" ref="trackSlider"/>
       <div class="track-btn-container">
-        <TrackRecordBtn ref="trackRecordBtn"/>
+        <TrackInputBtn ref="trackInputBtn"/>
         <TrackMuteBtn :muteNode="muteNode" ref="trackMuteBtn"/>
         <TrackSoloBtn @track-solo="$emit('track-solo')" ref="trackSoloBtn"/>
       </div>
@@ -37,7 +37,7 @@
 .track-label:hover{
   cursor: pointer;
 }
-.isTrackLabelSelected{
+.track-label.is-selected{
   background-color: #606060;
 }
 .track-btn-container{
@@ -64,7 +64,7 @@
 <script>
 import InputElement from '../../../util/InputElement.vue';
 import TrackSlider from './TrackSlider.vue';
-import TrackRecordBtn from './TrackRecordBtn.vue';
+import TrackInputBtn from './TrackInputBtn.vue';
 import TrackMuteBtn from './TrackMuteBtn.vue';
 import TrackSoloBtn from './TrackSoloBtn.vue';
 
@@ -77,7 +77,7 @@ export default {
   components: {
     InputElement,
     TrackSlider,
-    TrackRecordBtn,
+    TrackInputBtn,
     TrackMuteBtn,
     TrackSoloBtn,
     ContextMenu

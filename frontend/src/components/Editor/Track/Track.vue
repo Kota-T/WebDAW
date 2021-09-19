@@ -51,7 +51,7 @@ export default {
     this.gain = this.data.gain || 0.5;
     this.pan = this.data.pan || 0;
     this.data.audioStack?.forEach(elem=>this.$refs.container.createAudioCanvas(elem));
-    this.$watch('isRecording', value=>{
+    this.$watch('isInputed', value=>{
       if(value){
         this.sourceNode.connect(this.gainNode);
       }else{
@@ -101,12 +101,12 @@ export default {
         this.$refs.label.isSelected = value;
       }
     },
-    isRecording: {
+    isInputed: {
       get: function(){
-        return this.$refs.label.$refs.trackRecordBtn.isRecording;
+        return this.$refs.label.$refs.trackInputBtn.isInputed;
       },
       set: function(value){
-        this.$refs.label.$refs.trackRecordBtn.isRecording = value;
+        this.$refs.label.$refs.trackInputBtn.isInputed = value;
       }
     },
     isSolo(){

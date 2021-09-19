@@ -65,6 +65,11 @@ export default {
     this.x = this.initConfig.startPoint;
     this.initDiminished(this.initConfig.diminished);
 
+    this.canvas.onpointerover = e=>{
+      this.decideCursor(e.offsetX);
+      this.canvas.onpointermove = e=>this.decideCursor(e.offsetX);
+    }
+
     this.canvas.ontouchmove = e => {
       e.preventDefault();
       e.stopPropagation();
@@ -77,10 +82,8 @@ export default {
 
       const startX = e.offsetX;
       if(startX <= 30){
-        this.styles.cursor = 'col-resize';
         this.canvas.onpointermove = e=>this.resizeLeft(startX, e.offsetX);
       }else if(this.width - startX <= 30){
-        this.styles.cursor = 'col-resize';
         let preX = startX;
         this.canvas.onpointermove = e=>{
           this.resizeRight(preX, e.offsetX);
@@ -97,7 +100,14 @@ export default {
       e.stopPropagation();
     }
 
-    this.canvas.onpointerup = this.canvas.pointerout = e=>{
+    this.canvas.onpointerup = e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      this.decideCursor(e.offsetX);
+      this.canvas.onpointermove = e=>this.decideCursor(e.offsetX);
+    }
+
+    this.canvas.onpointerout = e=>{
       e.preventDefault();
       e.stopPropagation();
       delete this.styles.cursor;
@@ -194,6 +204,16 @@ export default {
     }
   },
   methods: {
+    decideCursor(x){
+      if(x <= 30){
+        this.styles.cursor = 'col-resize';
+      }else if(this.width - x <= 30){
+        this.styles.cursor = 'col-resize';
+      }else{
+        this.styles.cursor = 'grab';
+      }
+    },
+
     initDiminished(diminished={left: 0, right: 0}){
       this.diminished = {
         ...diminished,

@@ -1,5 +1,5 @@
 <template>
-<button type="button" class="track-btn track-mute-btn" @click="isMuted=!isMuted">
+<button type="button" class="track-btn track-mute-btn" @click="isMuted=!isMuted" title="消音">
   <svg v-show="!isMuted"><use href="../../../../assets/volume_on.svg#volume_on" fill="#323232" stroke="#323232"/></svg>
   <svg v-show="isMuted"><use href="../../../../assets/volume_off.svg#volume_off" fill="#323232" stroke="#323232"/></svg>
 </button>
