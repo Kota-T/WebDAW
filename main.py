@@ -34,7 +34,7 @@ class WebDAWHandler(WebSocketHandler):
         data = json.loads(msg)
         type = data['type']
         if type == "ping":
-            self.write_message({type: 'pong'})
+            self.write_message({'type': 'pong'})
         elif type == 'packet':
             packetId = data['packetId']
 
