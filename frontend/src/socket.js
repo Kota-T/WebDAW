@@ -67,7 +67,7 @@ export default class WebDAWSocket {
 
   set onopen(fn){
     this.socket.onopen = e=>{
-      this.socket.send(JSON.parse({type: 'ping'}));
+      this.socket.send(JSON.stringify({type: 'ping'}));
       console.info("接続しました。");
       fn(e);
     }
@@ -79,7 +79,7 @@ export default class WebDAWSocket {
       console.log(data);
       switch(data.type){
         case 'pong':
-          this.socket.send(JSON.parse({type: 'ping'}));
+          this.socket.send(JSON.stringify({type: 'ping'}));
           break;
         case 'packet':
           if(!this.buffer.hasOwnProperty(data.packetId)){
