@@ -9,6 +9,9 @@ export default class WebDAWSocket {
   connect(){
     this.socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/websocket`);
     this.connected = true;
+    this.socket.onopen(()=>{
+      this.intervalId = setInterval(()=>this.socket.send(JSON.parse({type: 'ping'})), 1000);
+    });
   }
 
   setDefault(){
@@ -109,6 +112,7 @@ export default class WebDAWSocket {
   set onclose(fn){
     this.socket.onclose = e=>{
       fn(e);
+      clearInterval(this.intervalId);
       console.info("接続が閉じられました。");
     }
   }

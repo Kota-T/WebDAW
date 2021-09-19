@@ -33,7 +33,9 @@ class WebDAWHandler(WebSocketHandler):
         print("メッセージを受信")
         data = json.loads(msg)
         type = data['type']
-        if type == 'packet':
+        if type == "ping":
+            self.write_message({type: 'pong'})
+        elif type == 'packet':
             packetId = data['packetId']
 
             #ブラウザで作られたpacketIdが他の人が送信中のものと被っていないかを確かめ、
