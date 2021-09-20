@@ -3,9 +3,11 @@
     <a @click="$refs.editor.downloadProject">プロジェクトファイルをダウンロード</a>
     <a @click="isShowPopup=true;popUpType='WriteRange';">選択範囲を書き出す</a>
     <template v-if="projectId === null">
-      <a @click="startProject">プロジェクトを共有</a>
+      <a>プロジェクトを共有<br>
+        <input size="8" @keydown.enter.prevent="startProject">
+      </a>
       <a>プロジェクトに参加<br>
-        <textarea cols="2" rows="1" @keydown.enter="joinProject" ref="projectIdField"></textarea>
+        <input size="8" @keydown.enter.prevent="joinProject">
       </a>
     </template>
     <a v-else-if="projectId === 'loading'">Loading...</a>
@@ -107,16 +109,17 @@ export default {
         alert("画面を横向きにしてください。")
     },
 
-    startProject(){
+    startProject(e){
       this.projectId = "loading";
+      const id = e.target.value;
       this.socket.connect();
       this.socket.onclose = e=>this.projectId = null;
       this.socket.onerror = e=>this.projectId = null;
       this.socket.onopen = () => {
-        this.socket.send({type: "startProject"});
+        this.socket.send({ type: "startProject", id: id });
         this.socket.onmessage = data=>{
-          if(data.type === 'id'){
-            this.projectId = data.id;
+          if(data.type === 'startProject'){
+            this.projectId = id;
             console.info("プロジェクトを共有しました。id: " + this.projectId);
           }
           this.socket.setDefault();
@@ -124,14 +127,14 @@ export default {
       }
     },
 
-    joinProject(){
+    joinProject(e){
       this.projectId = "loading";
-      const id = this.$refs.projectIdField.value;
+      const id = e.target.value;
       this.socket.connect();
       this.socket.onclose = e=>this.projectId = null;
       this.socket.onerror = e=>this.projectId = null;
       this.socket.onopen = () => {
-        this.socket.send({ type: "joinProject", id: id});
+        this.socket.send({ type: "joinProject", id: id });
         this.socket.onmessage = data=>{
           if(data.type === 'shareProject'){
             this.projectId = id;

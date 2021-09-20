@@ -3,21 +3,16 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler
 
-def generateId(numOfDigits):
-    ch_list = [chr(ord("a")+i) for i in range(26)] + [chr(ord("A")+i) for i in range(26)] + [str(n) for n in range(10)]
-    id = ''.join([random.choice(ch_list) for i in range(numOfDigits)])
-    return id
 
 class Team:
     teams = {}
-    def __init__(self):
-        self.members = []
-        while True:
-            id = generateId(16)
-            if Team.teams.get(id) is None:
-                Team.teams[id] = self
-                self.id = id
-                break
+    def __init__(self, id):
+        if Team.teams.get(id) is None:
+            Team.teams[id] = self
+            self.id = id
+            self.members = []
+        else:
+            raise KeyError(f'Team.teams has id:{id} already.')
 
 
 class IndexHandler(RequestHandler):
@@ -44,7 +39,7 @@ class WebDAWHandler(WebSocketHandler):
             return
         print("メッセージを受信")
         if type == 'startProject':
-            self.startProject()
+            self.startProject(data['id'])
             return
         elif type == 'joinProject':
             self.joinProject(data['id'])
@@ -60,11 +55,15 @@ class WebDAWHandler(WebSocketHandler):
                     return
 
             #self.packetIdsにpacketIdをキーにし、送られてくるpacketの合計数をvalueとして保存し、
-            #一つ送られてくるたびにカウントダウン
             if self.packetIds.get(packetId) is None:
                 self.packetIds[packetId] = data['numOfPackets']
-            else:
-                self.packetIds[packetId] -= 1
+
+            #一つ送られてくるたびにカウントダウン
+            self.packetIds[packetId] -= 1
+
+            #カウントが0になった時self.packetIdsから削除
+            if self.packetIds[packetId] == 0:
+                del self.packetIds[packetId]
 
         if data.get('target') is None:
             self.write_message_to_other_members(msg)
@@ -86,11 +85,16 @@ class WebDAWHandler(WebSocketHandler):
             if member != self:
                 member.write_message(message)
 
-    def startProject(self):
-        self.team = Team()
-        self.team.members.append(self)
-        self.write_message({'type': "id", 'id': self.team.id})
-        print("プロジェクトを共有")
+    def startProject(self, id):
+        try:
+            self.team = Team(id)
+            self.team.members.append(self)
+            self.write_message({'type': "startProject"})
+            print("プロジェクトを共有")
+        except KeyError:
+            print("プロジェクトの共有失敗")
+            self.write_message({'type': 'msg', 'msg': f"無効なidです。 id: {id}"})
+            self.close()
 
     def joinProject(self, id):
         try:

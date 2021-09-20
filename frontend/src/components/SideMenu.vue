@@ -47,12 +47,11 @@
 #side-menu a:visited{
   color: black;
 }
-#side-menu a > textarea{
-  border:1px solid;
+#side-menu a > input{
+  border: 1px solid;
   padding: 3px;
-  text-align:right;
+  text-align: center;
   vertical-align: middle;
-  resize:none;
 }
 </style>
 
