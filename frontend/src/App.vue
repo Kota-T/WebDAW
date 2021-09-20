@@ -14,7 +14,7 @@
       <a @click="endProject">共有を停止する</a>
     </template>
     <a href="/docs/" target="_blank">ヘルプ</a>
-    <VideoContainer v-if="projectId !== 'loading' && projectId !== null" :stream="$refs.editor.stream" :roomId="projectId" ref="videoContainer"/>
+    <VideoContainer v-if="projectId !== 'loading' && projectId !== null" :stream="stream" :roomId="projectId" ref="videoContainer"/>
   </SideMenu>
   <Popup v-show="isShowPopup" @hide-popup="isShowPopup=false">
     <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="$refs.editor.writeProjectAudio"/>
@@ -62,6 +62,7 @@ export default {
       popUpType: null,
       projectId: null,
       socket: null,
+      stream: null
     }
   },
   created(){
@@ -111,13 +112,15 @@ export default {
       this.socket.connect();
       this.socket.onclose = e=>this.projectId = null;
       this.socket.onerror = e=>this.projectId = null;
-      this.socket.onopen = async () => this.socket.send({type: "startProject"});
-      this.socket.onmessage = data=>{
-        if(data.type === 'id'){
-          this.projectId = data.id;
-          console.info("プロジェクトを共有しました。id: " + this.projectId);
+      this.socket.onopen = () => {
+        this.socket.send({type: "startProject"});
+        this.socket.onmessage = data=>{
+          if(data.type === 'id'){
+            this.projectId = data.id;
+            console.info("プロジェクトを共有しました。id: " + this.projectId);
+          }
+          this.socket.setDefault();
         }
-        this.socket.setDefault();
       }
     },
 
@@ -127,16 +130,15 @@ export default {
       this.socket.connect();
       this.socket.onclose = e=>this.projectId = null;
       this.socket.onerror = e=>this.projectId = null;
-      this.socket.onopen = async () => this.socket.send({
-        type: "joinProject",
-        id: id
-      });
-      this.socket.onmessage = data=>{
-        if(data.type === 'shareProject'){
+      this.socket.onopen = () => {
+        this.socket.send({ type: "joinProject", id: id});
+        this.socket.onmessage = data=>{
+          if(data.type === 'shareProject'){
             this.projectId = id;
             this.$refs.editor.loadSharedProject(data.projectData);
+          }
+          this.socket.setDefault();
         }
-        this.socket.setDefault();
       }
     },
 

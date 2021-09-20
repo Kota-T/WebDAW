@@ -101,8 +101,7 @@ export default class WebDAWSocket {
           reader.onload(()=>this.send(JSON.parse(reader.result)));
           reader.readAsText(this.lastSendDataBlobURL);
           break;
-        case 'closed':
-        case 'error':
+        case 'msg':
           console.info(data.msg);
           break;
         default:

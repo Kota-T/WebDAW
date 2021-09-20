@@ -43,7 +43,13 @@ class WebDAWHandler(WebSocketHandler):
             self.write_message({'type': 'pong'})
             return
         print("メッセージを受信")
-        if type == 'packet':
+        if type == 'startProject':
+            self.startProject()
+            return
+        elif type == 'joinProject':
+            self.joinProject(data['id'])
+            return
+        elif type == 'packet':
             packetId = data['packetId']
 
             #ブラウザで作られたpacketIdが他の人が送信中のものと被っていないかを確かめ、
@@ -60,27 +66,15 @@ class WebDAWHandler(WebSocketHandler):
             else:
                 self.packetIds[packetId] -= 1
 
-            #packetにtargetが指定されている時はself.team.membersのtargetのインデックスのものにpacketを送信
-            if data.get('target') is None:
-                self.write_message_to_other_members(msg)
-            else:
-                self.team.members[int(data['target'])].write_message(msg)
-
-        elif type == 'startProject':
-            self.startProject()
-        elif type == 'joinProject':
-            self.joinProject(data['id'])
+        if data.get('target') is None:
+            self.write_message_to_other_members(msg)
         else:
-            if data.get('target') is None:
-                self.write_message_to_other_members(msg)
-            else:
-                self.team.members[int(data['target'])].write_message(msg)
+            self.team.members[int(data['target'])].write_message(msg)
 
     def on_close(self):
-        self.write_message_to_other_members({'type': 'closed', 'msg': 'メンバーが退出しました。'})
         if not hasattr(self, "team"):
-            print("self.team is None")
             return
+        self.write_message_to_other_members({'type': 'msg', 'msg': 'メンバーが退出しました。'})
         self.team.members.remove(self)
         print("グループから退出")
         if self.team.members == []:
@@ -106,8 +100,9 @@ class WebDAWHandler(WebSocketHandler):
             self.team.members[0].write_message({'type': 'joinProject', 'target': target})
             print("プロジェクトに参加")
         except KeyError:
-            self.write_message({'type': 'error', 'msg': f'無効なIDです。id: {id}'})
             print("プロジェクトに参加失敗")
+            self.write_message({'type': 'msg', 'msg': f"無効なidです。id: {id}"})
+            self.close()
 
 
 if __name__ == "__main__":
