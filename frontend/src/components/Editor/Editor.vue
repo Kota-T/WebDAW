@@ -267,7 +267,7 @@ export default {
       await navigator.mediaDevices
         .getUserMedia(
           {
-            video: false,
+            video: true,
             audio: {
               autoGainControl: false,
               echoCancellation: false,
