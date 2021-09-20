@@ -264,12 +264,11 @@ export default {
     },
 
     async getStream(){
+      if(this.sourceNode?.mediaStream?.active){ return; }
       await navigator.mediaDevices
         .getUserMedia(
           {
-            video: {
-              aspectRatio: 1920/1080
-            },
+            video: false,
             audio: {
               autoGainControl: false,
               echoCancellation: false,
@@ -280,22 +279,15 @@ export default {
         )
         .then(stream=>{
           this.sourceNode = this.audioCtx.createMediaStreamSource(stream);
-          this.$parent.stream = stream;
         })
-        .catch(err=>window.alert("マイク入力を取得できません。"));
-    },
-
-    async init(){
-      if(!this.sourceNode?.mediaStream?.active){
-        await this.getStream();
-      }
+        .catch(err=>{
+          window.alert("マイク入力を取得できません。");
+          throw new Error();
+        })
     },
 
     async addTrack(trackData={}){
-      await this.init();
-      if(!this.sourceNode?.mediaStream?.active){return;}
-
-      this.tracks = [];
+      try{ await this.getStream(); }catch(e){ return; }
       trackData.id = this.lastTrackId;
       this.trackParams.push(trackData);
       this.lastTrackId++;
@@ -360,7 +352,7 @@ export default {
     },
 
     async startRecording(){
-      await this.init();
+      try{ await this.getStream(); }catch(e){ return; }
       this.selectedTracks = this.tracks.filter(track=>track.isSelected);
       const notSelectedTracks = this.tracks.filter(track=>!track.isSelected);
       if(!this.selectedTracks.length){return;}
@@ -398,7 +390,7 @@ export default {
     },
 
     async play(){
-      await this.init();
+      try{ await this.getStream(); }catch(e){ return; }
       this.tracks.forEach(track=>track.play());
       const scale_interval = this.$store.getters.scale_interval;
       const x = this.$refs.pointer.x;

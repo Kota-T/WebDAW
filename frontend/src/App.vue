@@ -16,7 +16,7 @@
       <a @click="endProject">共有を停止する</a>
     </template>
     <a href="/docs/" target="_blank">ヘルプ</a>
-    <VideoContainer v-if="projectId !== 'loading' && projectId !== null" :stream="stream" :roomId="projectId" ref="videoContainer"/>
+    <VideoContainer v-if="projectId !== 'loading' && projectId !== null" :roomId="projectId" ref="videoContainer"/>
   </SideMenu>
   <Popup v-show="isShowPopup" @hide-popup="isShowPopup=false">
     <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="$refs.editor.writeProjectAudio"/>
@@ -63,8 +63,7 @@ export default {
       isShowPopup: false,
       popUpType: null,
       projectId: null,
-      socket: null,
-      stream: null
+      socket: null
     }
   },
   created(){
@@ -109,12 +108,8 @@ export default {
         alert("画面を横向きにしてください。")
     },
 
-    async startProject(e){
+    startProject(e){
       this.projectId = "loading";
-      if(!this.stream)
-        await this.$refs.editor.getStream();
-      if(!this.stream)
-        this.projectId = null;
       const id = e.target.value;
       this.socket.connect();
       this.socket.onclose = e=>this.projectId = null;
@@ -131,12 +126,8 @@ export default {
       }
     },
 
-    async joinProject(e){
+    joinProject(e){
       this.projectId = "loading";
-      if(!this.stream)
-        await this.$refs.editor.getStream();
-      if(!this.stream)
-        this.projectId = null;
       const id = e.target.value;
       this.socket.connect();
       this.socket.onclose = e=>this.projectId = null;

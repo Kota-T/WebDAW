@@ -37,7 +37,7 @@ export default {
     DraftCanvas,
     AudioCanvas
   },
-  props: ['audioCtx', 'nextNode', 'sourceNode', 'pointer'],
+  props: ['audioCtx', 'sourceNode', 'nextNode', 'pointer'],
   emits: ['track-selected'],
   data(){
     return {

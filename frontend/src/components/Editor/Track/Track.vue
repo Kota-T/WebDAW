@@ -13,8 +13,8 @@
   <teleport to="#ruler_layer">
     <TrackAudioContainer
     :audioCtx="audioCtx"
-    :nextNode="gainNode"
     :sourceNode="sourceNode"
+    :nextNode="gainNode"
     :pointer="pointer"
     ref="container"
     @track-selected="select"
@@ -114,7 +114,7 @@ export default {
     }
   },
   methods: {
-    select(shiftKey){
+    select(shiftKey=false){
       if(!shiftKey){
         this.$parent.tracks.forEach(track=>{
           track.isSelected = false;

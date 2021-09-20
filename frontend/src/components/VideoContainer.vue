@@ -39,17 +39,19 @@ const __SKYWAY_KEY__ = "8ce51882-3317-4964-99cc-a7e50809042a";
 
 export default {
   name: 'VideoContainer',
-  props: ['stream', 'roomId'],
+  props: ['roomId'],
   data(){
     return {
       videoOn: true,
       audioOn: true,
       videoParams: [],
       videos: [],
+      stream: null,
       room: null
     }
   },
   async mounted(){
+    this.stream = await this.getStream();
     this.$refs.localVideo.srcObject = this.stream;
 
     const peer = new Peer({ key: __SKYWAY_KEY__, debug: 3 });
@@ -105,11 +107,21 @@ export default {
     }
   },
   methods: {
+    getStream(){
+      return navigator.mediaDevices.getUserMedia(
+          {
+            video: { aspectRatio: 1920/1080 },
+            audio: true
+          }
+        )
+        .catch(err=>window.alert("マイク入力を取得できません。"));
+    },
+
     setVideoRef(el){
       if(el && !this.videos.includes(el)){
         this.videos.push(el);
       }
-    },
+    }
   }
 }
 </script>
