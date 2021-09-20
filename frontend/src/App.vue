@@ -4,14 +4,17 @@
     <a @click="isShowPopup=true;popUpType='WriteRange';">選択範囲を書き出す</a>
     <template v-if="projectId === null">
       <a @click="startProject">プロジェクトを共有</a>
-      <a>プロジェクトに参加:<textarea cols="2" rows="1" @keydown.enter="joinProject" ref="projectIdField"></textarea></a>
+      <a>プロジェクトに参加<br>
+        <textarea cols="2" rows="1" @keydown.enter="joinProject" ref="projectIdField"></textarea>
+      </a>
     </template>
     <a v-else-if="projectId === 'loading'">Loading...</a>
     <template v-else>
       <a>プロジェクトID: {{ projectId }}</a>
-      <a @click="socket.close()">共有を停止する</a>
+      <a @click="endProject">共有を停止する</a>
     </template>
     <a href="/docs/" target="_blank">ヘルプ</a>
+    <VideoContainer v-if="projectId !== 'loading' && projectId !== null" :stream="$refs.editor.stream" :roomId="projectId" ref="videoContainer"/>
   </SideMenu>
   <Popup v-show="isShowPopup" @hide-popup="isShowPopup=false">
     <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="$refs.editor.writeProjectAudio"/>
@@ -39,6 +42,7 @@ body{
 import WebDAWSocket from './socket.js';
 
 import SideMenu from './components/SideMenu.vue';
+import VideoContainer from './components/VideoContainer.vue';
 import Popup from './components/Popup.vue';
 import WriteRange from './components/WriteRange.vue';
 import Editor from './components/Editor/Editor.vue';
@@ -47,6 +51,7 @@ export default {
   name: 'App',
   components: {
     SideMenu,
+    VideoContainer,
     Popup,
     WriteRange,
     Editor
@@ -56,7 +61,7 @@ export default {
       isShowPopup: false,
       popUpType: null,
       projectId: null,
-      socket: null
+      socket: null,
     }
   },
   created(){
@@ -133,6 +138,11 @@ export default {
         }
         this.socket.setDefault();
       }
+    },
+
+    endProject(){
+      this.socket.close();
+      this.$refs.videoContainer.room.close();
     }
   }
 }

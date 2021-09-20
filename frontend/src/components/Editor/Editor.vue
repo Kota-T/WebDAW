@@ -278,6 +278,7 @@ export default {
         )
         .then(stream=>{
           this.sourceNode = this.audioCtx.createMediaStreamSource(stream);
+          this.$parent.stream = stream;
         })
         .catch(err=>window.alert("マイク入力を取得できません。"));
     },

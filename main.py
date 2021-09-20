@@ -1,17 +1,24 @@
-import os, json
+import os, json, random
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler
 
+def generateId(numOfDigits):
+    ch_list = [chr(ord("a")+i) for i in range(26)] + [chr(ord("A")+i) for i in range(26)] + [str(n) for n in range(10)]
+    id = ''.join([random.choice(ch_list) for i in range(numOfDigits)])
+    return id
 
 class Team:
-    lastId = 0
-    teams = []
+    teams = {}
     def __init__(self):
-        self.id = Team.lastId
         self.members = []
-        Team.teams.append(self)
-        Team.lastId += 1
+        while True:
+            id = generateId(16)
+            if Team.teams.get(id) is None:
+                Team.teams[id] = self
+                self.id = id
+                break
+
 
 class IndexHandler(RequestHandler):
     def get(self):
@@ -77,7 +84,7 @@ class WebDAWHandler(WebSocketHandler):
         self.team.members.remove(self)
         print("グループから退出")
         if self.team.members == []:
-            Team.teams.remove(self.team)
+            del Team.teams[self.team.id]
             print("グループを終了")
 
     def write_message_to_other_members(self, message):
@@ -93,12 +100,12 @@ class WebDAWHandler(WebSocketHandler):
 
     def joinProject(self, id):
         try:
-            self.team = [team for team in Team.teams if str(team.id) == id][0]
+            self.team = Team.teams[id]
             self.team.members.append(self)
             target = self.team.members.index(self)
             self.team.members[0].write_message({'type': 'joinProject', 'target': target})
             print("プロジェクトに参加")
-        except IndexError:
+        except KeyError:
             self.write_message({'type': 'error', 'msg': f'無効なIDです。id: {id}'})
             print("プロジェクトに参加失敗")
 

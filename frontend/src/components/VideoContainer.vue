@@ -1,0 +1,117 @@
+<template>
+<div id="video-container">
+  <video id="local-video" muted playsinline ref="localVideo"></video>
+  <button type="button" class="video-btn" :class="{active: videoOn}" @click="videoOn=!videoOn" ref="videoBtn">video</button>
+  <button type="button" class="video-btn" :class="{active: audioOn}" @click="audioOn=!audioOn" ref="audioBtn">audio</button>
+  <video class="member-video" playsinline v-for="data in videoParams" :key="data.peerId" :ref="setVideoRef"></video>
+</div>
+</template>
+
+<style>
+#video-container{
+  width: 100%;
+  overflow-y: scroll;
+}
+#video-container video{
+  display: block;
+  background-color: black;
+  width: 100%;
+  height: 150px;
+  margin-top: 20px;
+}
+#local-video{
+  transform: scaleX(-1);
+}
+.video-btn{
+  width: 50%;
+  color: gray;
+}
+.video-btn.active{
+  color: black;
+}
+</style>
+
+<script>
+import Peer from 'skyway-js';
+const __SKYWAY_KEY__ = "8ce51882-3317-4964-99cc-a7e50809042a";
+
+export default {
+  name: 'VideoContainer',
+  props: ['stream', 'roomId'],
+  data(){
+    return {
+      videoOn: true,
+      audioOn: true,
+      videoParams: [],
+      videos: [],
+      room: null
+    }
+  },
+  async mounted(){
+    console.log("VideoContainer", this.stream);
+    this.$refs.localVideo.srcObject = this.stream;
+
+    const peer = new Peer({ key: __SKYWAY_KEY__, debug: 3 });
+
+    peer.on('open', ()=>{
+      const room = peer.joinRoom(this.roomId, {mode: 'sfu', stream: this.stream});
+      this.room = room;
+
+      room.once('open', ()=>console.log('=== You joined ==='));
+      room.on('peerJoin', peerId=>console.log(`=== ${peerId} joined ===`));
+
+      room.on('stream', async stream => {
+        this.videoParams.push({peerId: stream.peerId});
+        this.$nextTick(function(){
+          this.videos[this.videos.length - 1].srcObject = stream;
+          this.videos[this.videos.length - 1].peerId = stream.peerId;
+        });
+      });
+
+      room.on('data', ({ data, src })=>console.log(`${src}: ${data}`));
+
+      room.on('peerLeave', peerId => {
+        const remoteVideo = this.videos.find(video => video.peerId === peerId);
+        remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+        remoteVideo.srcObject = null;
+
+        const index = this.videoParams.indexOf(param => param.peerId === peerId);
+        this.videoParams.splice(index, 1);
+
+        console.log(`=== ${peerId} left ===`);
+      });
+
+      // for closing myself
+      room.once('close', () => {
+        console.log('== You left ===');
+        this.videos.forEach(remoteVideo => {
+          remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+          remoteVideo.srcObject = null;
+        });
+        this.$refs.localVideo.srcObject = null;
+        this.videoParams = [];
+      });
+    });
+
+    peer.on('error', console.error);
+  },
+  watch: {
+    videoOn(value){
+      const videoTracks = this.stream.getVideoTracks();
+      if(videoTracks.length)
+        videoTracks[0].enabled = value;
+    },
+    audioOn(value){
+      this.stream.getAudioTracks()[0].enabled = value;
+      console.log(this.stream.getAudioTracks()[0].enabled);
+    }
+  },
+  methods: {
+    setVideoRef(el){
+      if(el && !this.videos.includes(el)){
+        this.videos.push(el);
+      }
+    },
+  }
+}
+</script>
