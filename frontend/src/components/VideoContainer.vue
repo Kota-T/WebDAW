@@ -50,7 +50,6 @@ export default {
     }
   },
   async mounted(){
-    console.log("VideoContainer", this.stream);
     this.$refs.localVideo.srcObject = this.stream;
 
     const peer = new Peer({ key: __SKYWAY_KEY__, debug: 3 });
@@ -76,7 +75,7 @@ export default {
         remoteVideo.srcObject.getTracks().forEach(track => track.stop());
         remoteVideo.srcObject = null;
 
-        this.videos = []
+        this.videos = [];
         const index = this.videoParams.indexOf(param => param.peerId === peerId);
         this.videoParams.splice(index, 1);
 

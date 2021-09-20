@@ -28,7 +28,7 @@
   color: #323232;
   text-align: center;
   width: 200px;
-  padding: 55px 10px 0 10px;
+  padding: 55px 10px 10px 10px;
   position: absolute;
   top: 0;
   right: 0;

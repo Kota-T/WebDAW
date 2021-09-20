@@ -109,8 +109,12 @@ export default {
         alert("画面を横向きにしてください。")
     },
 
-    startProject(e){
+    async startProject(e){
       this.projectId = "loading";
+      if(!this.stream)
+        await this.$refs.editor.getStream();
+      if(!this.stream)
+        this.projectId = null;
       const id = e.target.value;
       this.socket.connect();
       this.socket.onclose = e=>this.projectId = null;
@@ -127,8 +131,12 @@ export default {
       }
     },
 
-    joinProject(e){
+    async joinProject(e){
       this.projectId = "loading";
+      if(!this.stream)
+        await this.$refs.editor.getStream();
+      if(!this.stream)
+        this.projectId = null;
       const id = e.target.value;
       this.socket.connect();
       this.socket.onclose = e=>this.projectId = null;
