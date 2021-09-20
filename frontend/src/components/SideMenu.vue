@@ -34,6 +34,7 @@
   right: 0;
   bottom: 0;
   z-index: 4;
+  overflow-y: scroll;
 }
 #side-menu a{
   display: block;

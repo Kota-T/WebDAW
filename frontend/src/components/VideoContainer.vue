@@ -1,9 +1,9 @@
 <template>
 <div id="video-container">
-  <video id="local-video" muted playsinline ref="localVideo"></video>
+  <video id="local-video" autoplay muted playsinline ref="localVideo"></video>
   <button type="button" class="video-btn" :class="{active: videoOn}" @click="videoOn=!videoOn" ref="videoBtn">video</button>
   <button type="button" class="video-btn" :class="{active: audioOn}" @click="audioOn=!audioOn" ref="audioBtn">audio</button>
-  <video class="member-video" playsinline v-for="data in videoParams" :key="data.peerId" :ref="setVideoRef"></video>
+  <video class="member-video" autoplay playsinline v-for="data in videoParams" :key="data.peerId" :ref="setVideoRef"></video>
 </div>
 </template>
 
@@ -16,8 +16,7 @@
   display: block;
   background-color: black;
   width: 100%;
-  height: 150px;
-  margin-top: 20px;
+  height: 120px;
 }
 #local-video{
   transform: scaleX(-1);
@@ -28,6 +27,9 @@
 }
 .video-btn.active{
   color: black;
+}
+.member-video{
+  margin-top: 20px;
 }
 </style>
 
@@ -54,13 +56,12 @@ export default {
     const peer = new Peer({ key: __SKYWAY_KEY__, debug: 3 });
 
     peer.on('open', ()=>{
-      const room = peer.joinRoom(this.roomId, {mode: 'sfu', stream: this.stream});
-      this.room = room;
+      this.room = peer.joinRoom(this.roomId, {mode: 'sfu', stream: this.stream});
 
-      room.once('open', ()=>console.log('=== You joined ==='));
-      room.on('peerJoin', peerId=>console.log(`=== ${peerId} joined ===`));
+      this.room.once('open', ()=>console.log('=== You joined ==='));
+      this.room.on('peerJoin', peerId=>console.log(`=== ${peerId} joined ===`));
 
-      room.on('stream', async stream => {
+      this.room.on('stream', async stream => {
         this.videoParams.push({peerId: stream.peerId});
         this.$nextTick(function(){
           this.videos[this.videos.length - 1].srcObject = stream;
@@ -68,13 +69,14 @@ export default {
         });
       });
 
-      room.on('data', ({ data, src })=>console.log(`${src}: ${data}`));
+      this.room.on('data', ({ data, src })=>console.log(`${src}: ${data}`));
 
-      room.on('peerLeave', peerId => {
+      this.room.on('peerLeave', peerId => {
         const remoteVideo = this.videos.find(video => video.peerId === peerId);
         remoteVideo.srcObject.getTracks().forEach(track => track.stop());
         remoteVideo.srcObject = null;
 
+        this.videos = []
         const index = this.videoParams.indexOf(param => param.peerId === peerId);
         this.videoParams.splice(index, 1);
 
@@ -82,7 +84,7 @@ export default {
       });
 
       // for closing myself
-      room.once('close', () => {
+      this.room.once('close', () => {
         console.log('== You left ===');
         this.videos.forEach(remoteVideo => {
           remoteVideo.srcObject.getTracks().forEach(track => track.stop());
@@ -97,13 +99,10 @@ export default {
   },
   watch: {
     videoOn(value){
-      const videoTracks = this.stream.getVideoTracks();
-      if(videoTracks.length)
-        videoTracks[0].enabled = value;
+      this.stream.getVideoTracks()[0].enabled = value;
     },
     audioOn(value){
       this.stream.getAudioTracks()[0].enabled = value;
-      console.log(this.stream.getAudioTracks()[0].enabled);
     }
   },
   methods: {

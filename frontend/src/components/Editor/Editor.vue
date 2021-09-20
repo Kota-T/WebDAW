@@ -267,7 +267,9 @@ export default {
       await navigator.mediaDevices
         .getUserMedia(
           {
-            video: true,
+            video: {
+              aspectRatio: 1920/1080
+            },
             audio: {
               autoGainControl: false,
               echoCancellation: false,
