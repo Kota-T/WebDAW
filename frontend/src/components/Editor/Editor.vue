@@ -146,13 +146,14 @@ export default {
       state: null//"playing" or "preparing" or "recording" or null
     }
   },
-  created(){
+  async created(){
+    this.trackIdManager = new IdManager(8);
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     this.audioCtx.onstatechange = () => {
       if(this.audioCtx.state !== 'running')
         this.audioCtx.resume();
     }
-    this.trackIdManager = new IdManager(8);
+    await this.audioCtx.audioWorklet.addModule('./RecorderProcessor.js');
   },
   mounted(){
     const label_field = this.$refs.label_field;

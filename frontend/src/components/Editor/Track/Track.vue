@@ -34,7 +34,7 @@ export default {
     TrackAudioContainer
   },
   props: ['data', 'audioCtx', 'sourceNode', 'pointer'],
-  emits: ['track-solo', 'track-remove'],
+  emits: ['track-solo', 'track-remove', 'audio-remove'],
   created(){
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 0.5;
