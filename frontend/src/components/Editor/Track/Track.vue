@@ -18,6 +18,7 @@
     :pointer="pointer"
     ref="container"
     @track-selected="select"
+    @audio-remove="removeAudioByUser"
     />
   </teleport>
 </template>
@@ -47,6 +48,7 @@ export default {
       .connect(this.audioCtx.destination);
   },
   mounted(){
+    this.id = this.data.id;
     this.name = this.data.name?.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";
     this.gain = this.data.gain || 0.5;
     this.pan = this.data.pan || 0;
@@ -123,6 +125,10 @@ export default {
       this.isSelected = true;
     },
 
+    removeAudioByUser(audioId){
+      this.$emit('audio-remove', {trackId: this.id, audioId});
+    },
+
     startRecording(){
       this.$refs.container.startRecording();
     },
@@ -151,6 +157,7 @@ export default {
 
     async getUploadData(){
       return {
+        id: this.id,
         name: this.name,
         gain: this.gain,
         pan : this.pan,

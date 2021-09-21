@@ -32,7 +32,7 @@
 
 <script>
 import WavHandler from '../../../../webaudio/WavHandler.js';
-import { Loader } from '../../../../webaudio/webaudio.js';
+import { loadAudioBuffer } from '../../../../webaudio/webaudio.js';
 import { Player, DrawDataProcessor, Drawer } from './AudioCanvas.js';
 
 import ContextMenu from '../../../util/ContextMenu.vue';
@@ -42,7 +42,7 @@ export default {
   components: {
     ContextMenu
   },
-  props: ['initConfig', 'audioCtx', 'nextNode'],
+  props: ['data', 'audioCtx', 'nextNode'],
   emits: ['track-selected', 'remove'],
   data(){
     return {
@@ -55,15 +55,16 @@ export default {
   },
   async mounted(){
     /*
-    initConfig: {
+    data: {
       startPoint: double,
       diminished: Object,
       url: objectURL | dataURL
     }
     */
+    this.id = this.data.id;
     this.ctx = this.canvas.getContext('2d');
-    this.x = this.initConfig.startPoint;
-    this.initDiminished(this.initConfig.diminished);
+    this.x = this.data.startPoint;
+    this.initDiminished(this.data.diminished);
 
     this.canvas.onpointerover = e=>{
       this.decideCursor(e.offsetX);
@@ -123,20 +124,17 @@ export default {
       e.stopPropagation();
     }
 
-    this.data = { buffer: null };
+    this.audioBuffer = await loadAudioBuffer(this.audioCtx, this.data.url);
 
-    this.loader = new Loader(this.audioCtx, this.initConfig.url, this.data);
+    this.player = new Player(this.audioCtx, this.nextNode, this.audioBuffer);
 
-    this.player = new Player(this.audioCtx, this.nextNode, this.data);
-
-    this.drawer = new Drawer(this.canvas, this.ctx, this.data);
+    this.drawer = new Drawer(this.canvas, this.ctx);
 
     this.drawdataprocessor = new DrawDataProcessor(this.audioCtx);
 
-    await this.loader.load();
-    this.width = this.data.buffer.duration * this.$store.getters.second_width;
+    this.width = this.audioBuffer.duration * this.$store.getters.second_width;
     if(this.width > this.$store.getters.ruler_width){
-      this.$store.commit('number_of_bars', this.$store.getters.getNumberOfBarsFromDuration(this.data.buffer.duration));
+      this.$store.commit('number_of_bars', this.$store.getters.getNumberOfBarsFromDuration(this.audioBuffer.duration));
     }
   },
   computed: {
@@ -254,7 +252,7 @@ export default {
     draw(){
       this.drawer.draw(
         this.drawdataprocessor.getDrawData(
-          this.data.buffer,
+          this.audioBuffer,
           this.getTime(this.startPoint),
           this.getTime(this.endPoint)
         )
@@ -262,8 +260,8 @@ export default {
     },
 
     async zoom(newVal, oldVal){
-      if(!this.data.buffer){
-        await this.loader.load();
+      if(!this.audioBuffer){
+        this.audioBuffer = await loadAudioBuffer(this.audioCtx, this.data.url);
       }
       const ratio = newVal / oldVal;
       this.diminished.left *= ratio;
@@ -334,7 +332,7 @@ export default {
       const length = this.duration * this.audioCtx.sampleRate;
       const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, length, this.audioCtx.sampleRate);
       const source = offlineCtx.createBufferSource();
-      source.buffer = this.data.buffer;
+      source.buffer = this.audioBuffer;
       source.connect(offlineCtx.destination);
       source.start(0, this.diminished.leftTime, this.duration);
       offlineCtx.startRendering().then(buffer=>{
@@ -347,7 +345,7 @@ export default {
     },
 
     async getDownloadData(folder, index){
-      await fetch(this.loader.url)
+      await fetch(this.data.url)
       .then(res=>res.blob())
       .then(res=>folder.file(index + ".wav", res))
       .catch(console.error);
@@ -359,7 +357,7 @@ export default {
     },
 
     async getUploadData(){
-      const url = await fetch(this.loader.url)
+      const url = await fetch(this.data.url)
       .then(res=>res.blob())
       .then(res=>new Promise(resolve=>{
         const reader = new FileReader();
@@ -369,6 +367,7 @@ export default {
       .catch(console.error);
 
       return {
+        id: this.data.id,
         startPoint: this.startPoint,
         diminished: this.diminished.getData(),
         url       : url
@@ -378,7 +377,7 @@ export default {
     createOfflineSource(offlineCtx, nextNode, startRecordingTime, stopRecordingTime){
       if(startRecordingTime > this.endTime) return;
       const source = offlineCtx.createBufferSource();
-      source.buffer = this.data.buffer;
+      source.buffer = this.audioBuffer;
       source.connect(nextNode);
 
       //when: 録音を開始する時間, offset: このAudioCanvasの音声ファイルのどの時点から再生を始めるか, duration: どれくらいの時間録音するか

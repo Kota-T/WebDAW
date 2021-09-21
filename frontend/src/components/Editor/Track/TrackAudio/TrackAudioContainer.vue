@@ -6,14 +6,14 @@
   >
     <DraftCanvas :audioCtx="audioCtx" :sourceNode="sourceNode" ref="draftCanvas"/>
     <AudioCanvas
-    v-for="(initConfig, index) in audioParamStack"
-    :key="initConfig.id"
-    :initConfig="initConfig"
+    v-for="data in audioParamStack"
+    :key="data.id"
+    :data="data"
     :audioCtx="audioCtx"
     :nextNode="nextNode"
     :ref="setAudioRef"
     @track-selected="shiftKey=>$emit('track-selected', shiftKey)"
-    @remove="removeAudioCanvas(index)"
+    @remove="removeAudioCanvasByUser(data.id)"
     />
   </div>
 </template>
@@ -26,6 +26,8 @@
 </style>
 
 <script>
+import IdManager from '../../../../IdManager.js';
+
 import { AudioRecorder } from '../../../../webaudio/webaudio.js';
 
 import DraftCanvas from './DraftCanvas.vue';
@@ -38,15 +40,15 @@ export default {
     AudioCanvas
   },
   props: ['audioCtx', 'sourceNode', 'nextNode', 'pointer'],
-  emits: ['track-selected'],
+  emits: ['track-selected', 'audio-remove'],
   data(){
     return {
       audioParamStack: [],
-      lastAudioId: 0,
       audioStack: []
     }
   },
   created(){
+    this.audioIdManager = new IdManager(8);
     this.initRecorder();
   },
   methods: {
@@ -56,17 +58,25 @@ export default {
       }
     },
 
-    createAudioCanvas(initConfig){
-      this.audioStack = [];
-      initConfig.id = this.lastAudioId;
-      this.audioParamStack.push(initConfig);
-      this.lastAudioId++;
+    createAudioCanvas(audioData){
+      if(!audioData.hasOwnProperty('id'))
+        audioData.id = this.audioIdManager.generateId();
+      else
+        this.audioIdManager.storeId(audioData.id);
+      this.audioParamStack.push(audioData);
     },
 
-    removeAudioCanvas(index){
-      if(!window.confirm("選択されているオーディオを削除しますか？")) return;
+    removeAudioCanvas(audioId){
       this.audioStack = [];
+      const index = this.audioParamStack.findIndex(audio => audio.id === audioId);
       this.audioParamStack.splice(index, 1);
+      this.audioIdManager.removeId(audioId);
+    },
+
+    removeAudioCanvasByUser(audioId){
+      if(!window.confirm("選択されているオーディオを削除しますか？")) return;
+      this.$emit('audio-remove', audioId);
+      this.removeAudioCanvas(audioId);
     },
 
     initRecorder(){

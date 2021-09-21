@@ -1,9 +1,15 @@
+import IdManager from './IdManager.js';
+
 export default class WebDAWSocket {
   static MAX_DATA_SIZE = 10000000;
 
+  constructor(){
+    this.packetIdManager = new IdManager(8);
+    this.packetBuffer = {};
+  }
+
   init(defaultOnmessage){
     this.defaultOnmessage = defaultOnmessage;
-    this.buffer = {};
   }
 
   connect(){
@@ -12,24 +18,15 @@ export default class WebDAWSocket {
   }
 
   setDefault(){
-    this.onmessage = data=>this.defaultOnmessage(data);
+    this.onmessage = data => this.defaultOnmessage(data);
   }
 
-  generatePacketId(length){
-    const ch_list = [];
-    for(let i = 0; i < 26; i++)
-      ch_list.push(String.fromCharCode("a".charCodeAt(0)+i));
-    for(let i = 0; i < 26; i++)
-      ch_list.push(String.fromCharCode("A".charCodeAt(0)+i));
-    for(let i = 0; i < 10; i++)
-      ch_list.push(String(i));
-
-    let packetId = "";
-    for(let i = 0; i < length; i++)
-      packetId += ch_list[Math.floor(Math.random() * ch_list.length)];
-
-    if(this.buffer.hasOwnProperty(packetId))
+  generatePacketId(){
+    const packetId = this.packetIdManager.generateId();
+    if(this.packetBuffer.hasOwnProperty(packetId)){
+      IdManager.removeId(packetId);
       return this.generatePacketId();
+    }
     return packetId;
   }
 
@@ -83,17 +80,15 @@ export default class WebDAWSocket {
       console.log(data);
       switch(data.type){
         case 'packet':
-          if(!this.buffer.hasOwnProperty(data.packetId)){
-            this.buffer[data.packetId] = [];
-            for(let i = 0; i < data.numOfPackets; i++)
-              this.buffer[data.packetId].push(undefined);
+          if(!this.packetBuffer.hasOwnProperty(data.packetId)){
+            this.packetBuffer[data.packetId] = new Array(data.numOfPackets).fill(undefined);
           }
-          this.buffer[data.packetId][data.index] = data;
+          this.packetBuffer[data.packetId][data.index] = data;
 
-          if(this.buffer[data.packetId].every(packet=>packet)){
-            const result = JSON.parse(this.buffer[data.packetId].reduce((acc, cur) => acc + cur.body, ""));
+          if(this.packetBuffer[data.packetId].every(packet=>packet)){
+            const result = JSON.parse(this.packetBuffer[data.packetId].reduce((acc, cur) => acc + cur.body, ""));
             fn(result);
-            delete this.buffer[data.packetId];
+            delete this.packetBuffer[data.packetId];
           }
           break;
         case 'packet_id_overlapped_error':

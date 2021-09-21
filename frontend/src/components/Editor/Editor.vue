@@ -18,7 +18,7 @@
     </div>
   </div>
   <Track
-  v-for="(data, index) in trackParams"
+  v-for="data in trackParams"
   :key="data.id"
   :data="data"
   :audioCtx="audioCtx"
@@ -26,7 +26,8 @@
   :pointer="$refs.pointer"
   :ref="setTrackRef"
   @track-solo="makeTracksSolo"
-  @track-remove="removeTrackByUser(index)"
+  @track-remove="removeTrackByUser(data.id)"
+  @audio-remove="removeAudioByUser"
   />
 </template>
 
@@ -110,6 +111,7 @@
 <script>
 import JSZip from 'jszip';
 
+import IdManager from '../../IdManager.js';
 import WavHandler from '../../webaudio/WavHandler.js';
 
 import Count from './Header/Count.vue';
@@ -138,7 +140,6 @@ export default {
   data(){
     return {
       trackParams: [],
-      lastTrackId: 0,
       tracks: [],
       audioCtx: null,
       sourceNode: null,
@@ -151,6 +152,7 @@ export default {
       if(this.audioCtx.state !== 'running')
         this.audioCtx.resume();
     }
+    this.trackIdManager = new IdManager(8);
   },
   mounted(){
     const label_field = this.$refs.label_field;
@@ -257,12 +259,6 @@ export default {
     }
   },
   methods: {
-    setTrackRef(el){
-      if(el && !this.tracks.includes(el)){
-        this.tracks.push(el);
-      }
-    },
-
     async getStream(){
       if(this.sourceNode?.mediaStream?.active){ return; }
       await navigator.mediaDevices
@@ -286,11 +282,19 @@ export default {
         })
     },
 
+    setTrackRef(el){
+      if(el && !this.tracks.includes(el)){
+        this.tracks.push(el);
+      }
+    },
+
     async addTrack(trackData={}){
       try{ await this.getStream(); }catch(e){ return; }
-      trackData.id = this.lastTrackId;
+      if(!trackData.hasOwnProperty('id'))
+        trackData.id = this.trackIdManager.generateId();
+      else
+        this.trackIdManager.storeId(trackData.id);
       this.trackParams.push(trackData);
-      this.lastTrackId++;
     },
 
     async addTrackByUser(trackData){
@@ -306,20 +310,22 @@ export default {
       }
     },
 
-    removeTrack(index){
+    removeTrack(trackId){
       this.tracks = [];
+      const index = this.trackParams.findIndex(param => param.id === trackId);
       this.trackParams.splice(index, 1);
+      this.trackIdManager.removeId(trackId);
     },
 
-    removeTrackByUser(index){
+    removeTrackByUser(trackId){
       if(!window.confirm("選択されているトラックを削除しますか？")) return;
-      this.removeTrack(index);
+      this.removeTrack(trackId);
 
       if(this.socket.connected){
         this.$nextTick(function(){
           this.socket.send({
             type: "removeTrack",
-            index: index
+            trackId: trackId
           });
         });
       }
@@ -328,9 +334,16 @@ export default {
     removeSelectedTracks(){
       this.tracks
         .filter(track=>track.isSelected)
-        .map(track=>this.trackParams.findIndex(param=>param.id===track.data.id))
-        .sort((a, b) => b - a)
-        .forEach(index=>this.removeTrackByUser(index));
+        .forEach(track=>this.removeTrackByUser(track.id));
+    },
+
+    removeAudioByUser(data){
+      if(this.socket.connected){
+        this.socket.send({
+          type: "removeAudio",
+          ...data
+        });
+      }
     },
 
     makeTracksSolo(){
@@ -412,7 +425,7 @@ export default {
       const audioDataArray = await Promise.all(this.selectedTracks.map(async track=>{
         const audioStack = track.$refs.container.audioStack;
         return {
-          index: this.tracks.indexOf(track),
+          trackId: track.id,
           data: await audioStack[audioStack.length - 1].getUploadData()
         };
       }));
@@ -425,7 +438,8 @@ export default {
 
     acceptAudioDataArray(audioDataArray){
       audioDataArray.forEach(audioData=>{
-        this.tracks[audioData.index].$refs.container.createAudioCanvas(audioData.data);
+        const track = this.tracks.find(track => track.id === audioData.trackId)
+        track.$refs.container.createAudioCanvas(audioData.data);
       });
     },
 
@@ -538,6 +552,7 @@ export default {
     },
 
     loadProject(data){
+      this.trackIdManager = new IdManager(8);
       this.trackParams = [];
       this.$nextTick(async ()=>{
         const config = data["config.json"];
@@ -559,6 +574,7 @@ export default {
     },
 
     loadSharedProject(project){
+      this.trackIdManager = new IdManager(8);
       this.trackParams = [];
       this.$nextTick(async ()=>{
         this.setProjectConfig(project);

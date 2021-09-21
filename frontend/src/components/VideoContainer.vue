@@ -8,10 +8,6 @@
 </template>
 
 <style>
-#video-container{
-  width: 100%;
-  overflow-y: scroll;
-}
 #video-container video{
   display: block;
   background-color: black;

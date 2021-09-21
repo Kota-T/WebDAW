@@ -1,19 +1,9 @@
 import WavHandler from './WavHandler.js';
 
-export class Loader{
-  constructor(audioCtx, url, data){
-    this.audioCtx = audioCtx;
-    this.url = url;
-    this.data = data;
-  }
-
-  async load(){
-    return await fetch(this.url)
-    .then(res=>res.arrayBuffer())
-    .then(res=>this.audioCtx.decodeAudioData(res))
-    .then(buf=>this.data.buffer = buf)
-    .catch(console.error);
-  }
+export function loadAudioBuffer(audioCtx, url){
+  return fetch(url)
+  .then(res=>res.arrayBuffer())
+  .then(res=>audioCtx.decodeAudioData(res))
 }
 
 export class AudioRecorder{

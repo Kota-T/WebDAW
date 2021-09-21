@@ -93,10 +93,13 @@ export default {
           this.$refs.editor.addTrack(data.trackData);
           break;
         case 'removeTrack':
-          this.$refs.editor.removeTrack(data.index);
+          this.$refs.editor.removeTrack(data.trackId);
           break;
         case 'addAudio':
           this.$refs.editor.acceptAudioDataArray(data.audioDataArray);
+          break;
+        case 'removeAudio':
+          this.$refs.editor.tracks.find(track=>track.id===data.trackId).$refs.container.removeAudioCanvas(data.audioId);
           break;
       }
     });

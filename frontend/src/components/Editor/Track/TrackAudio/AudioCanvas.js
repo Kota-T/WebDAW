@@ -1,13 +1,13 @@
 export class Player{
-  constructor(audioCtx, nextNode, data){
+  constructor(audioCtx, nextNode, audioBuffer){
     this.audioCtx = audioCtx;
     this.nextNode = nextNode;
-    this.data = data;
+    this.audioBuffer = audioBuffer;
   }
 
   createSource(){
     this.source = this.audioCtx.createBufferSource();
-    this.source.buffer = this.data.buffer;
+    this.source.buffer = this.audioBuffer;
     this.source.connect(this.nextNode);
   }
 
@@ -84,10 +84,9 @@ export class DrawDataProcessor{
 }
 
 export class Drawer{
-  constructor(canvas, ctx, data){
+  constructor(canvas, ctx){
     this.canvas = canvas;
     this.ctx = ctx;
-    this.data = data;
 
     this.initCtxStyle();
   }
