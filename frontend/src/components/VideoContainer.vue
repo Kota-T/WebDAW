@@ -50,7 +50,7 @@ export default {
     this.stream = await this.getStream();
     this.$refs.localVideo.srcObject = this.stream;
 
-    const peer = new Peer({ key: __SKYWAY_KEY__, debug: 3 });
+    const peer = new Peer({ key: __SKYWAY_KEY__, debug: 2 });
 
     peer.on('open', ()=>{
       this.room = peer.joinRoom(this.roomId, {mode: 'sfu', stream: this.stream});
@@ -70,7 +70,7 @@ export default {
 
       this.room.on('peerLeave', peerId => {
         const remoteVideo = this.videos.find(video => video.peerId === peerId);
-        remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+        remoteVideo.srcObject?.getTracks().forEach(track => track.stop());
         remoteVideo.srcObject = null;
 
         this.videos = [];
@@ -84,9 +84,10 @@ export default {
       this.room.once('close', () => {
         console.log('== You left ===');
         this.videos.forEach(remoteVideo => {
-          remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+          remoteVideo.srcObject?.getTracks().forEach(track => track.stop());
           remoteVideo.srcObject = null;
         });
+        this.$refs.localVideo.srcObject?.getTracks().forEach(track => track.stop());
         this.$refs.localVideo.srcObject = null;
         this.videoParams = [];
       });
@@ -110,7 +111,7 @@ export default {
             audio: true
           }
         )
-        .catch(err=>window.alert("マイク入力を取得できません。"));
+        .catch(err=>window.alert("カメラ・マイク入力を取得できません。"));
     },
 
     setVideoRef(el){

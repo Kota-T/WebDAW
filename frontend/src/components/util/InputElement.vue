@@ -1,7 +1,7 @@
 <template>
 <div class="input-element">
   <p v-if="!isInputing" @dblclick="if(!disabled){isInputing = true;}">{{ value }}</p>
-  <input :type="type" :style="{width: size + 'rem'}" v-else v-model="value" @keydown.enter.stop="finishInput" @keydown.stop>
+  <input :type="type" :style="{ width: size + 'rem' }" v-else v-model="value" @keydown.enter.stop="finishInput" @keydown.stop>
 </div>
 </template>
 
@@ -34,7 +34,8 @@ export default {
   },
   methods: {
     finishInput(){
-      this.value = this.value.trim().replace(/\r?\n/g,"");
+      if(this.type === 'text')
+        this.value = this.value.trim().replace(/\r?\n/g,"");
       if(!this.value){
         return;
       }

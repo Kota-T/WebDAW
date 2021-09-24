@@ -1,40 +1,41 @@
 <template>
   <teleport to="#label_field">
-    <TrackLabel
+    <AudioTrackLabel
     :gainNode="gainNode"
     :pannerNode="pannerNode"
     :muteNode="muteNode"
-    ref="label"
-    @track-selected="select"
+    @track-select="select"
     @track-solo="$emit('track-solo')"
     @track-remove="$emit('track-remove')"
+    ref="label"
     />
   </teleport>
   <teleport to="#ruler_layer">
-    <TrackAudioContainer
+    <AudioCanvasContainer
+    :pointer="pointer"
     :audioCtx="audioCtx"
     :sourceNode="sourceNode"
     :nextNode="gainNode"
-    :pointer="pointer"
+    @track-select="select"
     ref="container"
-    @track-selected="select"
-    @audio-remove="removeAudioByUser"
     />
   </teleport>
 </template>
 
 <script>
-import TrackLabel from './TrackLabel.vue';
-import TrackAudioContainer from './TrackAudio/TrackAudioContainer.vue';
+import TrackMixin from '../TrackMixin.js';
+import AudioTrackLabel from './AudioTrackLabel.vue';
+import AudioCanvasContainer from './AudioCanvasContainer.vue';
 
 export default {
-  name: 'Track',
+  name: 'AudioTrack',
   components: {
-    TrackLabel,
-    TrackAudioContainer
+    AudioTrackLabel,
+    AudioCanvasContainer
   },
-  props: ['data', 'audioCtx', 'sourceNode', 'pointer'],
-  emits: ['track-solo', 'track-remove', 'audio-remove'],
+  mixins: [TrackMixin],
+  props: ['audioCtx', 'sourceNode'],
+  emits: ['track-solo'],
   created(){
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 0.5;
@@ -48,11 +49,8 @@ export default {
       .connect(this.audioCtx.destination);
   },
   mounted(){
-    this.id = this.data.id;
-    this.name = this.data.name?.substring(this.data?.name.indexOf("_") + 1) || "新規トラック";
-    this.gain = this.data.gain || 0.5;
-    this.pan = this.data.pan || 0;
-    this.data.audioStack?.forEach(elem=>this.$refs.container.createAudioCanvas(elem));
+    this.gain = this.trackData.gain || 0.5;
+    this.pan = this.trackData.pan || 0;
     this.$watch('isMonitoring', value=>{
       if(value){
         this.sourceNode.connect(this.gainNode);
@@ -62,7 +60,6 @@ export default {
         }catch(e){}
       }
     });
-    this.select();
   },
   unmounted(){
     try{
@@ -71,43 +68,27 @@ export default {
     this.soloNode.disconnect();
   },
   computed: {
-    name: {
-      get: function(){
-        return this.$refs.label.$refs.trackName.value;
-      },
-      set: function(value){
-        this.$refs.label.$refs.trackName.value = value;
-      },
-    },
     gain: {
-      get: function(){
+      get(){
         return this.gainNode.gain.value;
       },
-      set: function(value){
+      set(value){
         this.$refs.label.gainValue = value;
       }
     },
     pan: {
-      get: function(){
+      get(){
         return this.pannerNode.pan.value;
       },
-      set: function(value){
+      set(value){
         this.$refs.label.panValue = value;
       }
     },
-    isSelected: {
-      get: function(){
-        return this.$refs.label.isSelected;
-      },
-      set: function(value){
-        this.$refs.label.isSelected = value;
-      }
-    },
     isMonitoring: {
-      get: function(){
+      get(){
         return this.$refs.label.isMonitoring;
       },
-      set: function(value){
+      set(value){
         this.$refs.label.isMonitoring = value;
       }
     },
@@ -116,52 +97,25 @@ export default {
     }
   },
   methods: {
-    select(shiftKey=false){
-      if(!shiftKey){
-        this.$parent.tracks.forEach(track=>{
-          track.isSelected = false;
-        });
-      }
-      this.isSelected = true;
-    },
-
-    removeAudioByUser(audioId){
-      this.$emit('audio-remove', {trackId: this.id, audioId});
-    },
-
-    startRecording(){
-      this.$refs.container.startRecording();
-    },
-
-    stopRecording(){
-      this.$refs.container.stopRecording();
-    },
-
-    play(){
-      this.$refs.container.play();
-    },
-
-    pause(){
-      this.$refs.container.pause();
-    },
-
     async getDownloadData(root, index){
       const name = index + "_" + this.name;
       return {
+        component: "AudioTrack",
         name: name,
         gain: this.gain,
         pan : this.pan,
-        audioStack: await Promise.all(this.$refs.container.getDownloadData(root.folder(name)))
+        canvases: await Promise.all(this.$refs.container.getDownloadData(root.folder(name), ".wav"))
       };
     },
 
     async getUploadData(){
       return {
         id: this.id,
+        component: "AudioTrack",
         name: this.name,
         gain: this.gain,
         pan : this.pan,
-        audioStack: await Promise.all(this.$refs.container.getUploadData())
+        canvases: await Promise.all(this.$refs.container.getUploadData("audio/wav"))
       };
     },
 

@@ -3,20 +3,20 @@
 </template>
 
 <script>
-import InputElement from '../../util/InputElement.vue';
-
 export default {
   name: 'Rhythm',
-  components: {
-    InputElement
-  },
+  inject: ['socket'],
   methods: {
     init(value){
       this.$refs.inputElement.value = value.join("/");
       this.$store.commit('rhythm', value.map(elem=>Number(elem)));
     },
+
     valueChanged(value){
-      this.$store.commit('rhythm', value.split('/').map(elem=>Number(elem)));
+      const changedValue = value.split('/').map(elem=>Number(elem));
+      this.$store.commit('rhythm', changedValue);
+      if(this.socket.connected)
+        this.socket.send({ type: 'changeRhythm', value: changedValue });
     }
   }
 }

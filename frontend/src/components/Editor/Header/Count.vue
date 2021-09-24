@@ -26,7 +26,7 @@
 </style>
 
 <script>
-import { loadAudioBuffer } from '../../../webaudio/webaudio.js';
+import { loadAudioBuffer, Player } from '../../../webaudio/webaudio.js';
 
 export default {
   name: 'Count',
@@ -38,7 +38,8 @@ export default {
     }
   },
   async mounted(){
-    this.audioBuffer = await loadAudioBuffer(this.audioCtx, "/metronome.wav");
+    const audioBuffer = await loadAudioBuffer(this.audioCtx, "/metronome.wav");
+    this.player = new Player(this.audioCtx, this.audioCtx.destination, audioBuffer);
   },
   computed: {
     rhythm(){
@@ -60,7 +61,7 @@ export default {
 
     stop(){
       clearInterval(this.countId);
-      this.pauseMetronome();
+      this.player.pause();
     },
 
     count(){
@@ -75,21 +76,12 @@ export default {
 
     playMetronome(){
       if(this.isMuted){return;}
-      this.source = this.audioCtx.createBufferSource();
-      this.source.buffer = this.audioBuffer;
-      this.source.connect(this.audioCtx.destination);
-      this.source.start();
-    },
-
-    pauseMetronome(){
-      if(!this.source) return;
-      this.source.stop();
-      this.source.disconnect();
+      this.player.play();
     },
 
     setNumberFromPointerX(x){
       const getters = this.$store.getters;
-      this.number = Math.floor(x % getters.bar_width / getters.scale_interval) + 1;
+      this.number = Math.floor(x % getters.bar_width / getters.scale_width) + 1;
       if(this.number <= 0){
         this.number += this.rhythm[0];
       }

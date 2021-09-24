@@ -6,6 +6,36 @@ export function loadAudioBuffer(audioCtx, url){
   .then(res=>audioCtx.decodeAudioData(res))
 }
 
+export class Player{
+  constructor(audioCtx, nextNode, audioBuffer){
+    this.audioCtx = audioCtx;
+    this.nextNode = nextNode;
+    this.audioBuffer = audioBuffer;
+  }
+
+  createSource(){
+    this.source = this.audioCtx.createBufferSource();
+    this.source.buffer = this.audioBuffer;
+    this.source.connect(this.nextNode);
+  }
+
+  play(start, end, onended){
+    this.createSource();
+    if(start && end && onended){
+      this.source.onended = onended;
+      this.source.start(0, start, end - start);
+    }else {
+      this.source.start();
+    }
+  }
+
+  pause(){
+    if(!this.source) return;
+    this.source.stop();
+    this.source.disconnect();
+  }
+}
+
 class RecorderNode extends AudioWorkletNode {
   constructor(audioCtx){
     super(audioCtx, 'recorder-processor');

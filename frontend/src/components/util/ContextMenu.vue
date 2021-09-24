@@ -5,6 +5,7 @@
   :style="styles"
   v-show="isShow"
   @blur="isShow=false;"
+  @click.stop
   ref="domElement"
   >
     <ul>

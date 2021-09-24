@@ -1,7 +1,7 @@
 <template>
   <SideMenu>
     <a @click="$refs.editor.downloadProject">プロジェクトファイルをダウンロード</a>
-    <a @click="isShowPopup=true;popUpType='WriteRange';">選択範囲を書き出す</a>
+    <a @click="showDialog('WriteRange')">選択範囲を書き出す</a>
     <template v-if="projectId === null">
       <a>プロジェクトを共有<br>
         <input size="8" @keydown.enter.prevent="startProject">
@@ -18,10 +18,19 @@
     <a href="/docs/" target="_blank">ヘルプ</a>
     <VideoContainer v-if="projectId !== 'loading' && projectId !== null" :roomId="projectId" ref="videoContainer"/>
   </SideMenu>
-  <Popup v-show="isShowPopup" @hide-popup="isShowPopup=false">
-    <WriteRange v-if="popUpType === 'WriteRange'" @hide-popup="isShowPopup=false" @write-project="$refs.editor.writeProjectAudio"/>
-  </Popup>
-  <Editor :socket="socket" ref="editor"/>
+  <Dialog v-show="isShowDialog" @hide-dialog="isShowDialog=false">
+    <ChooseTrackComponent
+    v-if="dialogType === 'ChooseTrackComponent'"
+    @choose-track-component="component=>$refs.editor.addTrackByUser({component})"
+    @hide-dialog="isShowDialog=false"
+    />
+    <WriteRange
+    v-else-if="dialogType === 'WriteRange'"
+    @write-project="$refs.editor.writeProjectAudio"
+    @hide-dialog="isShowDialog=false"
+    />
+  </Dialog>
+  <Editor @add-track="showDialog('ChooseTrackComponent')" ref="editor"/>
 </template>
 
 <style>
@@ -41,12 +50,14 @@ body{
 </style>
 
 <script>
+import { computed } from 'vue';
 import WebDAWSocket from './socket.js';
 
 import SideMenu from './components/SideMenu.vue';
 import VideoContainer from './components/VideoContainer.vue';
-import Popup from './components/Popup.vue';
-import WriteRange from './components/WriteRange.vue';
+import Dialog from './components/Dialog/Dialog.vue';
+import ChooseTrackComponent from './components/Dialog/ChooseTrackComponent.vue';
+import WriteRange from './components/Dialog/WriteRange.vue';
 import Editor from './components/Editor/Editor.vue';
 
 export default {
@@ -54,20 +65,23 @@ export default {
   components: {
     SideMenu,
     VideoContainer,
-    Popup,
+    Dialog,
+    ChooseTrackComponent,
     WriteRange,
     Editor
   },
   data(){
     return {
-      isShowPopup: false,
-      popUpType: null,
+      isShowDialog: false,
+      dialogType: null,
       projectId: null,
-      socket: null
     }
   },
-  created(){
+  provide(){
     this.socket = new WebDAWSocket();
+    return {
+      socket: this.socket
+    }
   },
   mounted(){
     window.onpopstate = e => e.preventDefault();
@@ -89,17 +103,23 @@ export default {
             projectData: await this.$refs.editor.getUploadData()
           });
           break;
+        case 'changeBpm':
+          this.$refs.editor.$refs.bpm.init(data.value);
+          break;
+        case 'changeRhythm':
+          this.$refs.editor.$refs.rhythm.init(data.value);
+          break;
         case 'addTrack':
           this.$refs.editor.addTrack(data.trackData);
           break;
         case 'removeTrack':
           this.$refs.editor.removeTrack(data.trackId);
           break;
-        case 'addAudio':
-          this.$refs.editor.acceptAudioDataArray(data.audioDataArray);
+        case 'addCanvas':
+          this.$refs.editor.tracks.find(track=>track.id===data.trackId).$refs.container.createCanvas(data.canvasData);
           break;
-        case 'removeAudio':
-          this.$refs.editor.tracks.find(track=>track.id===data.trackId).$refs.container.removeAudioCanvas(data.audioId);
+        case 'removeCanvas':
+          this.$refs.editor.tracks.find(track=>track.id===data.trackId).$refs.container.removeCanvas(data.canvasId);
           break;
       }
     });
@@ -109,6 +129,11 @@ export default {
       const angle = window.screen?.orientaion?.angle || window.orientation;
       if(window.screen.width < 550 && angle === 0)
         alert("画面を横向きにしてください。")
+    },
+
+    showDialog(dialogType){
+      this.isShowDialog = true;
+      this.dialogType = dialogType;
     },
 
     startProject(e){

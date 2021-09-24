@@ -108,6 +108,7 @@ export default class WebDAWSocket {
   set onclose(fn){
     this.socket.onclose = e=>{
       fn(e);
+      this.connected = false;
       console.info("接続が閉じられました。");
     }
   }
@@ -115,6 +116,7 @@ export default class WebDAWSocket {
   set onerror(fn){
     this.socket.onerror = e=>{
       fn(e);
+      this.connected = false;
       console.error(e);
     }
   }

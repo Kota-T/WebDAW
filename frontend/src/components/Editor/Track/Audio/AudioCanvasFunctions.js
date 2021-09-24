@@ -1,46 +1,16 @@
-export class Player{
-  constructor(audioCtx, nextNode, audioBuffer){
-    this.audioCtx = audioCtx;
-    this.nextNode = nextNode;
-    this.audioBuffer = audioBuffer;
-  }
-
-  createSource(){
-    this.source = this.audioCtx.createBufferSource();
-    this.source.buffer = this.audioBuffer;
-    this.source.connect(this.nextNode);
-  }
-
-  play(start, end, onended){
-    this.createSource();
-    this.source.onended = onended;
-    this.source.start(0, start, end - start);
-  }
-
-  pause(){
-    if(!this.source) return;
-    this.source.stop();
-    this.source.disconnect();
-  }
-}
-
 export class DrawDataProcessor{
-  constructor(audioCtx){
-    this.audioCtx = audioCtx;
-  }
-
-  getDrawData(buffer, start_time, end_time, peakLength){
+  getDrawData(buffer, start_time, end_time, sampleRate, peakLength){
     const chs = [];
     for(let i = 0; i < buffer.numberOfChannels; i++){
-      chs[i] = this.getPeaks(this.getDrawRange(buffer.getChannelData(i), start_time, end_time), peakLength);
+      chs[i] = this.getPeaks(this.getDrawRange(buffer.getChannelData(i), start_time, end_time, sampleRate), peakLength);
     }
 
     return chs;
   }
 
-  getDrawRange(data, start_time, end_time){
-    const startIndex = this.audioCtx.sampleRate * start_time;
-    const endIndex   = this.audioCtx.sampleRate * end_time;
+  getDrawRange(data, start_time, end_time, sampleRate){
+    const startIndex = sampleRate * start_time;
+    const endIndex   = sampleRate * end_time;
 
     return data.slice(Math.floor(startIndex), Math.floor(endIndex));
   }

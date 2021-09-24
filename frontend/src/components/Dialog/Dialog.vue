@@ -1,13 +1,13 @@
 <template>
-<div id="popup-background" @click.stop="$emit('hide-popup')" @keydown.stop>
-  <div id="popup" @click.stop>
+<div id="dialog-background" @click.stop="$emit('hide-dialog')" @keydown.stop>
+  <div id="dialog" @click.stop>
     <slot></slot>
   </div>
 </div>
 </template>
 
 <style>
-#popup-background{
+#dialog-background{
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,7 +19,7 @@
   left: 0;
   z-index: 6;
 }
-#popup{
+#dialog{
   display: flex;
   justify-content: center;
   align-items: center;
@@ -30,7 +30,7 @@
 
 <script>
 export default {
-  name: 'Popup',
-  emits: ['hide-popup']
+  name: 'Dialog',
+  emits: ['hide-dialog']
 }
 </script>

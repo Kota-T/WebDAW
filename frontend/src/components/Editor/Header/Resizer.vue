@@ -1,9 +1,6 @@
 <template>
-<input type="range" min="10" max="100" step="1" :title="value" v-model="value" @input="valueChanged" :disabled="disabled">
+  <input type="range" min="10" max="100" step="1" :title="value" v-model="value" @input="valueChanged" :disabled="disabled">
 </template>
-
-<style>
-</style>
 
 <script>
 export default {
@@ -17,10 +14,10 @@ export default {
   methods: {
     init(value){
       this.value = value;
-      this.$store.commit('beat_interval', Number(value));
+      this.$store.commit('beat_width', Number(value));
     },
     valueChanged(){
-      this.$store.commit('beat_interval', Number(this.value));
+      this.$store.commit('beat_width', Number(this.value));
     }
   }
 }

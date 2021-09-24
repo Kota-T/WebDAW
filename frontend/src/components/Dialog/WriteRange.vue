@@ -1,6 +1,6 @@
 <template>
 <div id="write-range-container">
-  <form @submit="writeProject">
+  <form @submit.prevent="writeProject">
     <table>
       <tr><th></th><th>小節</th><th>拍</th></tr>
       <tr>
@@ -47,7 +47,7 @@
 <script>
 export default {
   name: 'WriteRange',
-  emits:['hide-popup', 'write-project'],
+  emits:['write-project', 'hide-dialog'],
   data(){
     return {
       startBar: "",
@@ -89,9 +89,7 @@ export default {
     }
   },
   methods: {
-    writeProject(e){
-      e.preventDefault();
-
+    writeProject(){
       const start = Object.freeze({
         bar  : Number(this.startBar),
         beat : Number(this.startBeat)
@@ -102,7 +100,7 @@ export default {
       });
 
       this.$emit('write-project', {start, stop});
-      this.$emit('hide-popup');
+      this.$emit('hide-dialog');
     },
     reset(){
       this.startBar = "";
@@ -112,7 +110,7 @@ export default {
     },
     hide(){
       this.reset();
-      this.$emit('hide-popup');
+      this.$emit('hide-dialog');
     }
   }
 }

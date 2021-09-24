@@ -21,14 +21,16 @@ export default {
   },
   computed: {
     rhythm(){return this.$store.state.rhythm;},
-    beat_interval(){return this.$store.state.beat_interval;},
-    number_of_bars(){return this.$store.state.number_of_bars;},
+    bpm(){return this.$store.state.bpm;},
+    beat_width(){return this.$store.state.beat_width;},
+    project_duration(){return this.$store.state.project_duration;},
     canvas(){return this.$refs.canvas;}
   },
   watch: {
     rhythm(){this.draw();},
-    beat_interval(){this.draw();},
-    number_of_bars(){this.draw();}
+    bpm(){this.draw();},
+    beat_width(){this.draw();},
+    project_duration(){this.draw();}
   },
   methods: {
     draw(){
@@ -38,9 +40,9 @@ export default {
 
       this.ctx.strokeStyle = this.ctx.fillStyle = "#f0f0f0";
       const num = this.rhythm[0];
-      const scale_interval = this.$store.getters.scale_interval;
-      for(let i = 0; i < this.canvas.width / scale_interval; i++){
-        const x = i * scale_interval;
+      const scale_width = this.$store.getters.scale_width;
+      for(let i = 0; i < this.canvas.width / scale_width; i++){
+        const x = i * scale_width;
         this.ctx.beginPath();
         if(i%num === 0){
           this.ctx.fillText(`${Math.floor(i/num)}`, x, 12);

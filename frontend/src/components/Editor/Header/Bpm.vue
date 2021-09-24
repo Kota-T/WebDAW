@@ -3,17 +3,13 @@
 </template>
 
 <script>
-import InputElement from '../../util/InputElement.vue';
-
 export default {
   name: 'Bpm',
-  components: {
-    InputElement
-  },
+  inject: ['socket'],
   computed: {
     disabled: {
-      get: function(){return this.$refs.inputElement.disabled;},
-      set: function(value){this.$refs.inputElement.disabled = value;}
+      get(){return this.$refs.inputElement.disabled;},
+      set(value){this.$refs.inputElement.disabled = value;}
     }
   },
   methods: {
@@ -21,12 +17,15 @@ export default {
       this.$refs.inputElement.value = value;
       this.$store.commit('bpm', Number(value));
     },
+
     valueChanged(value){
       if(this.disabled){
         this.$refs.inputElement.value = this.$store.state.bpm;
         return;
       }
       this.$store.commit('bpm', Number(value));
+      if(this.socket.connected)
+        this.socket.send({ type: 'changeBpm', value });
     }
   }
 }

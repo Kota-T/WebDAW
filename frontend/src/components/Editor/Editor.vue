@@ -9,7 +9,7 @@
     <Resizer ref="resizer"/>
   </div>
   <div id="label_field" class="no-scroll-bar" ref="label_field">
-    <AddTrackBtn @add-track="addTrackByUser"/>
+    <div id="add_track_btn" title="トラックを追加" @click="$emit('add-track')"><img src="../../assets/plus_icon.png"></div>
   </div>
   <div id="pointer_layer" class="no-scroll-bar" ref="pointer_layer">
     <Pointer :margin="20" @move="onPointerMove" ref="pointer"/>
@@ -17,18 +17,19 @@
       <Ruler ref="ruler"/>
     </div>
   </div>
-  <Track
-  v-for="data in trackParams"
-  :key="data.id"
-  :data="data"
+  <component
+  v-for="trackData in trackParams"
+  :key="trackData.id"
+  :is="trackData.component"
+  :trackData="trackData"
+  :pointer="$refs.pointer"
   :audioCtx="audioCtx"
   :sourceNode="sourceNode"
-  :pointer="$refs.pointer"
+  :videoStream="videoStream"
   :ref="setTrackRef"
   @track-solo="makeTracksSolo"
-  @track-remove="removeTrackByUser(data.id)"
-  @audio-remove="removeAudioByUser"
-  />
+  @track-remove="removeTrackByUser(trackData.id)"
+  ></component>
 </template>
 
 <style>
@@ -83,6 +84,24 @@
   left: 0;
   overflow-y: scroll;
 }
+#add_track_btn{
+  background-color: #aaaaaa;
+  width: 100%;
+  height: 30px;
+  position: sticky;
+  top: 0;
+  touch-action: none;
+}
+#add_track_btn img{
+  height: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+#add_track_btn:hover{
+  cursor: pointer;
+}
 #pointer_layer{
   background-color: #323232;
   position: absolute;
@@ -106,6 +125,25 @@
   font-size: 0;
   touch-action: manipulation;
 }
+.canvas-container{
+  height: 120px;
+  position: relative;
+}
+.draft-canvas{
+  position: absolute;
+  z-index: 1;
+}
+.data-canvas{
+  position: absolute;
+  top: 0;
+}
+.data-canvas:hover{
+  cursor: pointer;
+}
+.data-canvas:focus{
+  border: 1px solid white;
+  outline: none;
+}
 </style>
 
 <script>
@@ -119,10 +157,10 @@ import Rhythm from './Header/Rhythm.vue';
 import Bpm from './Header/Bpm.vue';
 import Resizer from './Header/Resizer.vue';
 
-import AddTrackBtn from './AddTrackBtn.vue';
 import Ruler from './Ruler.vue';
 import Pointer from './Pointer.vue';
-import Track from './Track/Track.vue';
+import AudioTrack from './Track/Audio/AudioTrack.vue';
+import VideoTrack from './Track/Video/VideoTrack.vue';
 
 export default {
   name: 'Editor',
@@ -131,18 +169,20 @@ export default {
     Rhythm,
     Bpm,
     Resizer,
-    AddTrackBtn,
     Ruler,
     Pointer,
-    Track
+    AudioTrack,
+    VideoTrack
   },
-  props: ['socket'],
+  emits: ['add-track'],
+  inject: ['socket'],
   data(){
     return {
       trackParams: [],
       tracks: [],
       audioCtx: null,
       sourceNode: null,
+      videoStream: null,
       state: null//"playing" or "preparing" or "recording" or null
     }
   },
@@ -165,7 +205,7 @@ export default {
 
     const label_field_width = 200;
     pointer_layer.onclick = e=>{
-      if(this.state === "recording") return;
+      if(this.state === "recording" || e.offsetY > 30) return;
       this.$refs.pointer.layerX = e.clientX - label_field_width + pointer_layer.scrollLeft;
       this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
       if(this.state === "playing"){
@@ -191,10 +231,10 @@ export default {
       if(this.state === "recording" || e.touches.length !== 2) return;
       e.preventDefault();
       const curDiff = getDiff(e.touches);
-      const newVal = Math.round(this.$store.state.beat_interval * curDiff / oldDiff);
+      const newVal = Math.round(this.$store.state.beat_width * curDiff / oldDiff);
       if(10 < newVal && newVal < 100){
         this.$refs.resizer.value = newVal;
-        this.$store.commit('beat_interval', newVal);
+        this.$store.commit('beat_width', newVal);
         oldDiff = curDiff;
       }
     }
@@ -219,6 +259,8 @@ export default {
             async file=>{
               if(this.isAudioFile(file)){
                 this.loadAudioFile(file);
+              }else if(this.isVideoFile(file)){
+                this.loadVideoFile(file);
               }else if(file.type === 'application/zip'){
                 const data = await this.readProjectZip(file);
                 this.loadProject(data);
@@ -260,7 +302,7 @@ export default {
     }
   },
   methods: {
-    async getStream(){
+    async getAudioStream(){
       if(this.sourceNode?.mediaStream?.active){ return; }
       await navigator.mediaDevices
         .getUserMedia(
@@ -283,6 +325,17 @@ export default {
         })
     },
 
+    async getVideoStream(){
+      if(this.videoStream?.active){ return; }
+      await navigator.mediaDevices
+        .getUserMedia({ video: true, audio: false })
+        .then(stream => this.videoStream = stream)
+        .catch(err=>{
+          window.alert("カメラを取得できません。");
+          throw new Error();
+        })
+    },
+
     setTrackRef(el){
       if(el && !this.tracks.includes(el)){
         this.tracks.push(el);
@@ -290,7 +343,15 @@ export default {
     },
 
     async addTrack(trackData={}){
-      try{ await this.getStream(); }catch(e){ return; }
+      try{
+        if(trackData.component === "AudioTrack")
+          await this.getAudioStream();
+        else if(trackData.component === "VideoTrack")
+          await this.getVideoStream();
+        else
+          return;
+      }catch(e){ return; }
+
       if(!trackData.hasOwnProperty('id'))
         trackData.id = this.trackIdManager.generateId();
       else
@@ -298,17 +359,8 @@ export default {
       this.trackParams.push(trackData);
     },
 
-    async addTrackByUser(trackData){
-      await this.addTrack(trackData);
-
-      if(this.socket.connected){
-        this.$nextTick(async function(){
-          this.socket.send({
-            type: "addTrack",
-            trackData: await this.tracks[this.tracks.length - 1].getUploadData()
-          });
-        });
-      }
+    async addTrackByUser(trackData={}){
+      await this.addTrack({ ...trackData, send: true });
     },
 
     removeTrack(trackId){
@@ -321,30 +373,14 @@ export default {
     removeTrackByUser(trackId){
       if(!window.confirm("選択されているトラックを削除しますか？")) return;
       this.removeTrack(trackId);
-
-      if(this.socket.connected){
-        this.$nextTick(function(){
-          this.socket.send({
-            type: "removeTrack",
-            trackId: trackId
-          });
-        });
-      }
+      if(this.socket.connected)
+        this.socket.send({ type: "removeTrack", trackId });
     },
 
     removeSelectedTracks(){
       this.tracks
         .filter(track=>track.isSelected)
         .forEach(track=>this.removeTrackByUser(track.id));
-    },
-
-    removeAudioByUser(data){
-      if(this.socket.connected){
-        this.socket.send({
-          type: "removeAudio",
-          ...data
-        });
-      }
     },
 
     makeTracksSolo(){
@@ -361,15 +397,21 @@ export default {
         pointer_layer.scrollLeft += pointer_layer.offsetWidth;
       }
       if(x >= this.$store.getters.ruler_width){
-        this.$store.commit('addNumberOfBars', 30);
+        this.$store.commit('addProjectDuration', 30);
       }
     },
 
     async startRecording(){
-      try{ await this.getStream(); }catch(e){ return; }
       this.selectedTracks = this.tracks.filter(track=>track.isSelected);
       const notSelectedTracks = this.tracks.filter(track=>!track.isSelected);
       if(!this.selectedTracks.length){return;}
+
+      try{
+        if(this.selectedTracks.filter(track=>track.component==="AudioTrack").length)
+          await this.getAudioStream();
+        if(this.selectedTracks.filter(track=>track.component==="VideoTrack").length)
+          await this.getVideoStream();
+      }catch(e){ return; }
 
       if(this.state === "playing"){
         this.pause();
@@ -389,7 +431,7 @@ export default {
         this.$refs.bpm.disabled = true;
         this.$refs.resizer.disabled = true;
         this.selectedTracks.forEach(track=>track.startRecording());
-      }, this.$store.getters.getTimeOfDistance(this.$store.getters.bar_width) * 1000);
+      }, (this.$store.getters.bar_width / this.$store.getters.second_width) * 1000);
     },
 
     stopRecording(){
@@ -397,19 +439,16 @@ export default {
         this.$refs.bpm.disabled = false;
         this.$refs.resizer.disabled = false;
         this.selectedTracks.forEach(track=>track.stopRecording());
-        if(this.socket.connected)
-          this.$nextTick(function(){this.sendAudioDataArray()});
       }
       this.pause();
     },
 
     async play(){
-      try{ await this.getStream(); }catch(e){ return; }
       this.tracks.forEach(track=>track.play());
-      const scale_interval = this.$store.getters.scale_interval;
+      const scale_width = this.$store.getters.scale_width;
       const x = this.$refs.pointer.x;
-      const remain_interval = x > 0 ? scale_interval - x % scale_interval : -(x % scale_interval);
-      const start_time = this.$store.getters.getTimeOfDistance(remain_interval);
+      const remain_interval = x > 0 ? scale_width - x % scale_width : -(x % scale_width);
+      const start_time = remain_interval / this.$store.getters.second_width;
       this.$refs.count.start(start_time);
       this.$refs.pointer.start();
       this.state = "playing";
@@ -422,38 +461,33 @@ export default {
       this.state = null;
     },
 
-    async sendAudioDataArray(){
-      const audioDataArray = await Promise.all(this.selectedTracks.map(async track=>{
-        const audioStack = track.$refs.container.audioStack;
-        return {
-          trackId: track.id,
-          data: await audioStack[audioStack.length - 1].getUploadData()
-        };
-      }));
-
-      this.socket.send({
-        type: "addAudio",
-        audioDataArray: audioDataArray
-      });
-    },
-
-    acceptAudioDataArray(audioDataArray){
-      audioDataArray.forEach(audioData=>{
-        const track = this.tracks.find(track => track.id === audioData.trackId)
-        track.$refs.container.createAudioCanvas(audioData.data);
-      });
-    },
-
     isAudioFile(file){
       return file.type.split('/')[0] === "audio";
     },
 
     async loadAudioFile(file){
       await this.addTrackByUser({
-        audioStack: [
+        component: "AudioTrack",
+        canvases: [
           {
-            startPoint: 0,
-            url: window.URL.createObjectURL(file)
+            startTime: 0,
+            url: URL.createObjectURL(file)
+          }
+        ]
+      });
+    },
+
+    isVideoFile(file){;
+      return file.type.split("/")[0] === "video";
+    },
+
+    async loadVideoFile(file){
+      await this.addTrackByUser({
+        component: "VideoTrack",
+        canvases: [
+          {
+            startTime: 0,
+            url: URL.createObjectURL(file)
           }
         ]
       });
@@ -476,16 +510,16 @@ export default {
       return {
         rhythm: state.rhythm,
         bpm: state.bpm,
-        beat_interval: state.beat_interval,
-        number_of_bars: state.number_of_bars
+        beat_width: state.beat_width,
+        project_duration: state.project_duration
       };
     },
 
     setProjectConfig(json){
       this.$refs.rhythm.init(json.rhythm);
       this.$refs.bpm.init(json.bpm);
-      this.$refs.resizer.init(json.beat_interval);
-      this.$store.commit('number_of_bars', Number(json.number_of_bars));
+      this.$refs.resizer.init(json.beat_width);
+      this.$store.commit('project_duration', Number(json.project_duration));
     },
 
     async getDownloadData(){
@@ -559,8 +593,14 @@ export default {
         const config = data["config.json"];
         this.setProjectConfig(config);
         for await(let trackData of config.tracks){
-          trackData.audioStack.forEach((elem, i)=>{
-            elem.url = data[trackData.name][i+".wav"];
+          let ext;
+          if(trackData.component === "AudioTrack")
+            ext = ".wav";
+          else if(trackData.component === "VideoTrack")
+            ext = ".webm";
+
+          trackData.canvases.forEach(canvasData=>{
+            canvasData.url = data[trackData.name][canvasData.id + ext];
           });
           await this.addTrackByUser(trackData);
         }
@@ -589,8 +629,8 @@ export default {
     getTimeFromBarAndBeat(bar_and_beat){
       const state = this.$store.state;
       const num_of_scales = bar_and_beat.bar * state.rhythm[0] + bar_and_beat.beat - 1;
-      const distance = num_of_scales * this.$store.getters.scale_interval;
-      return this.$store.getters.getTimeOfDistance(distance);
+      const distance = num_of_scales * this.$store.getters.scale_width;
+      return distance / this.$store.getters.second_width;
     },
 
     writeProjectAudio(data){
@@ -598,7 +638,7 @@ export default {
       const stopRecordingTime = this.getTimeFromBarAndBeat(data.stop);
       const length = (stopRecordingTime - startRecordingTime) * this.audioCtx.sampleRate;
       const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, length, this.audioCtx.sampleRate);
-      this.tracks.forEach(track=>track.createOffline(offlineCtx, startRecordingTime, stopRecordingTime));
+      this.tracks.forEach(track=>track.createOffline?.(offlineCtx, startRecordingTime, stopRecordingTime));
       offlineCtx.startRendering()
         .then(buffer=>this.download(WavHandler.AudioBuffer2WavFile(buffer), 'project.wav'))
         .catch(console.error);
