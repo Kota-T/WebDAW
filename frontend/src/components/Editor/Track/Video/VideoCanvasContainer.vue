@@ -29,7 +29,10 @@ export default {
   props: ['videoStream'],
   methods: {
     initRecorder(){
-      this.recorder = new MediaRecorder(this.videoStream);
+      let mimeType;
+      if(MediaRecorder.isTypeSupported('video/mp4;codecs=avc1'))
+        mimeType = 'video/mp4;codecs=avc1';
+      this.recorder = new MediaRecorder(this.videoStream, { mimeType });
 
       let startPoint;
       let recordingId;
