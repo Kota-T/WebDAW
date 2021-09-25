@@ -9,7 +9,7 @@ export default {
     await this.seekSync(this.dataVideo, 7*24*60*1000);
     await this.seekSync(this.dataVideo, 0);
     this.sample_width = this.dataVideo.videoWidth * 120 / this.dataVideo.videoHeight;
-    
+
     const leftTime  = this.canvasData.diminished?.leftTime || 0;
     const rightTime = this.canvasData.diminished?.rightTime || 0;
     this.width = (this.dataVideo.duration - leftTime - rightTime) * this.$store.getters.second_width;
