@@ -23,7 +23,7 @@ export const store = createStore({
       return getters.scale_width * state.rhythm[0];
     },
     ruler_width: (state, getters) => {
-      return state.project_duration * getters.second_width; 
+      return state.project_duration * getters.second_width;
     }
   },
   mutations: {

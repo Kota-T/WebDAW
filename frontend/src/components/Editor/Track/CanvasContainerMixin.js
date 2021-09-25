@@ -90,8 +90,8 @@ const CanvasContainerMixin = {
       return this.canvases.map(canvas=>canvas.getDownloadData(folder, ext));
     },
 
-    getUploadData(mimeType){
-      return this.canvases.map(canvas=>canvas.getUploadData(mimeType));
+    getUploadData(){
+      return this.canvases.map(canvas=>canvas.getUploadData());
     }
   }
 }

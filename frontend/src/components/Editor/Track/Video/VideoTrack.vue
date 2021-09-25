@@ -35,7 +35,7 @@ export default {
       return {
         component: "VideoTrack",
         name: name,
-        canvases: await Promise.all(this.$refs.container.getDownloadData(root.folder(name), ".webm"))
+        canvases: await Promise.all(this.$refs.container.getDownloadData(root.folder(name), ".mp4"))
       };
     },
 
@@ -44,7 +44,7 @@ export default {
         id: this.id,
         component: "VideoTrack",
         name: this.name,
-        canvases: await Promise.all(this.$refs.container.getUploadData("video/webm"))
+        canvases: await Promise.all(this.$refs.container.getUploadData())
       };
     }
   }

@@ -115,7 +115,7 @@ export default {
         name: this.name,
         gain: this.gain,
         pan : this.pan,
-        canvases: await Promise.all(this.$refs.container.getUploadData("audio/wav"))
+        canvases: await Promise.all(this.$refs.container.getUploadData())
       };
     },
 

@@ -8,7 +8,7 @@ export default {
     this.analyserNode = this.audioCtx.createAnalyser();
     this.analyserNode.fftSize = 1024;
     this.sourceNode.connect(this.analyserNode);
-    this.dataArray = new Uint8Array(this.analyserNode.fftSize);
+    this.dataArray = new Float32Array(this.analyserNode.fftSize);
   },
   unmounted(){
     this.sourceNode.disconnect(this.analyserNode);
@@ -30,7 +30,7 @@ export default {
         this.resize();
       }
 
-      this.analyserNode.getByteTimeDomainData(this.dataArray);
+      this.analyserNode.getFloatTimeDomainData(this.dataArray);
 
       this.ctx.fillRect(
         this.drawPoint,
@@ -41,7 +41,7 @@ export default {
 
       this.ctx.beginPath();
       for (let i = 0; i < this.dataArray.length; i++) {
-        let y = this.dataArray[i] / 256  * this.canvas.height;
+        let y = (this.dataArray[i] + 1) * this.canvas.height / 2;
 
         if (i === 0) {
           this.ctx.moveTo(this.drawPoint, y);

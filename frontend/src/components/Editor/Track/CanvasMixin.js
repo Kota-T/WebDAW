@@ -318,12 +318,12 @@ const CanvasMixin = {
       };
     },
 
-    async getUploadData(mimeType){
+    async getUploadData(){
       const url = await fetch(this.canvasData.url)
       .then(res=>res.blob())
       .then(res=>new Promise(resolve=>{
         const reader = new FileReader();
-        reader.onload = ()=>resolve(reader.result.replace("text/plain", mimeType));
+        reader.onload = ()=>resolve(reader.result);
         reader.readAsDataURL(res);
       }))
       .catch(console.error);

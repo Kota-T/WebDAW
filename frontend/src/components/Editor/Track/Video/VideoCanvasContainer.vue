@@ -49,7 +49,7 @@ export default {
 
       this.recorder.onstop = () => {
         cancelAnimationFrame(recordingId);
-        const blob = new Blob(chunks);
+        const blob = new Blob(chunks, { type: "video/mp4;codecs=avc1" });
         chunks = [];
         const url = URL.createObjectURL(blob);
         this.createCanvasByUser({

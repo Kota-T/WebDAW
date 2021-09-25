@@ -40,8 +40,7 @@ export default {
         this.drawdataprocessor.getDrawData(
           this.audioBuffer,
           this.getTime(this.startPoint),
-          this.getTime(this.endPoint),
-          this.audioCtx.sampleRate
+          this.getTime(this.endPoint)
         )
       );
     },

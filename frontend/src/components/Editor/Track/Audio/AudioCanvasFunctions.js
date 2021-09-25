@@ -1,47 +1,38 @@
 export class DrawDataProcessor{
-  getDrawData(buffer, start_time, end_time, sampleRate, peakLength){
+  getDrawData(audioBuffer, start_time, end_time, peakLength){
+    const startIndex = Math.floor(audioBuffer.sampleRate * start_time);
+    const endIndex   = Math.floor(audioBuffer.sampleRate * end_time);
+
     const chs = [];
-    for(let i = 0; i < buffer.numberOfChannels; i++){
-      chs[i] = this.getPeaks(this.getDrawRange(buffer.getChannelData(i), start_time, end_time, sampleRate), peakLength);
+    for(let i = 0; i < audioBuffer.numberOfChannels; i++){
+      chs[i] = this.getPeaks(audioBuffer.getChannelData(i), startIndex, endIndex, peakLength);
     }
 
     return chs;
   }
 
-  getDrawRange(data, start_time, end_time, sampleRate){
-    const startIndex = sampleRate * start_time;
-    const endIndex   = sampleRate * end_time;
+  getPeaks(array, startIndex, endIndex, peakLength=4500){
+    let step = Math.floor((endIndex - startIndex) / peakLength);
 
-    return data.slice(Math.floor(startIndex), Math.floor(endIndex));
-  }
-
-  getPeaks(array, peakLength){
-    if(!peakLength){
-      peakLength = 4500;
-    }
-
-    let step = Math.floor(array.length / peakLength);
-
-    if(step < 1){
-      step = 1;
+    if(step < 2){
+      return array.slice(startIndex, endIndex);
     }
 
     const peaks = [];
 
-    for(let i = 0; i < array.length; i += step){
+    for(let i = startIndex; i < endIndex; i += step){
       const result = this.getPeak(array, i, i + step);
-      peaks.push(result.max, result.min);
+      peaks.push(result[0], result[1]);
     }
 
     return peaks;
   }
 
   getPeak(array, startIndex, endIndex){
-    const sliced = array.slice(startIndex, endIndex);
-    let max = sliced[0];
+    let max = array[startIndex];
     let min = max;
-    for(let i = 0; i < sliced.length; i++){
-      const sample = sliced[i];
+    for(let i = startIndex + 1; i < endIndex; i++){
+      const sample = array[i];
       if(sample > max){
         max = sample;
       }
@@ -49,7 +40,7 @@ export class DrawDataProcessor{
         min = sample;
       }
     }
-    return Object.freeze({max: max, min: min});
+    return [max, min];
   }
 }
 
@@ -70,7 +61,7 @@ export class Drawer{
   draw(chs){
     this.initCtxStyle();
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    chs.forEach(data=>this.drawData(data));
+    chs.forEach(buffer=>this.drawData(buffer));
   }
 
   drawData(buffer){
@@ -79,7 +70,7 @@ export class Drawer{
 
     this.ctx.beginPath();
     for (let i = 0; i < buffer.length; i++) {
-      let y = (buffer[i] + 1) / 2  * this.canvas.height;
+      const y = (buffer[i] + 1) * this.canvas.height / 2;
 
       if (i === 0) {
         this.ctx.moveTo(drawPoint, y);
