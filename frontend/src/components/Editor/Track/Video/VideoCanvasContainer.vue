@@ -29,7 +29,7 @@ export default {
   props: ['videoStream'],
   methods: {
     initRecorder(){
-      this.recorder = new MediaRecorder(this.videoStream, { mimeType : "video/webm" });
+      this.recorder = new MediaRecorder(this.videoStream);
 
       let startPoint;
       let recordingId;
@@ -49,7 +49,7 @@ export default {
 
       this.recorder.onstop = () => {
         cancelAnimationFrame(recordingId);
-        const blob = new Blob(chunks, { type: "video/webm" });
+        const blob = new Blob(chunks);
         chunks = [];
         const url = URL.createObjectURL(blob);
         this.createCanvasByUser({
