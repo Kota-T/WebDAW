@@ -6,8 +6,10 @@ export default {
   async mounted(){
     this.dataVideo = document.createElement('video');
     this.dataVideo.src = this.canvasData.url;
+    await new Promise(resolve => this.dataVideo.onloadedmetadata = resolve);
     await this.seekSync(this.dataVideo, 7*24*60*1000);
     await this.seekSync(this.dataVideo, 0);
+    console.log(this.dataVideo);
     this.sample_width = this.dataVideo.videoWidth * 120 / this.dataVideo.videoHeight;
 
     const leftTime  = this.canvasData.diminished?.leftTime || 0;
