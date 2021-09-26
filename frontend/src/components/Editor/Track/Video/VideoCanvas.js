@@ -7,7 +7,10 @@ export default {
     this.dataVideo = document.createElement('video');
     this.dataVideo.onstalled = console.error;
     this.dataVideo.src = this.canvasData.url;
-    await new Promise(resolve => this.dataVideo.onloadedmetadata = resolve);
+    await new Promise(resolve => this.dataVideo.onloadedmetadata = ()=>{
+      console.log("loadedmetadata");
+      resolve();
+    });
     await this.seekSync(this.dataVideo, 7*24*60*1000);
     await this.seekSync(this.dataVideo, 0);
     console.log(this.dataVideo.duration);
