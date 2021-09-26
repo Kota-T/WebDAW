@@ -5,7 +5,7 @@ export default {
   mixins: [CanvasMixin],
   async mounted(){
     this.dataVideo = document.createElement('video');
-    this.dataVideo.onstalled = console.error;
+    this.dataVideo.onstalled = ()=>console.error("データを取得できません。");
     this.dataVideo.src = this.canvasData.url;
     await new Promise(resolve => this.dataVideo.onloadedmetadata = ()=>{
       console.log("loadedmetadata");
@@ -33,6 +33,7 @@ export default {
   },
   methods: {
     async seekSync(video, time){
+      console.log("seek start");
       video.currentTime = time;
       await new Promise(resolve => video.onseeked = ()=>{
         console.log("seeked")
