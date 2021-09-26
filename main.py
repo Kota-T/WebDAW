@@ -36,7 +36,7 @@ class VideoTranscodeHandler(RequestHandler):
         inputFile.seek(0)
 
         subprocess.run(
-            f"ffmpeg -i {inputFile.name} -profile:v Main -level 4.0 {outputFileName}",
+            f"ffmpeg -i {inputFile.name} -c:v libx264 -vf yadif=0:-1:1 -profile:v Main -level 4.1 {outputFileName}",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
