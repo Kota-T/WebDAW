@@ -4,18 +4,15 @@ export default {
   name: 'VideoCanvas',
   mixins: [CanvasMixin],
   async mounted(){
-    console.log("canvas mounted start");
     this.dataVideo = document.createElement('video');
-    console.log(this.dataVideo);
     this.dataVideo.onstalled = console.error;
     this.dataVideo.src = this.canvasData.url;
     await new Promise(resolve => this.dataVideo.onloadedmetadata = resolve);
-    console.log(this.dataVideo);
     await this.seekSync(this.dataVideo, 7*24*60*1000);
     await this.seekSync(this.dataVideo, 0);
-    console.log(this.dataVideo);
+    console.log(this.dataVideo.duration);
     this.sample_width = this.dataVideo.videoWidth * 120 / this.dataVideo.videoHeight;
-
+    console.log(this.sample_width);
     const leftTime  = this.canvasData.diminished?.leftTime || 0;
     const rightTime = this.canvasData.diminished?.rightTime || 0;
     this.width = (this.dataVideo.duration - leftTime - rightTime) * this.$store.getters.second_width;
