@@ -16,8 +16,6 @@
 </template>
 
 <script>
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-
 import CanvasContainerMixin from '../CanvasContainerMixin.js';
 import VideoDraftCanvas from './VideoDraftCanvas.js';
 import VideoCanvas from './VideoCanvas.js';
@@ -54,17 +52,15 @@ export default {
         const blob = new Blob(chunks);
         console.log(blob);
         chunks = [];
-        const ffmpeg = createFFmpeg({ log: true });
-        await ffmpeg.load();
-        ffmpeg.FS('writeFile', 'recorded.mp4', await fetchFile(blob));
-        await ffmpeg.run('-i', 'recorded.mp4',  'transcoded.mp4');
-        const data = ffmpeg.FS('readFile', 'transcoded.mp4');
-        const transcodedBlob = new Blob([data.buffer], { type: 'video/mp4' });
-        console.log(transcodedBlob);
-        const transcodedUrl = URL.createObjectURL(transcodedBlob);
+        const url = URL.createObjectURL(blob);
+        await fetch(`${location.protocol}//${location.host}/encode-video`, {
+          method: 'POST',
+          body: blob
+        })
+        .then(res=>console.log(res.text()))
         this.createCanvasByUser({
           startTime: startPoint / this.$store.getters.second_width,
-          url: transcodedUrl
+          url
         });
         this.$refs.draftCanvas.hide();
       }

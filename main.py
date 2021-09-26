@@ -26,6 +26,12 @@ class DocsHandler(RequestHandler):
             return
         self.render(f"docs/templates/{title}.html")
 
+class VideoEncodeHandler(RequestHandler):
+    def post(self):
+        print(self.get_body_arguments())
+        self.finish("finished")
+
+
 class WebDAWHandler(WebSocketHandler):
     def open(self):
         print("接続")
@@ -113,6 +119,7 @@ if __name__ == "__main__":
     application = Application([
         (r"/", IndexHandler),
         (r"/websocket", WebDAWHandler),
+        (r"/encode-video", VideoEncodeHandler),
         (r"/docs/static/(.*)", StaticFileHandler, {"path": "docs/static/"}),
         (r"/docs/(.*)", DocsHandler),
         (r"/(.*)", StaticFileHandler, {"path": "frontend/dist/"}),
