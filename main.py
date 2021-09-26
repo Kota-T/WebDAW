@@ -1,4 +1,4 @@
-import io, tempfile, subprocess, os, json, random
+import tempfile, subprocess, os, json, random
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler

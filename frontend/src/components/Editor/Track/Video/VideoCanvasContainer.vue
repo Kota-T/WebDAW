@@ -29,7 +29,7 @@ export default {
   props: ['videoStream'],
   methods: {
     initRecorder(){
-      this.recorder = new MediaRecorder(this.videoStream);
+      this.recorder = new MediaRecorder(this.videoStream, { mimeType: 'video/webm;codecs=vp9' });
 
       let startPoint;
       let recordingId;
@@ -49,17 +49,19 @@ export default {
 
       this.recorder.onstop = async () => {
         cancelAnimationFrame(recordingId);
-        const blob = new Blob(chunks);
+        const blob = new Blob(chunks, { type: 'video/webm;codecs=vp9'});
         chunks = [];
-        const transcodedBlob = await fetch(`${location.protocol}//${location.host}/transcode-video`, {
+        const url = URL.createObjectURL(blob);
+        /*const transcodedBlob = await fetch(`${location.protocol}//${location.host}/transcode-video`, {
           method: 'POST',
           body: blob
         })
         .then(res=>res.blob());
-        const transcodedUrl = URL.createObjectURL(transcodedBlob);
+        const transcodedUrl = URL.createObjectURL(transcodedBlob);*/
         this.createCanvasByUser({
           startTime: startPoint / this.$store.getters.second_width,
-          url: transcodedUrl
+          //url: transcodedUrl
+          url
         });
         this.$refs.draftCanvas.hide();
       }

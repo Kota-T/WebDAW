@@ -346,8 +346,13 @@ export default {
       try{
         if(trackData.component === "AudioTrack")
           await this.getAudioStream();
-        else if(trackData.component === "VideoTrack")
+        else if(trackData.component === "VideoTrack"){
+          if(!MediaRecorder.isTypeSupported('video/webm;codecs=vp9')){
+            alert("このブラウザではwebm形式がサポートされていないので録画ができません。")
+            return;
+          }
           await this.getVideoStream();
+        }
         else
           return;
       }catch(e){ return; }
