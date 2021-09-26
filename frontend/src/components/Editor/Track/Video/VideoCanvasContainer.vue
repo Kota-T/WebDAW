@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+
 import CanvasContainerMixin from '../CanvasContainerMixin.js';
 import VideoDraftCanvas from './VideoDraftCanvas.js';
 import VideoCanvas from './VideoCanvas.js';
@@ -29,9 +31,6 @@ export default {
   props: ['videoStream'],
   methods: {
     initRecorder(){
-      let mimeType;
-      if(MediaRecorder.isTypeSupported("video/mp4;codecs=vp8"))
-        mimeType = "video/mp4;codecs=vp8";
       this.recorder = new MediaRecorder(this.videoStream);
 
       let startPoint;
@@ -50,15 +49,22 @@ export default {
 
       this.recorder.ondataavailable = e => chunks.push(e.data);
 
-      this.recorder.onstop = () => {
+      this.recorder.onstop = async () => {
         cancelAnimationFrame(recordingId);
-        const blob = new Blob(chunks, { type: "video/mp4" });
+        const blob = new Blob(chunks);
         console.log(blob);
         chunks = [];
-        const url = URL.createObjectURL(blob);
+        const ffmpeg = createFFmpeg({ log: true });
+        await ffmpeg.load();
+        ffmpeg.FS('writeFile', 'recorded.mp4', await fetchFile(blob));
+        await ffmpeg.run('-i', 'recorded.mp4',  'transcoded.mp4');
+        const data = ffmpeg.FS('readFile', 'transcoded.mp4');
+        const transcodedBlob = new Blob([data.buffer], { type: 'video/mp4' });
+        console.log(transcodedBlob);
+        const transcodedUrl = URL.createObjectURL(transcodedBlob);
         this.createCanvasByUser({
           startTime: startPoint / this.$store.getters.second_width,
-          url
+          url: transcodedUrl
         });
         this.$refs.draftCanvas.hide();
       }
