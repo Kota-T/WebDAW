@@ -30,8 +30,8 @@ export default {
   methods: {
     initRecorder(){
       let mimeType;
-      if(MediaRecorder.isTypeSupported("video/mp4;codecs=avc1"))
-        mimeType = "video/mp4;codecs=avc1";
+      if(MediaRecorder.isTypeSupported("video/mp4;codecs=vp8"))
+        mimeType = "video/mp4;codecs=vp8";
       this.recorder = new MediaRecorder(this.videoStream);
 
       let startPoint;
