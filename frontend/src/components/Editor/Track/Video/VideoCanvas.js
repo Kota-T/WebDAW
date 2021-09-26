@@ -6,8 +6,11 @@ export default {
   async mounted(){
     console.log("canvas mounted start");
     this.dataVideo = document.createElement('video');
+    console.log(this.dataVideo);
+    this.dataVideo.onstalled = console.error;
     this.dataVideo.src = this.canvasData.url;
     await new Promise(resolve => this.dataVideo.onloadedmetadata = resolve);
+    console.log(this.dataVideo);
     await this.seekSync(this.dataVideo, 7*24*60*1000);
     await this.seekSync(this.dataVideo, 0);
     console.log(this.dataVideo);

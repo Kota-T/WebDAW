@@ -63,7 +63,6 @@ const CanvasMixin = {
         canvasData: await this.getUploadData()
       });
     }
-    console.log("mixin created");
   },
   async mounted(){
     /*
@@ -133,8 +132,6 @@ const CanvasMixin = {
       e.preventDefault();
       e.stopPropagation();
     }
-
-    console.log("mixin mounted");
   },
   computed: {
     bpm(){
