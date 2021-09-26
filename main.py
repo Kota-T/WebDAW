@@ -1,4 +1,4 @@
-import io, ffmpeg, tempfile, os, json, random
+import io, tempfile, subprocess, os, json, random
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler
@@ -35,7 +35,13 @@ class VideoTranscodeHandler(RequestHandler):
         inputFile.write(self.request.body)
         inputFile.seek(0)
 
-        ffmpeg.input(inputFile.name).output(outputFileName).run()
+        subprocess.run(
+            f"ffmpeg -i {inputFile.name} -profile:v Main -level 4.0 {outputFileName}",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
 
         with open(outputFileName, 'rb') as f:
             self.finish(f.read())
