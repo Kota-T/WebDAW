@@ -6,7 +6,7 @@ export default {
   async mounted(){
     this.dataVideo = document.createElement('video');
     this.dataVideo.onstalled = ()=>console.error("データを取得できません。");
-    tihs.dataVideo.onsuspend = ()=>console.error("suspend");
+    this.dataVideo.onsuspend = ()=>console.error("suspend");
     this.dataVideo.src = this.canvasData.url;
     await new Promise(resolve => this.dataVideo.onloadedmetadata = ()=>{
       console.log("loadedmetadata");
