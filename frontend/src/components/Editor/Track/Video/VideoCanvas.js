@@ -5,13 +5,9 @@ export default {
   mixins: [CanvasMixin],
   async mounted(){
     this.dataVideo = document.createElement('video');
-    this.dataVideo.onstalled = ()=>console.error("データを取得できません。");
-    this.dataVideo.onsuspend = ()=>console.error("suspend");
+    this.dataVideo.onsuspend = e=>console.error(e);
     this.dataVideo.src = this.canvasData.url;
-    await new Promise(resolve => this.dataVideo.onloadedmetadata = ()=>{
-      console.log("loadedmetadata");
-      resolve();
-    });
+    await new Promise(resolve => this.dataVideo.onloadedmetadata = resolve);
     this.dataVideo.ondurationchange = ()=>console.error("duration changed");
     await this.seekSync(this.dataVideo, 7*24*60*1000);
     await this.seekSync(this.dataVideo, 0);
