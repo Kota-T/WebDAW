@@ -31,8 +31,12 @@ export default {
   methods: {
     async seekSync(video, time){
       video.currentTime = time;
-      await new Promise(resolve => video.onseeked = resolve);
+      await new Promise(resolve => video.onseeked = ()=>{
+        console.log("seeked")
+        resolve();
+      });
       video.onseeked = null;
+      console.log("seek?");
     },
 
     async play(startPoint, onended){
