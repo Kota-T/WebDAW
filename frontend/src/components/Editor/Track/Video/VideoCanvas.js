@@ -4,6 +4,7 @@ export default {
   name: 'VideoCanvas',
   mixins: [CanvasMixin],
   async mounted(){
+    this.downloadFile();
     this.dataVideo = document.createElement('video');
     this.dataVideo.src = this.canvasData.url;
     await this.seekSync(this.dataVideo, 7*24*60*1000);
