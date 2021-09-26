@@ -4,6 +4,7 @@ export default {
   name: 'VideoCanvas',
   mixins: [CanvasMixin],
   async mounted(){
+    console.log("canvas mounted start");
     this.dataVideo = document.createElement('video');
     this.dataVideo.src = this.canvasData.url;
     await new Promise(resolve => this.dataVideo.onloadedmetadata = resolve);
