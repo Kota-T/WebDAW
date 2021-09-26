@@ -29,10 +29,7 @@ export default {
   props: ['videoStream'],
   methods: {
     initRecorder(){
-      let mimeType;
-      if(MediaRecorder.isTypeSupported('video/mp4;codecs=avc1'))
-        mimeType = 'video/mp4;codecs=avc1';
-      this.recorder = new MediaRecorder(this.videoStream, { mimeType });
+      this.recorder = new MediaRecorder(this.videoStream);
 
       let startPoint;
       let recordingId;
@@ -52,7 +49,7 @@ export default {
 
       this.recorder.onstop = () => {
         cancelAnimationFrame(recordingId);
-        const blob = new Blob(chunks, { type: "video/mp4;codecs=avc1" });
+        const blob = new Blob(chunks, { type: "video/mp4;codecs=vp9" });
         console.log(blob);
         chunks = [];
         const url = URL.createObjectURL(blob);
