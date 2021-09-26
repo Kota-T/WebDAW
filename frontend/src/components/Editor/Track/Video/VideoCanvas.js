@@ -5,15 +5,11 @@ export default {
   mixins: [CanvasMixin],
   async mounted(){
     this.dataVideo = document.createElement('video');
-    this.dataVideo.onsuspend = e=>console.error(e);
     this.dataVideo.src = this.canvasData.url;
-    await new Promise(resolve => this.dataVideo.onloadedmetadata = resolve);
-    this.dataVideo.ondurationchange = ()=>console.error("duration changed");
     await this.seekSync(this.dataVideo, 7*24*60*1000);
     await this.seekSync(this.dataVideo, 0);
-    console.log(this.dataVideo.duration);
     this.sample_width = this.dataVideo.videoWidth * 120 / this.dataVideo.videoHeight;
-    console.log(this.sample_width);
+
     const leftTime  = this.canvasData.diminished?.leftTime || 0;
     const rightTime = this.canvasData.diminished?.rightTime || 0;
     this.width = (this.dataVideo.duration - leftTime - rightTime) * this.$store.getters.second_width;
@@ -31,15 +27,9 @@ export default {
   },
   methods: {
     async seekSync(video, time){
-      console.log("seek start");
-      video.onseeking = ()=>console.log("seek start2");
       video.currentTime = time;
-      await new Promise(resolve => video.onseeked = ()=>{
-        console.log("seeked")
-        resolve();
-      });
+      await new Promise(resolve => video.onseeked = resolve);
       video.onseeked = null;
-      console.log("seek?");
     },
 
     async play(startPoint, onended){
@@ -70,7 +60,7 @@ export default {
     downloadFile(){
       const link = document.createElement('a');
       link.href = this.canvasData.url;
-      link.download = "video.webm";
+      link.download = "video.mp4";
       link.click();
     }
   }

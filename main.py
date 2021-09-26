@@ -1,4 +1,4 @@
-import os, json, random
+import io, ffmpeg, tempfile, os, json, random
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler
@@ -26,10 +26,22 @@ class DocsHandler(RequestHandler):
             return
         self.render(f"docs/templates/{title}.html")
 
-class VideoEncodeHandler(RequestHandler):
+class VideoTranscodeHandler(RequestHandler):
     def post(self):
-        print(self.get_body_arguments())
-        self.finish("finished")
+        inputFile = tempfile.NamedTemporaryFile()
+        outputDir = tempfile.TemporaryDirectory()
+        outputFileName = os.path.join(outputDir.name, 'output.mp4')
+
+        inputFile.write(self.request.body)
+        inputFile.seek(0)
+
+        ffmpeg.input(inputFile.name).output(outputFileName).run()
+
+        with open(outputFileName, 'rb') as f:
+            self.finish(f.read())
+
+        inputFile.close()
+        outputDir.cleanup()
 
 
 class WebDAWHandler(WebSocketHandler):
@@ -119,7 +131,7 @@ if __name__ == "__main__":
     application = Application([
         (r"/", IndexHandler),
         (r"/websocket", WebDAWHandler),
-        (r"/encode-video", VideoEncodeHandler),
+        (r"/transcode-video", VideoTranscodeHandler),
         (r"/docs/static/(.*)", StaticFileHandler, {"path": "docs/static/"}),
         (r"/docs/(.*)", DocsHandler),
         (r"/(.*)", StaticFileHandler, {"path": "frontend/dist/"}),

@@ -50,17 +50,16 @@ export default {
       this.recorder.onstop = async () => {
         cancelAnimationFrame(recordingId);
         const blob = new Blob(chunks);
-        console.log(blob);
         chunks = [];
-        const url = URL.createObjectURL(blob);
-        await fetch(`${location.protocol}//${location.host}/encode-video`, {
+        const transcodedBlob = await fetch(`${location.protocol}//${location.host}/transcode-video`, {
           method: 'POST',
           body: blob
         })
-        .then(res=>console.log(res.text()))
+        .then(res=>res.blob());
+        const transcodedUrl = URL.createObjectURL(transcodedBlob);
         this.createCanvasByUser({
           startTime: startPoint / this.$store.getters.second_width,
-          url
+          url: transcodedUrl
         });
         this.$refs.draftCanvas.hide();
       }
