@@ -5,7 +5,7 @@ export default {
   mixins: [DraftCanvasMixin],
   methods: {
     initCtxStyle(){
-      this.ctx.fillStyle = "#78328c";
+      this.ctx.fillStyle = "#328c78";
     },
 
     draw(){

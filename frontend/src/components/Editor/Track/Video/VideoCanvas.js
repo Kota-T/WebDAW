@@ -10,12 +10,7 @@ export default {
     await this.seekSync(this.dataVideo, 0);
     this.sample_width = this.dataVideo.videoWidth * 120 / this.dataVideo.videoHeight;
 
-    const leftTime  = this.canvasData.diminished?.leftTime || 0;
-    const rightTime = this.canvasData.diminished?.rightTime || 0;
-    this.width = (this.dataVideo.duration - leftTime - rightTime) * this.$store.getters.second_width;
-    if(this.endPoint > this.$store.getters.ruler_width){
-      this.$store.commit('project_duration', this.canvasData.startTime + this.dataVideo.duration);
-    }
+    this.initWidth(this.dataVideo.duration);
 
     this.showVideo = document.createElement('video');
     this.showVideo.style.position = "fixed";
@@ -24,6 +19,12 @@ export default {
     this.showVideo.style.height = "110px";
     this.showVideo.src = this.canvasData.url;
     await this.seekSync(this.showVideo, 0);
+  },
+  unmounted(){
+    this.showVideo.onpause = null;
+    this.showVideo.pause();
+    this.showVideo.removeAttribute('src');
+    this.showVideo.remove();
   },
   methods: {
     async seekSync(video, time){
@@ -52,7 +53,7 @@ export default {
     async draw(){
       const seek_interval = this.sample_width / this.$store.getters.second_width;
       for(let i = 0; i < Math.ceil(this.width / this.sample_width); i++){
-        await this.seekSync(this.dataVideo, seek_interval * i);
+        await this.seekSync(this.dataVideo, this.diminished.leftTime + seek_interval * i);
         this.ctx.drawImage(this.dataVideo, this.sample_width * i, 0, this.sample_width, 120);
       }
     },

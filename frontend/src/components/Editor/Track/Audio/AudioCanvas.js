@@ -12,15 +12,10 @@ export default {
     this.audioBuffer = await loadAudioBuffer(this.audioCtx, this.canvasData.url);
 
     this.player = new Player(this.audioCtx, this.nextNode, this.audioBuffer);
-    this.drawer = new Drawer(this.canvas, this.ctx);
+    this.drawer = new Drawer();
     this.drawdataprocessor = new DrawDataProcessor();
 
-    const leftTime = this.canvasData.diminished?.leftTime || 0;
-    const rightTime = this.canvasData.diminished?.rightTime || 0;
-    this.width = (this.audioBuffer.duration - leftTime - rightTime) * this.$store.getters.second_width;
-    if(this.endPoint > this.$store.getters.ruler_width){
-      this.$store.commit('project_duration', this.canvasData.startTime + this.audioBuffer.duration);
-    }
+    this.initWidth(this.audioBuffer.duration);
   },
   methods: {
     play(startPoint, onended){
@@ -37,6 +32,8 @@ export default {
 
     draw(){
       this.drawer.draw(
+        this.canvas,
+        this.ctx,
         this.drawdataprocessor.getDrawData(
           this.audioBuffer,
           this.getTime(this.startPoint),

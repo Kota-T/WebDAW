@@ -45,40 +45,35 @@ export class DrawDataProcessor{
 }
 
 export class Drawer{
-  constructor(canvas, ctx){
-    this.canvas = canvas;
-    this.ctx = ctx;
-
-    this.initCtxStyle();
+  initCtxStyle(ctx){
+    ctx.fillStyle = "#78328c";
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#000";
   }
 
-  initCtxStyle(){
-    this.ctx.fillStyle = "#78328c";
-    this.ctx.lineWidth = 2;
-    this.ctx.strokeStyle = "#000";
+  draw(canvas, ctx, channels){
+    this.initCtxStyle(ctx);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.drawData(canvas, ctx, channels);
   }
 
-  draw(chs){
-    this.initCtxStyle();
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    chs.forEach(buffer=>this.drawData(buffer));
-  }
+  drawData(canvas, ctx, channels){
+    channels.forEach(buffer=>{
+      const sliceWidth = canvas.width / buffer.length;
+      let drawPoint = 0;
 
-  drawData(buffer){
-    const sliceWidth = this.canvas.width / buffer.length;
-    let drawPoint = 0;
+      ctx.beginPath();
+      for (let i = 0; i < buffer.length; i++) {
+        const y = (buffer[i] + 1) * canvas.height / 2;
 
-    this.ctx.beginPath();
-    for (let i = 0; i < buffer.length; i++) {
-      const y = (buffer[i] + 1) * this.canvas.height / 2;
-
-      if (i === 0) {
-        this.ctx.moveTo(drawPoint, y);
-      } else {
-        this.ctx.lineTo(drawPoint, y);
+        if (i === 0) {
+          ctx.moveTo(drawPoint, y);
+        } else {
+          ctx.lineTo(drawPoint, y);
+        }
+        drawPoint += sliceWidth;
       }
-      drawPoint += sliceWidth;
-    }
-    this.ctx.stroke();
+      ctx.stroke();
+    });
   }
 }

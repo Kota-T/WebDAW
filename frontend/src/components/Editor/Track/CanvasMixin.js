@@ -133,6 +133,9 @@ const CanvasMixin = {
       e.stopPropagation();
     }
   },
+  unmounted(){
+    URL.revokeObjectURL(this.canvasData.url);
+  },
   computed: {
     bpm(){
       return this.$store.state.bpm;
@@ -207,16 +210,6 @@ const CanvasMixin = {
 
     downloadFile(){},
 
-    decideCursor(x){
-      if(x <= 30){
-        this.styles.cursor = this.diminished.left === 0 ? 'e-resize' : 'ew-resize';
-      }else if(this.width - x <= 30){
-        this.styles.cursor = this.diminished.right === 0 ? 'w-resize' : 'ew-resize';
-      }else{
-        this.styles.cursor = 'grab';
-      }
-    },
-
     initDiminished(diminished={ leftTime: 0, rightTime: 0 }){
       this.diminished = {
         left  : diminished.leftTime * this.$store.getters.second_width,
@@ -233,6 +226,25 @@ const CanvasMixin = {
           get: () => this.diminished.right / this.$store.getters.second_width
         }
       });
+    },
+
+    decideCursor(x){
+      if(x <= 30){
+        this.styles.cursor = this.diminished.left === 0 ? 'e-resize' : 'ew-resize';
+      }else if(this.width - x <= 30){
+        this.styles.cursor = this.diminished.right === 0 ? 'w-resize' : 'ew-resize';
+      }else{
+        this.styles.cursor = 'grab';
+      }
+    },
+
+    initWidth(duration){
+      const leftTime = this.canvasData.diminished?.leftTime || 0;
+      const rightTime = this.canvasData.diminished?.rightTime || 0;
+      this.width = (duration - leftTime - rightTime) * this.$store.getters.second_width;
+      if(this.endPoint > this.$store.getters.ruler_width){
+        this.$store.commit('project_duration', this.canvasData.startTime + duration);
+      }
     },
 
     getTime(point){
@@ -299,10 +311,10 @@ const CanvasMixin = {
 
     zoom(newVal, oldVal){
       const ratio = newVal / oldVal;
-      this.diminished.left *= ratio;
-      this.diminished.right *= ratio;
       this.x *= ratio;
       this.width *= ratio;
+      this.diminished.left *= ratio;
+      this.diminished.right *= ratio;
     },
 
     async getDownloadData(folder, ext){
