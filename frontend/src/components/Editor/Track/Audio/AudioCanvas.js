@@ -42,6 +42,24 @@ export default {
       );
     },
 
+    split(){
+      const pointerX = this.pointer.x;
+      if(this.startPoint < pointerX && pointerX < this.endPoint){
+        const splitTime = this.getTime(pointerX);
+        const former = {
+          startTime: this.startTime,
+          diminished: { leftTime: this.diminished.leftTime, rightTime: 0 },
+          url: WavHandler.AudioBuffer2WavFile(this.audioBuffer, 0, splitTime)
+        };
+        const latter = {
+          startTime: this.startTime + splitTime,
+          diminished: { leftTime: 0, rightTime: this.diminished.rightTime },
+          url: WavHandler.AudioBuffer2WavFile(this.audioBuffer, splitTime, this.initDuration)
+        };
+        this.$emit('canvas-split', { canvasId: this.id, former, latter });
+      }
+    },
+
     downloadFile(){
       const length = this.duration * this.audioCtx.sampleRate;
       const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, length, this.audioCtx.sampleRate);

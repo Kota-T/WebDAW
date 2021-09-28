@@ -1,4 +1,4 @@
-import tempfile, subprocess, os, json, random
+import tempfile, subprocess, base64, os, json, random
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.websocket import WebSocketHandler
@@ -26,7 +26,7 @@ class DocsHandler(RequestHandler):
             return
         self.render(f"docs/templates/{title}.html")
 
-class VideoTranscodeHandler(RequestHandler):
+class TranscodeVideoHandler(RequestHandler):
     def post(self):
         inputFile = tempfile.NamedTemporaryFile()
         outputDir = tempfile.TemporaryDirectory()
@@ -48,6 +48,44 @@ class VideoTranscodeHandler(RequestHandler):
 
         inputFile.close()
         outputDir.cleanup()
+
+class SplitVideoHandler(RequestHandler):
+    def post(self):
+        data = json.loads(self.request.body)
+        splitTime = data['splitTime']
+        videoData = base64.b64decode(data['base64'].encode())
+
+        inputFile = tempfile.NamedTemporaryFile()
+        outputDir = tempfile.TemporaryDirectory()
+        formerFileName = os.path.join(outputDir.name, 'former.webm')
+        latterFileName = os.path.join(outputDir.name, 'latter.webm')
+
+        inputFile.write(videoData)
+        inputFile.seek(0)
+
+        subprocess.run(
+            f"ffmpeg -i {inputFile.name} -t {splitTime} -c copy {formerFileName}",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        subprocess.run(
+            f"ffmpeg -ss {splitTime} -i {inputFile.name} -c copy {latterFileName}",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        resDict = {}
+        with open(formerFileName, 'rb') as f:
+            resDict['former'] = base64.b64encode(f.read()).decode()
+        with open(latterFileName, 'rb') as f:
+            resDict['latter'] = base64.b64encode(f.read()).decode()
+
+        self.finish(resDict)
 
 
 class WebDAWHandler(WebSocketHandler):
@@ -137,7 +175,8 @@ if __name__ == "__main__":
     application = Application([
         (r"/", IndexHandler),
         (r"/websocket", WebDAWHandler),
-        (r"/transcode-video", VideoTranscodeHandler),
+        (r"/transcode-video", TranscodeVideoHandler),
+        (r"/split-video", SplitVideoHandler),
         (r"/docs/static/(.*)", StaticFileHandler, {"path": "docs/static/"}),
         (r"/docs/(.*)", DocsHandler),
         (r"/(.*)", StaticFileHandler, {"path": "frontend/dist/"}),

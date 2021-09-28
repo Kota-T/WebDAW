@@ -25,6 +25,10 @@ const CanvasMixin = {
           default: ()=>[
             h('li', { onClick: $event=>{
               $event.stopPropagation();
+              this.split();
+            } }, ["分割"]),
+            h('li', { onClick: $event=>{
+              $event.stopPropagation();
               this.downloadFile();
             } }, ["ダウンロード"]),
             h('li', { onClick: $event=>{
@@ -40,10 +44,14 @@ const CanvasMixin = {
     canvasData: {
       type: Object,
       required: true
+    },
+    pointer: {
+      type: Object,
+      required: true
     }
   },
   inject: ['socket', 'trackId'],
-  emits: ['track-select', 'canvas-remove'],
+  emits: ['track-select', 'canvas-split', 'canvas-remove'],
   data(){
     return {
       styles: {

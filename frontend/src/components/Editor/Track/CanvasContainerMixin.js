@@ -52,6 +52,12 @@ const CanvasContainerMixin = {
       }
     },
 
+    splitCanvas({ canvasId, former, latter }){
+      this.removeCanvasByUser(canvasId);
+      this.createCanvasByUser(former);
+      this.createCanvasByUser(latter);
+    },
+
     startRecording(){
       this.recorder.start();
     },

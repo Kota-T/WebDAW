@@ -1,34 +1,22 @@
 export default class WavHandler{
-  static Base642Wav(base64){
-    const array = base64.split(',');
-    const mimeType = array[0].slice(5, -7);
-    const byteString = atob(array[1]);
-    const content = new Uint8Array(byteString.length);
-    for(let i = 0; i < byteString.length; i++){
-      content[i] = byteString.charCodeAt(i);
-    }
-
-    const blob = new Blob([content], {type: mimeType[1]});
-    const url = URL.createObjectURL(blob);
-
-    return url;
-  }
-
-  static AudioBuffer2WavFile(buffer){
+  static AudioBuffer2WavFile(buffer, startTime, endTime){
     const url = WavHandler.writeWav(
-      WavHandler.AudioBuffer2WavData(buffer),
+      WavHandler.AudioBuffer2WavData(buffer, startTime, endTime),
       buffer.sampleRate
     );
     return url;
   }
 
-  static AudioBuffer2WavData(buffer){
+  static AudioBuffer2WavData(buffer, startTime, endTime){
+    const startIndex = Math.floor(startTime * buffer.sampleRate || 0);
+    const endIndex   = Math.floor(endTime   * buffer.sampleRate || buffer.length);
+    const dataLength = endIndex - startIndex;
     const left  = buffer.getChannelData(0);
     const right = buffer.getChannelData(1);
-    const array = new Float32Array(buffer.length * 2);
-    for(let i = 0; i < buffer.length; i++){
-      array[i * 2] = left[i];
-      array[i * 2 + 1] = right[i];
+    const array = new Float32Array(dataLength * 2);
+    for(let i = 0; i < dataLength; i++){
+      array[i * 2] = left[i + startIndex];
+      array[i * 2 + 1] = right[i + startIndex];
     }
     return array;
   }
@@ -40,7 +28,7 @@ export default class WavHandler{
     WavHandler.writeWavHead(view, samples.length, sampleRate);
     WavHandler.writeWavData(view, samples);
 
-    const blob = new Blob([view], {type: "audio/wav"});
+    const blob = new Blob([view], { type: "audio/wav" });
     const url = URL.createObjectURL(blob);
 
     return url;

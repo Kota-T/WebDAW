@@ -10,7 +10,9 @@
     :canvasData="canvasData"
     :audioCtx="audioCtx"
     :nextNode="nextNode"
+    :pointer="pointer"
     :ref="setCanvasRef"
+    @canvas-split="splitCanvas"
     @track-select="shiftKey=>$emit('track-select', shiftKey)"
     @canvas-remove="removeCanvasByUser(canvasData.id)"
     />

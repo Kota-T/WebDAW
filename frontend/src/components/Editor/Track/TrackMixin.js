@@ -14,6 +14,15 @@ const TrackMixin = {
   mounted(){
     this.name = this.trackData.name?.substring(this.trackData?.name.indexOf("_") + 1) || "新規トラック";
     this.trackData.canvases?.forEach(canvasData=>this.$refs.container.createCanvas(canvasData));
+    this.$watch('name', newVal=>{
+      if(this.socket.connected){
+        this.socket.send({
+          type: 'changeTrackName',
+          trackId: this.id,
+          value: newVal
+        });
+      }
+    });
     this.$nextTick(async function(){
       if(this.socket.connected && this.trackData.send){
         this.socket.send({

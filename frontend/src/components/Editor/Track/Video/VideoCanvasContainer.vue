@@ -8,7 +8,9 @@
     v-for="canvasData in canvasParams"
     :key="canvasData.id"
     :canvasData="canvasData"
+    :pointer="pointer"
     :ref="setCanvasRef"
+    @canvas-split="splitCanvas"
     @track-select="shiftKey=>$emit('track-select', shiftKey)"
     @canvas-remove="removeCanvasByUser(canvasData.id)"
     />
@@ -47,9 +49,9 @@ export default {
 
       this.recorder.ondataavailable = e => chunks.push(e.data);
 
-      this.recorder.onstop = async () => {
+      this.recorder.onstop = () => {//async
         cancelAnimationFrame(recordingId);
-        const blob = new Blob(chunks, { type: 'video/webm;codecs=vp9'});
+        const blob = new Blob(chunks, { type: 'video/webm;codecs=vp9' });
         chunks = [];
         const url = URL.createObjectURL(blob);
         /*const transcodedBlob = await fetch(`${location.protocol}//${location.host}/transcode-video`, {

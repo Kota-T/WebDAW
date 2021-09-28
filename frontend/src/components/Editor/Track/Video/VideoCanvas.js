@@ -1,3 +1,4 @@
+import { base642Url } from '../../../../util.js';
 import CanvasMixin from '../CanvasMixin.js';
 
 export default {
@@ -55,6 +56,40 @@ export default {
       for(let i = 0; i < Math.ceil(this.width / this.sample_width); i++){
         await this.seekSync(this.dataVideo, this.diminished.leftTime + seek_interval * i);
         this.ctx.drawImage(this.dataVideo, this.sample_width * i, 0, this.sample_width, 120);
+      }
+    },
+
+    async split(){
+      const pointerX = this.pointer.x;
+      if(this.startPoint < pointerX && pointerX < this.endPoint){
+        const splitTime = this.getTime(pointerX);
+
+        const base64 = await fetch(this.canvasData.url)
+        .then(res=>res.blob())
+        .then(res=>new Promise(resolve=>{
+          const reader = new FileReader();
+          reader.onload = ()=>resolve(reader.result.split(',')[1])
+          reader.readAsDataURL(res);
+        }))
+        .catch(console.error);
+
+        const resJson = await fetch(`${location.protocol}//${location.host}/split-video`, {
+          method: 'POST',
+          body: JSON.stringify({ splitTime, base64 })
+        })
+        .then(res=>res.json());
+
+        const former = {
+          startTime: this.startTime,
+          diminished: { leftTime: this.diminished.leftTime, rightTime: 0 },
+          url: base642Url(resJson.former, 'video/webm;codecs=vp9')
+        };
+        const latter = {
+          startTime: this.startTime + splitTime,
+          diminished: { leftTime: 0, rightTime: this.diminished.rightTime },
+          url: base642Url(resJson.latter, 'video/webm;codecs=vp9')
+        };
+        this.$emit('canvas-split', { canvasId: this.id, former, latter });
       }
     },
 
