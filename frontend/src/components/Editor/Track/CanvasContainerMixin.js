@@ -40,8 +40,8 @@ const CanvasContainerMixin = {
       this.canvasIdManager.removeId(canvasId);
     },
 
-    removeCanvasByUser(canvasId){
-      if(!window.confirm("選択されているキャンバスを削除しますか？")) return;
+    removeCanvasByUser(canvasId, alert=true){
+      if(alert && !window.confirm("選択されているキャンバスを削除しますか？")) return;
       this.removeCanvas(canvasId);
       if(this.socket.connected){
         this.socket.send({
@@ -53,7 +53,7 @@ const CanvasContainerMixin = {
     },
 
     splitCanvas({ canvasId, former, latter }){
-      this.removeCanvasByUser(canvasId);
+      this.removeCanvasByUser(canvasId, false);
       this.createCanvasByUser(former);
       this.createCanvasByUser(latter);
     },
