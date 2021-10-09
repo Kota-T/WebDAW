@@ -50,7 +50,6 @@ body{
 </style>
 
 <script>
-import { computed } from 'vue';
 import WebDAWSocket from './socket.js';
 
 import SideMenu from './components/SideMenu.vue';

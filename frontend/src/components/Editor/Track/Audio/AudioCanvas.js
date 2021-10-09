@@ -1,7 +1,6 @@
 import CanvasMixin from '../CanvasMixin.js';
 
-import WavHandler from '../../../../webaudio/WavHandler.js';
-import { loadAudioBuffer, Player } from '../../../../webaudio/webaudio.js';
+import { WavHandler, loadAudioBuffer, Player } from '../../../../audio.js';
 import { DrawDataProcessor, Drawer } from './AudioCanvasFunctions.js';
 
 export default {
@@ -11,7 +10,7 @@ export default {
   async mounted(){
     this.audioBuffer = await loadAudioBuffer(this.audioCtx, this.canvasData.url);
 
-    this.player = new Player(this.audioCtx, this.nextNode, this.audioBuffer);
+    this.player = new Player(this.audioBuffer, this.nextNode);
     this.drawer = new Drawer();
     this.drawdataprocessor = new DrawDataProcessor();
 

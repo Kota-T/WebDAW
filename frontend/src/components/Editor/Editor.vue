@@ -26,6 +26,7 @@
   :audioCtx="audioCtx"
   :sourceNode="sourceNode"
   :videoStream="videoStream"
+  :midiInput="midiInput"
   :ref="setTrackRef"
   @track-solo="makeTracksSolo"
   @track-remove="removeTrackByUser(trackData.id)"
@@ -147,10 +148,11 @@
 </style>
 
 <script>
+import WebMidi from 'webmidi';
 import JSZip from 'jszip';
 
 import IdManager from '../../IdManager.js';
-import WavHandler from '../../webaudio/WavHandler.js';
+import { WavHandler } from '../../audio.js';
 
 import Count from './Header/Count.vue';
 import Rhythm from './Header/Rhythm.vue';
@@ -161,6 +163,7 @@ import Ruler from './Ruler.vue';
 import Pointer from './Pointer.vue';
 import AudioTrack from './Track/Audio/AudioTrack.vue';
 import VideoTrack from './Track/Video/VideoTrack.vue';
+import MidiTrack from './Track/Midi/MidiTrack.vue';
 
 export default {
   name: 'Editor',
@@ -172,7 +175,8 @@ export default {
     Ruler,
     Pointer,
     AudioTrack,
-    VideoTrack
+    VideoTrack,
+    MidiTrack
   },
   emits: ['add-track'],
   inject: ['socket'],
@@ -183,6 +187,7 @@ export default {
       audioCtx: null,
       sourceNode: null,
       videoStream: null,
+      midiInput: null,
       state: null//"playing" or "preparing" or "recording" or null
     }
   },
@@ -320,9 +325,9 @@ export default {
           this.sourceNode = this.audioCtx.createMediaStreamSource(stream);
         })
         .catch(err=>{
-          window.alert("マイク入力を取得できません。");
+          alert("マイク入力を取得できません。");
           throw new Error();
-        })
+        });
     },
 
     async getVideoStream(){
@@ -331,9 +336,25 @@ export default {
         .getUserMedia({ video: true, audio: false })
         .then(stream => this.videoStream = stream)
         .catch(err=>{
-          window.alert("カメラを取得できません。");
+          alert("カメラを取得できません。");
           throw new Error();
+        });
+    },
+
+    async getMidiInput(){
+      if(this.midiInput){ return; }
+      await new Promise(
+        (resolve, reject)=>WebMidi.enable(err=>{
+          if(err)
+            reject("web midi error");
+          resolve(WebMidi.inputs[0]);
         })
+      )
+      .then(midiInput => this.midiInput = midiInput)
+      .catch(err=>{
+        alert("MIDI入力を取得できません。");
+        throw new Error();
+      });
     },
 
     setTrackRef(el){
@@ -352,8 +373,9 @@ export default {
             return;
           }
           await this.getVideoStream();
-        }
-        else
+        }else if(trackData.component === "MidiTrack"){
+          await this.getMidiInput();
+        }else
           return;
       }catch(e){ return; }
 

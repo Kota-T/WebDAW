@@ -26,7 +26,7 @@
 </style>
 
 <script>
-import { loadAudioBuffer, Player } from '../../../webaudio/webaudio.js';
+import { loadAudioBuffer, Player } from '../../../audio.js';
 
 export default {
   name: 'Count',
@@ -39,7 +39,7 @@ export default {
   },
   async mounted(){
     const audioBuffer = await loadAudioBuffer(this.audioCtx, "/metronome.wav");
-    this.player = new Player(this.audioCtx, this.audioCtx.destination, audioBuffer);
+    this.player = new Player(audioBuffer, this.audioCtx.destination);
   },
   computed: {
     rhythm(){

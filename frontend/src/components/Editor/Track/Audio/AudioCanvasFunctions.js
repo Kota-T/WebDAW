@@ -14,7 +14,7 @@ export class DrawDataProcessor{
   getPeaks(array, startIndex, endIndex, peakLength=4500){
     let step = Math.floor((endIndex - startIndex) / peakLength);
 
-    if(step < 2){
+    if(step < 3){
       return array.slice(startIndex, endIndex);
     }
 

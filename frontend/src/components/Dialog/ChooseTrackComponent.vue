@@ -3,6 +3,7 @@
     <form @submit.prevent="chooseTrackType">
       <p><label><input type="radio" name="track" value="AudioTrack" required v-model="component" checked>オーディオ</label></p>
       <p><label><input type="radio" name="track" value="VideoTrack" required v-model="component">ビデオ</label></p>
+      <p><label><input type="radio" name="track" value="MidiTrack" required v-model="component">MIDI</label></p>
       <p>
         <button type="submit">決定</button>
         <button type="button" @click="$emit('hide-dialog')">中止</button>

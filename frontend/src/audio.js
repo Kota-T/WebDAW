@@ -1,4 +1,4 @@
-export default class WavHandler{
+export class WavHandler{
   static AudioBuffer2WavFile(buffer, startTime, endTime){
     const url = WavHandler.writeWav(
       WavHandler.AudioBuffer2WavData(buffer, startTime, endTime),
@@ -61,5 +61,93 @@ export default class WavHandler{
       let s = Math.max(-1, Math.min(1, samples[i]));
       view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
     }
+  }
+}
+
+export function loadAudioBuffer(audioCtx, url){
+  return fetch(url)
+  .then(res=>res.arrayBuffer())
+  .then(res=>audioCtx.decodeAudioData(res))
+}
+
+export class Player{
+  constructor(audioBuffer, nextNode){
+    this.audioBuffer = audioBuffer;
+    this.nextNode = nextNode;
+  }
+
+  createSource(){
+    this.source = this.nextNode.context.createBufferSource();
+    this.source.buffer = this.audioBuffer;
+    this.source.connect(this.nextNode);
+  }
+
+  play(start, end, onended){
+    this.createSource();
+    if(start && end && onended){
+      this.source.onended = onended;
+      this.source.start(0, start, end - start);
+    }else {
+      this.source.start();
+    }
+  }
+
+  pause(){
+    if(!this.source) return;
+    this.source.stop();
+    this.source.disconnect();
+    this.source = null;
+  }
+}
+
+class RecorderNode extends AudioWorkletNode {
+  constructor(audioCtx){
+    super(audioCtx, 'recorder-processor');
+    this.buffers = [];
+    this.port.onmessage = e => this.buffers.push(e.data);
+  }
+
+  mergeBuffers(buffers){
+    const sampleLength = buffers.reduce((acc, buf) => acc + buf.length, 0);
+    const samples = new Float32Array(sampleLength);
+    let sampleIdx = 0;
+    for (let i = 0; i < buffers.length; i++) {
+      for (let j = 0; j < buffers[i].length; j++) {
+        samples[sampleIdx] = buffers[i][j];
+        sampleIdx++;
+      }
+    }
+
+    return samples;
+  }
+
+  getData(){
+    const samples = this.mergeBuffers(this.buffers);
+    this.buffers = [];
+    return samples;
+  }
+}
+
+export class AudioRecorder{
+  constructor(sourceNode){
+    this.audioCtx = sourceNode.context;
+    this.sourceNode = sourceNode;
+    this.recorderNode = new RecorderNode(this.audioCtx);
+  }
+
+  start(){
+    this.onstart();
+    this.sourceNode.connect(this.recorderNode).connect(this.audioCtx.destination);
+  }
+
+  stop(){
+    this.sourceNode.disconnect(this.recorderNode);
+    this.recorderNode.disconnect();
+    this.onstop(
+      WavHandler.writeWav(
+        this.recorderNode.getData(),
+        this.audioCtx.sampleRate
+      )
+    );
   }
 }

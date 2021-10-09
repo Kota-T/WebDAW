@@ -3,8 +3,8 @@
   class="canvas-container"
   @pointerdown="e=>$emit('track-select', e.shiftKey)"
   >
-    <AudioDraftCanvas :sourceNode="sourceNode" ref="draftCanvas"/>
-    <AudioCanvas
+    <MidiDraftCanvas ref="draftCanvas"/>
+    <MidiCanvas
     v-for="canvasData in canvasParams"
     :key="canvasData.id"
     :canvasData="canvasData"
@@ -20,22 +20,21 @@
 </template>
 
 <script>
-import { AudioRecorder } from '../../../../audio.js';
-
+import { MidiRecorder } from '../../../../midi.js';
 import CanvasContainerMixin from '../CanvasContainerMixin.js';
-import AudioDraftCanvas from './AudioDraftCanvas.js';
-import AudioCanvas from './AudioCanvas.js';
+import MidiDraftCanvas from './MidiDraftCanvas.js';
+import MidiCanvas from './MidiCanvas.js';
 
 export default {
-  name: 'AudioCanvasContainer',
+  name: 'MidiCanvasContainer',
   components: {
-    AudioDraftCanvas, AudioCanvas
+    MidiDraftCanvas, MidiCanvas
   },
   mixins: [CanvasContainerMixin],
-  props: ['audioCtx', 'sourceNode', 'nextNode'],
+  props: ['midiInput'],
   methods: {
     initRecorder(){
-      this.recorder = new AudioRecorder(this.sourceNode);
+      this.recorder = new MidiRecorder(this.midiInput);
 
       let startPoint;
       let recordingId;

@@ -3,9 +3,9 @@ import DraftCanvasMixin from '../DraftCanvasMixin.js';
 export default {
   name: 'AudioDraftCanvas',
   mixins: [DraftCanvasMixin],
-  props: ['audioCtx', 'sourceNode'],
+  props: ['sourceNode'],
   created(){
-    this.analyserNode = this.audioCtx.createAnalyser();
+    this.analyserNode = this.sourceNode.context.createAnalyser();
     this.analyserNode.fftSize = 1024;
     this.sourceNode.connect(this.analyserNode);
     this.dataArray = new Float32Array(this.analyserNode.fftSize);
