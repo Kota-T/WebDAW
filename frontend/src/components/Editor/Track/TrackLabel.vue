@@ -2,7 +2,7 @@
   <div
   class="track-label"
   :class="{'is-selected': isSelected}"
-  @pointerdown="e=>$emit('track-select', e.shiftKey)"
+  @pointerdown="isSelected=true;$emit('track-select', $event.shiftKey);"
   @contextmenu="$refs.menu.show"
   @touchstart="$refs.menu.show"
   >

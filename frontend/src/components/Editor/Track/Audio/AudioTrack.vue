@@ -1,12 +1,14 @@
 <template>
   <teleport to="#label_field">
     <AudioTrackLabel
-    :gainNode="gainNode"
-    :pannerNode="pannerNode"
-    :muteNode="muteNode"
+    v-model:name="name"
+    v-model:gainValue="gainValue"
+    v-model:panValue="panValue"
     @track-select="select"
-    @track-solo="$emit('track-solo')"
     @track-remove="$emit('track-remove')"
+    @track-monitoring="toggleMonitoring"
+    @track-muted="toggleMuted"
+    @track-solo="$emit('track-solo')"
     ref="label"
     />
   </teleport>
@@ -34,8 +36,17 @@ export default {
     AudioCanvasContainer
   },
   mixins: [TrackMixin],
-  props: ['audioCtx', 'sourceNode'],
-  emits: ['track-solo'],
+  props: {
+    audioCtx: Object,
+    sourceNode: Object
+  },
+  emits: ['track-remove', 'track-solo'],
+  data(){
+    return {
+      gainValue: 0.5,
+      panValue: 0
+    }
+  },
   created(){
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 0.5;
@@ -47,19 +58,9 @@ export default {
       .connect(this.muteNode)
       .connect(this.soloNode)
       .connect(this.audioCtx.destination);
-  },
-  mounted(){
-    this.gain = this.trackData.gain || 0.5;
-    this.pan = this.trackData.pan || 0;
-    this.$watch('isMonitoring', value=>{
-      if(value){
-        this.sourceNode.connect(this.gainNode);
-      }else{
-        try{
-          this.sourceNode.disconnect(this.gainNode);
-        }catch(e){}
-      }
-    });
+
+    this.gainValue = this.trackData.gain || 0.5;
+    this.panValue = this.trackData.pan || 0;
   },
   unmounted(){
     try{
@@ -67,43 +68,36 @@ export default {
     }catch(e){}
     this.soloNode.disconnect();
   },
-  computed: {
-    gain: {
-      get(){
-        return this.gainNode.gain.value;
-      },
-      set(value){
-        this.$refs.label.gainValue = value;
-      }
+  watch: {
+    gainValue(newVal){
+      this.gainNode.gain.value = newVal
     },
-    pan: {
-      get(){
-        return this.pannerNode.pan.value;
-      },
-      set(value){
-        this.$refs.label.panValue = value;
-      }
-    },
-    isMonitoring: {
-      get(){
-        return this.$refs.label.isMonitoring;
-      },
-      set(value){
-        this.$refs.label.isMonitoring = value;
-      }
-    },
-    isSolo(){
-      return this.$refs.label.isSolo;
+    panValue(newVal){
+      this.pannerNode.pan.value = newVal
     }
   },
   methods: {
+    toggleMonitoring(newVal){
+      if(newVal){
+        this.sourceNode.connect(this.gainNode);
+      }else{
+        try{
+          this.sourceNode.disconnect(this.gainNode);
+        }catch(e){}
+      }
+    },
+
+    toggleMuted(newVal){
+      this.muteNode.gain.value = newVal ? 0 : 1
+    },
+
     async getDownloadData(root, index){
       const name = index + "_" + this.name;
       return {
         component: "AudioTrack",
         name: name,
-        gain: this.gain,
-        pan : this.pan,
+        gain: this.gainValue,
+        pan : this.panValue,
         canvases: await Promise.all(this.$refs.container.getDownloadData(root.folder(name), ".wav"))
       };
     },
@@ -113,8 +107,8 @@ export default {
         id: this.id,
         component: "AudioTrack",
         name: this.name,
-        gain: this.gain,
-        pan : this.pan,
+        gain: this.gainValue,
+        pan : this.panValue,
         canvases: await Promise.all(this.$refs.container.getUploadData())
       };
     },

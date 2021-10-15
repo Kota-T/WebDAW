@@ -35,7 +35,9 @@ const __SKYWAY_KEY__ = "8ce51882-3317-4964-99cc-a7e50809042a";
 
 export default {
   name: 'VideoContainer',
-  props: ['roomId'],
+  props: {
+    roomId: String
+  },
   data(){
     return {
       videoOn: true,

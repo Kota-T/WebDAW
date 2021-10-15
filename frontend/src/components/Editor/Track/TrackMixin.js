@@ -1,5 +1,8 @@
 const TrackMixin = {
-  props: ['trackData', 'pointer'],
+  props: {
+    trackData: Object,
+    pointer: Object
+  },
   inject: ['socket'],
   emits: ['track-remove'],
   provide(){
@@ -7,22 +10,19 @@ const TrackMixin = {
       trackId: this.trackData.id
     }
   },
+  data(){
+    return {
+      name: "",
+      isSelected: true
+    }
+  },
   created(){
     this.id = this.trackData.id;
     this.component = this.trackData.component;
+    this.name = this.trackData.name?.substring(this.trackData?.name.indexOf("_") + 1) || "新規トラック";
   },
   mounted(){
-    this.name = this.trackData.name?.substring(this.trackData?.name.indexOf("_") + 1) || "新規トラック";
     this.trackData.canvases?.forEach(canvasData=>this.$refs.container.createCanvas(canvasData));
-    this.$watch('name', newVal=>{
-      if(this.socket.connected){
-        this.socket.send({
-          type: 'changeTrackName',
-          trackId: this.id,
-          value: newVal
-        });
-      }
-    });
     this.$nextTick(async function(){
       if(this.socket.connected && this.trackData.send){
         this.socket.send({
@@ -33,22 +33,18 @@ const TrackMixin = {
       this.select();
     });
   },
-  computed: {
-    name: {
-      get(){
-        return this.$refs.label.$refs.trackName.value;
-      },
-      set(value){
-        this.$refs.label.$refs.trackName.value = value;
-      },
-    },
-    isSelected: {
-      get(){
-        return this.$refs.label.isSelected;
-      },
-      set(value){
-        this.$refs.label.isSelected = value;
+  watch: {
+    name(newVal){
+      if(this.socket.connected){
+        this.socket.send({
+          type: 'changeTrackName',
+          trackId: this.id,
+          value: newVal
+        });
       }
+    },
+    isSelected(newVal){
+      this.$refs.label.$refs.container.isSelected = newVal
     }
   },
   methods: {

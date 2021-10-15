@@ -1,6 +1,7 @@
 <template>
   <teleport to="#label_field">
     <VideoTrackLabel
+    v-model:name="name"
     @track-select="select"
     @track-remove="$emit('track-remove')"
     ref="label"
@@ -28,7 +29,9 @@ export default {
     VideoCanvasContainer
   },
   mixins: [TrackMixin],
-  props: ['videoStream'],
+  props: {
+    videoStream: Object
+  },
   methods: {
     async getDownloadData(root, index){
       const name = index + "_" + this.name;

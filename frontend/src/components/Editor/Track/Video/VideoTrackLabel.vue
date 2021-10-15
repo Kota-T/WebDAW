@@ -5,7 +5,7 @@
   ref="container"
   >
     <template v-slot:contents>
-      <InputElement type="text" size="8" default="新規トラック" ref="trackName"/>
+      <InputElement type="text" size="8" v-model="_name" />
     </template>
   </TrackLabel>
 </template>
@@ -15,14 +15,25 @@ import TrackLabel from '../TrackLabel.vue';
 
 export default {
   name: 'VideoTrackLabel',
-  emits: ['track-select', 'track-remove'],
+  props: {
+    name: String
+  },
+  emits: [
+    'update:name',
+    'track-select',
+    'track-remove'
+  ],
   components: {
     TrackLabel
   },
-  computed: {
-    isSelected: {
-      get(){return this.$refs.container.isSelected;},
-      set(value){this.$refs.container.isSelected = value;}
+  data(){
+    return {
+      _name: this.name
+    }
+  },
+  watch: {
+    name(newVal){
+      this.$emit('update:name', newVal)
     }
   }
 }

@@ -28,7 +28,9 @@ export default {
     VideoDraftCanvas, VideoCanvas
   },
   mixins: [CanvasContainerMixin],
-  props: ['videoStream'],
+  props: {
+    videoStream: Object
+  },
   methods: {
     initRecorder(){
       this.recorder = new MediaRecorder(this.videoStream, { mimeType: 'video/webm;codecs=vp9' });

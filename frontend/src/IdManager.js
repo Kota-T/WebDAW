@@ -1,5 +1,5 @@
 export default class IdManager {
-  constructor(length){
+  constructor(length=8){
     this.idLength = length;
 
     this.ch_list = [];

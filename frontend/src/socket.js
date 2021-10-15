@@ -5,7 +5,7 @@ export default class WebDAWSocket {
 
   constructor(){
     this.packetIdManager = new IdManager(8);
-    this.packetBuffer = {};
+    this.packetBuffer = new Map();
   }
 
   init(defaultOnmessage){
@@ -23,7 +23,7 @@ export default class WebDAWSocket {
 
   generatePacketId(){
     const packetId = this.packetIdManager.generateId();
-    if(this.packetBuffer.hasOwnProperty(packetId)){
+    if(this.packetBuffer.has(packetId)){
       IdManager.removeId(packetId);
       return this.generatePacketId();
     }
@@ -80,15 +80,15 @@ export default class WebDAWSocket {
       console.log(data);
       switch(data.type){
         case 'packet':
-          if(!this.packetBuffer.hasOwnProperty(data.packetId)){
-            this.packetBuffer[data.packetId] = new Array(data.numOfPackets).fill(undefined);
+          if(!this.packetBuffer.has(data.packetId)){
+            this.packetBuffer.set(data.packetId, new Array(data.numOfPackets).fill(undefined));
           }
-          this.packetBuffer[data.packetId][data.index] = data;
+          this.packetBuffer.get(data.packetId)[data.index] = data;
 
-          if(this.packetBuffer[data.packetId].every(packet=>packet)){
-            const result = JSON.parse(this.packetBuffer[data.packetId].reduce((acc, cur) => acc + cur.body, ""));
+          if(this.packetBuffer.get(data.packetId).every(packet=>packet)){
+            const result = JSON.parse(this.packetBuffer.get(data.packetId).reduce((acc, cur) => acc + cur.body, ""));
             fn(result);
-            delete this.packetBuffer[data.packetId];
+            this.packetBuffer.delete(data.packetId);
           }
           break;
         case 'packet_id_overlapped_error':

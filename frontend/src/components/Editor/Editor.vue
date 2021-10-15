@@ -8,12 +8,19 @@
     <Bpm ref="bpm"/>
     <Resizer ref="resizer"/>
   </div>
-  <div id="label_field" class="no-scroll-bar" ref="label_field">
+  <div id="label_field" class="no-scroll-bar" @scroll="$refs.ruler_layer.scrollTop = $refs.label_field.scrollTop" ref="label_field">
     <div id="add_track_btn" title="トラックを追加" @click="$emit('add-track')"><img src="../../assets/plus_icon.png"></div>
   </div>
-  <div id="pointer_layer" class="no-scroll-bar" ref="pointer_layer">
+  <div id="pointer_layer" class="no-scroll-bar" @click="shiftPointer" ref="pointer_layer">
     <Pointer :margin="20" @move="onPointerMove" ref="pointer"/>
-    <div id="ruler_layer" class="no-scroll-bar" ref="ruler_layer">
+    <div
+    id="ruler_layer"
+    class="no-scroll-bar"
+    @scroll="$refs.label_field.scrollTop = $refs.ruler_layer.scrollTop"
+    @touchstart="startTouches"
+    @touchmove="zoomWithTouches"
+    ref="ruler_layer"
+    >
       <Ruler ref="ruler"/>
     </div>
   </div>
@@ -201,49 +208,6 @@ export default {
     await this.audioCtx.audioWorklet.addModule('./RecorderProcessor.js');
   },
   mounted(){
-    const label_field = this.$refs.label_field;
-    const pointer_layer = this.$refs.pointer_layer;
-    const ruler_layer = this.$refs.ruler_layer;
-
-    label_field.onscroll = e=>ruler_layer.scrollTop = label_field.scrollTop;
-    ruler_layer.onscroll = e=>label_field.scrollTop = ruler_layer.scrollTop;
-
-    const label_field_width = 200;
-    pointer_layer.onclick = e=>{
-      if(this.state === "recording" || e.offsetY > 30) return;
-      this.$refs.pointer.layerX = e.clientX - label_field_width + pointer_layer.scrollLeft;
-      this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
-      if(this.state === "playing"){
-        this.pause();
-        this.play();
-      }
-    }
-
-    let oldDiff;
-    const getDiff = touches=>{
-      const x1 = touches[0].clientX;
-      const y1 = touches[0].clientY;
-
-      const x2 = touches[1].clientX;
-      const y2 = touches[1].clientY;
-      return Math.sqrt(Math.pow(x2 - x1, 2), Math.pow(y2 - y1));
-    }
-    ruler_layer.ontouchstart = e=>{
-      if(this.state === "recording" || e.touches.length !== 2) return;
-      oldDiff = getDiff(e.touches);
-    }
-    ruler_layer.ontouchmove = e=>{
-      if(this.state === "recording" || e.touches.length !== 2) return;
-      e.preventDefault();
-      const curDiff = getDiff(e.touches);
-      const newVal = Math.round(this.$store.state.beat_width * curDiff / oldDiff);
-      if(10 < newVal && newVal < 100){
-        this.$refs.resizer.value = newVal;
-        this.$store.commit('beat_width', newVal);
-        oldDiff = curDiff;
-      }
-    }
-
     document.ondragover = e=>{
       e.stopPropagation();
       e.preventDefault();
@@ -425,6 +389,42 @@ export default {
       }
       if(x >= this.$store.getters.ruler_width){
         this.$store.commit('addProjectDuration', 30);
+      }
+    },
+
+    shiftPointer(e){
+      if(this.state === "recording" || e.offsetY > 30) return;
+      this.$refs.pointer.layerX = e.clientX - 200 + this.$refs.pointer_layer.scrollLeft;
+      this.$refs.count.setNumberFromPointerX(this.$refs.pointer.x);
+      if(this.state === "playing"){
+        this.pause();
+        this.play();
+      }
+    },
+
+    getTouchesDiff(touches){
+      const x1 = touches[0].clientX;
+      const y1 = touches[0].clientY;
+
+      const x2 = touches[1].clientX;
+      const y2 = touches[1].clientY;
+      return Math.sqrt(Math.pow(x2 - x1, 2), Math.pow(y2 - y1));
+    },
+
+    startTouches(e){
+      if(state !== "recording" || e.touches.length === 2)
+        this.oldTouchesDiff = this.getTouchesDiff(e.touches);
+    },
+
+    zoomWithTouches(e){
+      if(state === "recording" || e.touches.length !== 2) return;
+      e.preventDefault();
+      const curDiff = this.getTouchesDiff(e.touches);
+      const newVal = Math.round(this.$store.state.beat_width * curDiff / this.oldTouchesDiff);
+      if(10 < newVal && newVal < 100){
+        this.$refs.resizer.value = newVal;
+        this.$store.commit('beat_width', newVal);
+        this.oldTouchesDiff = curDiff;
       }
     },
 

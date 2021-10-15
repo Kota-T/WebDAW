@@ -31,10 +31,14 @@ export default {
     MidiDraftCanvas, MidiCanvas
   },
   mixins: [CanvasContainerMixin],
-  props: ['midiInput'],
+  props: {
+    audioCtx: Object,
+    nextNode: Object,
+    midiInput: Object
+  },
   methods: {
     initRecorder(){
-      this.recorder = new MidiRecorder(this.midiInput);
+      this.recorder = new MidiRecorder(this.midiInput, this.pointer);
 
       let startPoint;
       let recordingId;
@@ -47,6 +51,7 @@ export default {
           recordingId = requestAnimationFrame(loop);
         }
         recordingId = requestAnimationFrame(loop);
+        return this.pointer.time;
       }
 
       this.recorder.onstop = url=>{

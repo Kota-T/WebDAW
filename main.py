@@ -7,7 +7,7 @@ from tornado.websocket import WebSocketHandler
 class Team:
     teams = {}
     def __init__(self, id):
-        if Team.teams.get(id) is None:
+        if id not in Team.teams:
             Team.teams[id] = self
             self.id = id
             self.members = []
@@ -103,9 +103,6 @@ class WebDAWHandler(WebSocketHandler):
         if type == 'startProject':
             self.startProject(data['id'])
             return
-        elif type == 'joinProject':
-            self.joinProject(data['id'])
-            return
         elif type == 'packet':
             packetId = data['packetId']
 
@@ -148,27 +145,17 @@ class WebDAWHandler(WebSocketHandler):
                 member.write_message(message)
 
     def startProject(self, id):
-        try:
+        if id not in Team.teams:
             self.team = Team(id)
             self.team.members.append(self)
             self.write_message({'type': "startProject"})
             print("プロジェクトを共有")
-        except KeyError:
-            print("プロジェクトの共有失敗")
-            self.write_message({'type': 'msg', 'msg': f"無効なidです。 id: {id}"})
-            self.close()
-
-    def joinProject(self, id):
-        try:
+        else:
             self.team = Team.teams[id]
             self.team.members.append(self)
             target = self.team.members.index(self)
             self.team.members[0].write_message({'type': 'joinProject', 'target': target})
             print("プロジェクトに参加")
-        except KeyError:
-            print("プロジェクトに参加失敗")
-            self.write_message({'type': 'msg', 'msg': f"無効なidです。id: {id}"})
-            self.close()
 
 
 if __name__ == "__main__":

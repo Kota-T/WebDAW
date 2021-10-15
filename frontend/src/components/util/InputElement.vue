@@ -24,12 +24,20 @@
 <script>
 export default {
   name: 'InputElement',
-  props: ['type', 'size', 'default'],
+  props: {
+    type: String,
+    size: String,
+    modelValue: String,
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits:['update:modelValue'],
   data(){
     return {
       isInputing: false,
-      value: this.default,
-      disabled: false
+      value: this.modelValue
     }
   },
   methods: {
@@ -40,7 +48,7 @@ export default {
         return;
       }
       this.isInputing = false;
-      this.$emit('value-changed', this.value);
+      this.$emit('update:modelValue', this.value);
     }
   }
 }

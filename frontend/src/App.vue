@@ -2,14 +2,9 @@
   <SideMenu>
     <a @click="$refs.editor.downloadProject">プロジェクトファイルをダウンロード</a>
     <a @click="showDialog('WriteRange')">選択範囲を書き出す</a>
-    <template v-if="projectId === null">
-      <a>プロジェクトを共有<br>
-        <input size="8" @keydown.enter.prevent="startProject">
-      </a>
-      <a>プロジェクトに参加<br>
-        <input size="8" @keydown.enter.prevent="joinProject">
-      </a>
-    </template>
+    <a v-if="projectId === null">プロジェクトを共有<br>
+      <input size="8" @keydown.enter.prevent="startProject($event.target.value)">
+    </a>
     <a v-else-if="projectId === 'loading'">Loading...</a>
     <template v-else>
       <a>プロジェクトID: {{ projectId }}</a>
@@ -138,36 +133,23 @@ export default {
       this.dialogType = dialogType;
     },
 
-    startProject(e){
+    startProject(id){
       this.projectId = "loading";
-      const id = e.target.value;
       this.socket.connect();
-      this.socket.onclose = e=>this.projectId = null;
-      this.socket.onerror = e=>this.projectId = null;
+      this.socket.onclose = e => this.projectId = null;
+      this.socket.onerror = e => this.projectId = null;
       this.socket.onopen = () => {
         this.socket.send({ type: "startProject", id: id });
-        this.socket.onmessage = data=>{
-          if(data.type === 'startProject'){
-            this.projectId = id;
-            console.info("プロジェクトを共有しました。id: " + this.projectId);
-          }
-          this.socket.setDefault();
-        }
-      }
-    },
-
-    joinProject(e){
-      this.projectId = "loading";
-      const id = e.target.value;
-      this.socket.connect();
-      this.socket.onclose = e=>this.projectId = null;
-      this.socket.onerror = e=>this.projectId = null;
-      this.socket.onopen = () => {
-        this.socket.send({ type: "joinProject", id: id });
-        this.socket.onmessage = data=>{
-          if(data.type === 'shareProject'){
-            this.projectId = id;
-            this.$refs.editor.loadSharedProject(data.projectData);
+        this.socket.onmessage = data => {
+          switch(data.type){
+            case 'startProject':
+              this.projectId = id;
+              console.info("プロジェクトを共有しました。id: " + this.projectId);
+              break;
+            case 'shareProject':
+              this.projectId = id;
+              this.$refs.editor.loadSharedProject(data.projectData);
+              break;
           }
           this.socket.setDefault();
         }

@@ -1,12 +1,14 @@
 <template>
   <teleport to="#label_field">
     <AudioTrackLabel
-    :gainNode="gainNode"
-    :pannerNode="pannerNode"
-    :muteNode="muteNode"
+    v-model:name="name"
+    v-model:gainValue="gainValue"
+    v-model:panValue="panValue"
     @track-select="select"
-    @track-solo="$emit('track-solo')"
     @track-remove="$emit('track-remove')"
+    @track-monitoring="toggleMonitoring"
+    @track-muted="toggleMuted"
+    @track-solo="$emit('track-solo')"
     ref="label"
     />
   </teleport>
@@ -14,8 +16,8 @@
     <MidiCanvasContainer
     :pointer="pointer"
     :audioCtx="audioCtx"
-    :sourceNode="sourceNode"
     :nextNode="gainNode"
+    :midiInput="midiInput"
     @track-select="select"
     ref="container"
     />
@@ -23,7 +25,7 @@
 </template>
 
 <script>
-import { note2Freq } from '../../../../midi.js';
+import { Player } from '../../../../midi.js';
 import TrackMixin from '../TrackMixin.js';
 import AudioTrackLabel from '../Audio/AudioTrackLabel.vue';
 import MidiCanvasContainer from './MidiCanvasContainer.vue';
@@ -31,11 +33,20 @@ import MidiCanvasContainer from './MidiCanvasContainer.vue';
 export default {
   name: 'MidiTrack',
   components: {
-    AudioTrackLabel
+    AudioTrackLabel, MidiCanvasContainer
   },
   mixins: [TrackMixin],
-  props: ['audioCtx', 'midiInput'],
+  props: {
+    audioCtx: Object,
+    midiInput: Object
+  },
   emits: ['track-solo'],
+  data(){
+    return {
+      gainValue: 0.5,
+      panValue: 0
+    }
+  },
   created(){
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 0.5;
@@ -48,71 +59,61 @@ export default {
       .connect(this.soloNode)
       .connect(this.audioCtx.destination);
 
-    this.sourceNodeBuffer = [];
+    this.gainValue = this.trackData.gain || 0.5;
+    this.panValue = this.trackData.pan || 0;
+
+    const sourceNodeArray = [];
 
     this.midiInput.addListener('noteon', "all", e=>{
-      if(!this.isSelected) return;
-      const sourceNode = this.audioCtx.createOscillator();
-      const gainNode = this.audioCtx.createGain();
-      sourceNode.frequency.value = note2Freq(e.note);
-      gainNode.gain.value = e.velocity;
-      this.sourceNodeBuffer.push({note: e.note, sourceNode, gainNode});
-      sourceNode.connect(gainNode).connect(this.gainNode);
-      sourceNode.start();
+      if(this.isSelected){
+        const player = new Player(e.note.number, e.velocity, this.audioCtx, this.gainNode);
+        player.start()
+        sourceNodeArray.push(player);
+      }
     });
 
     this.midiInput.addListener('noteoff', "all", e=>{
-      this.sourceNodeBuffer
-      .filter(obj => obj.note.number === e.note.number)
-      .forEach(async obj=>{
-        const startTime = this.audioCtx.currentTime;
-        const tmpVal = obj.gainNode.gain.value;
-        obj.gainNode.gain.setValueAtTime(tmpVal, startTime);
-        obj.gainNode.gain.linearRampToValueAtTime(0, startTime + 0.01);
-        await new Promise(resolve=>setTimeout(()=>resolve(), 10));
-        obj.sourceNode.stop();
-        obj.gainNode.disconnect();
-        const index = this.sourceNodeBuffer.indexOf(obj);
-        this.sourceNodeBuffer.splice(index, 1);
+      sourceNodeArray
+      .filter(node => node.note_number === e.note.number)
+      .forEach(node=>{
+        node.stop();
+        sourceNodeArray.splice(sourceNodeArray.indexOf(node), 1);
       });
     });
-  },
-  mounted(){
-    this.gain = this.trackData.gain || 0.5;
-    this.pan = this.trackData.pan || 0;
   },
   unmounted(){
     this.soloNode.disconnect();
   },
-  computed: {
-    gain: {
-      get(){
-        return this.gainNode.gain.value;
-      },
-      set(value){
-        this.$refs.label.gainValue = value;
-      }
+  watch: {
+    gainValue(newVal){
+      this.gainNode.gain.value = newVal
     },
-    pan: {
-      get(){
-        return this.pannerNode.pan.value;
-      },
-      set(value){
-        this.$refs.label.panValue = value;
-      }
-    },
-    isSolo(){
-      return this.$refs.label.isSolo;
+    panValue(newVal){
+      this.pannerNode.pan.value = newVal
     }
   },
   methods: {
+    toggleMonitoring(newVal){
+      if(newVal){
+        this.sourceNode.connect(this.gainNode);
+      }else{
+        try{
+          this.sourceNode.disconnect(this.gainNode);
+        }catch(e){}
+      }
+    },
+
+    toggleMuted(newVal){
+      this.muteNode.gain.value = newVal ? 0 : 1
+    },
+
     async getDownloadData(root, index){
       const name = index + "_" + this.name;
       return {
         component: "MidiTrack",
         name: name,
-        gain: this.gain,
-        pan : this.pan,
+        gain: this.gainValue,
+        pan : this.panValue,
         canvases: await Promise.all(this.$refs.container.getDownloadData(root.folder(name), ".wav"))
       };
     },
@@ -122,8 +123,8 @@ export default {
         id: this.id,
         component: "MidiTrack",
         name: this.name,
-        gain: this.gain,
-        pan : this.pan,
+        gain: this.gainValue,
+        pan : this.panValue,
         canvases: await Promise.all(this.$refs.container.getUploadData())
       };
     },

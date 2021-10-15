@@ -1,7 +1,9 @@
 import IdManager from '../../../IdManager.js';
 
 const CanvasContainerMixin = {
-  props: ['pointer'],
+  props: {
+    pointer: Object
+  },
   inject: ['socket', 'trackId'],
   emits: ['track-select'],
   data(){
