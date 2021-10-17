@@ -15,15 +15,17 @@ const TrackMixin = {
       isSelected: true
     }
   },
-  async mounted(){
+  mounted(){
     this.trackData.canvases?.forEach(canvasData=>this.$refs.container.createCanvas(canvasData));
-    if(this.socket.connected && this.trackData.send){
-      this.socket.send({
-        type: "addTrack",
-        trackData: await this.getUploadData()
-      });
-    }
     this.select();
+    this.$nextTick(async ()=>{
+      if(this.socket.connected && this.trackData.send){
+        this.socket.send({
+          type: "addTrack",
+          trackData: await this.getUploadData()
+        });
+      }
+    });
   },
   watch: {
     name(newVal){
