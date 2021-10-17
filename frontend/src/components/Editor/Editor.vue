@@ -372,7 +372,7 @@ export default {
     removeSelectedTracks(){
       this.tracks
         .filter(track=>track.isSelected)
-        .forEach(track=>this.removeTrackByUser(track.id));
+        .forEach(track=>this.removeTrackByUser(track.trackData.id));
     },
 
     makeTracksSolo(){

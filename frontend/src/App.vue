@@ -115,13 +115,13 @@ export default {
           this.$refs.editor.removeTrack(data.trackId);
           break;
         case 'changeTrackName':
-          this.$refs.editor.tracks.find(track=>track.id===data.trackId).name = data.value;
+          this.$refs.editor.tracks.find(track=>track.trackData.id===data.trackId).name = data.value;
           break;
         case 'addCanvas':
-          this.$refs.editor.tracks.find(track=>track.id===data.trackId).$refs.container.createCanvas(data.canvasData);
+          this.$refs.editor.tracks.find(track=>track.trackData.id===data.trackId).$refs.container.createCanvas(data.canvasData);
           break;
         case 'removeCanvas':
-          this.$refs.editor.tracks.find(track=>track.id===data.trackId).$refs.container.removeCanvas(data.canvasId);
+          this.$refs.editor.tracks.find(track=>track.trackData.id===data.trackId).$refs.container.removeCanvas(data.canvasId);
           break;
       }
     });
