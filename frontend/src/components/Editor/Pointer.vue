@@ -48,6 +48,9 @@ export default {
   watch: {
     beat_width(newVal, oldVal){
       this.x *= newVal / oldVal;
+    },
+    x(newVal){
+      this.$store.commit('pointer_x', newVal);
     }
   },
   methods: {

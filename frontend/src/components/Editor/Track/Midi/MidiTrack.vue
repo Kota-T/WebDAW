@@ -1,20 +1,21 @@
 <template>
   <teleport to="#label_field">
     <AudioTrackLabel
+    :trackType="this.trackData.component"
     v-model:name="name"
-    v-model:gainValue="gainValue"
-    v-model:panValue="panValue"
+    v-model:gain="gain"
+    v-model:pan="pan"
+    v-model:isSelected="isSelected"
+    v-model:isMonitoring="isMonitoring"
+    v-model:isMuted="isMuted"
+    v-model:isSolo="isSolo"
     @track-select="select"
     @track-remove="$emit('track-remove')"
-    @track-monitoring="toggleMonitoring"
-    @track-muted="toggleMuted"
-    @track-solo="$emit('track-solo')"
     ref="label"
     />
   </teleport>
   <teleport to="#ruler_layer">
     <MidiCanvasContainer
-    :pointer="pointer"
     :audioCtx="audioCtx"
     :nextNode="gainNode"
     :midiInput="midiInput"
@@ -25,7 +26,7 @@
 </template>
 
 <script>
-import { Player } from '../../../../midi.js';
+import { SingleNotePlayer } from '../../../../midi.js';
 import TrackMixin from '../TrackMixin.js';
 import AudioTrackLabel from '../Audio/AudioTrackLabel.vue';
 import MidiCanvasContainer from './MidiCanvasContainer.vue';
@@ -43,8 +44,11 @@ export default {
   emits: ['track-solo'],
   data(){
     return {
-      gainValue: 0.5,
-      panValue: 0
+      gain: this.trackData.gain || 0.5,
+      pan: this.trackData.pan || 0,
+      isMonitoring: false,
+      isMuted: false,
+      isSolo: true
     }
   },
   created(){
@@ -59,14 +63,14 @@ export default {
       .connect(this.soloNode)
       .connect(this.audioCtx.destination);
 
-    this.gainValue = this.trackData.gain || 0.5;
-    this.panValue = this.trackData.pan || 0;
+    this.gainNode.gain.value = this.gain;
+    this.pannerNode.pan.value = this.pan;
 
     const sourceNodeArray = [];
 
     this.midiInput.addListener('noteon', "all", e=>{
       if(this.isSelected){
-        const player = new Player(e.note.number, e.velocity, this.audioCtx, this.gainNode);
+        const player = new SingleNotePlayer(e.note.number, e.velocity, this.audioCtx, this.gainNode);
         player.start()
         sourceNodeArray.push(player);
       }
@@ -81,50 +85,49 @@ export default {
       });
     });
   },
+  mounted(){
+    this.isSolo = false;
+  },
   unmounted(){
     this.soloNode.disconnect();
   },
   watch: {
-    gainValue(newVal){
+    gain(newVal){
       this.gainNode.gain.value = newVal
     },
-    panValue(newVal){
+    pan(newVal){
       this.pannerNode.pan.value = newVal
+    },
+    isMuted(newVal){
+      this.muteNode.gain.value = newVal ? 0 : 1
+    },
+    isSolo(newVal){
+      this.$emit('track-solo');
     }
   },
   methods: {
-    toggleMonitoring(newVal){
-      if(newVal){
-        this.sourceNode.connect(this.gainNode);
-      }else{
-        try{
-          this.sourceNode.disconnect(this.gainNode);
-        }catch(e){}
-      }
-    },
-
-    toggleMuted(newVal){
-      this.muteNode.gain.value = newVal ? 0 : 1
+    setSolo(value){
+      this.soloNode.gain.value = value ? 1 : 0;
     },
 
     async getDownloadData(root, index){
       const name = index + "_" + this.name;
       return {
-        component: "MidiTrack",
+        component: this.trackData.component,
         name: name,
-        gain: this.gainValue,
-        pan : this.panValue,
+        gain: this.gain,
+        pan : this.pan,
         canvases: await Promise.all(this.$refs.container.getDownloadData(root.folder(name), ".wav"))
       };
     },
 
     async getUploadData(){
       return {
-        id: this.id,
-        component: "MidiTrack",
+        id: this.trackData.id,
+        component: this.trackData.component,
         name: this.name,
-        gain: this.gainValue,
-        pan : this.panValue,
+        gain: this.gain,
+        pan : this.pan,
         canvases: await Promise.all(this.$refs.container.getUploadData())
       };
     },

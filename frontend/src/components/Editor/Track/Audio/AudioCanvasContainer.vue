@@ -8,9 +8,7 @@
     v-for="canvasData in canvasParams"
     :key="canvasData.id"
     :canvasData="canvasData"
-    :audioCtx="audioCtx"
     :nextNode="nextNode"
-    :pointer="pointer"
     :ref="setCanvasRef"
     @canvas-split="splitCanvas"
     @track-select="shiftKey=>$emit('track-select', shiftKey)"
@@ -32,7 +30,10 @@ export default {
     AudioDraftCanvas, AudioCanvas
   },
   mixins: [CanvasContainerMixin],
-  props: ['audioCtx', 'sourceNode', 'nextNode'],
+  props: {
+    sourceNode: Object,
+    nextNode: Object
+  },
   methods: {
     initRecorder(){
       this.recorder = new AudioRecorder(this.sourceNode);
@@ -41,7 +42,7 @@ export default {
       let recordingId;
 
       this.recorder.onstart = ()=>{
-        startPoint = this.pointer.x;
+        startPoint = this.$store.state.pointer_x;
         this.$refs.draftCanvas.show(startPoint);
         let loop = ()=>{
           this.$refs.draftCanvas.draw();

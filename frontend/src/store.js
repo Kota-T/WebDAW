@@ -6,7 +6,8 @@ export const store = createStore({
       rhythm           : [4, 4],
       bpm              : 120,
       beat_width       : 20,
-      project_duration : 60
+      project_duration : 60,
+      pointer_x        : 0
     }
   },
   getters: {
@@ -31,6 +32,7 @@ export const store = createStore({
     bpm                : (state, value) => state.bpm = value,
     beat_width         : (state, value) => state.beat_width = value,
     project_duration   : (state, value) => state.project_duration = value,
-    addProjectDuration : (state, value) => state.project_duration += value
+    addProjectDuration : (state, value) => state.project_duration += value,
+    pointer_x          : (state, value) => state.pointer_x = value
   },
 });

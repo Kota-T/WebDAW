@@ -6,8 +6,11 @@ import { DrawDataProcessor, Drawer } from './AudioCanvasFunctions.js';
 export default {
   name: 'AudioCanvas',
   mixins: [CanvasMixin],
-  props: ['audioCtx', 'nextNode'],
+  props: {
+    nextNode: Object
+  },
   async mounted(){
+    this.audioCtx = this.nextNode.context;
     this.audioBuffer = await loadAudioBuffer(this.audioCtx, this.canvasData.url);
 
     this.player = new Player(this.audioBuffer, this.nextNode);
@@ -42,9 +45,9 @@ export default {
     },
 
     split(){
-      const pointerX = this.pointer.x;
-      if(this.startPoint < pointerX && pointerX < this.endPoint){
-        const splitTime = this.getTime(pointerX);
+      const pointer_x = this.$store.state.pointer_x;
+      if(this.startPoint < pointer_x && pointer_x < this.endPoint){
+        const splitTime = this.getTime(pointer_x);
         const former = {
           startTime: this.startTime,
           diminished: { leftTime: this.diminished.leftTime, rightTime: 0 },
@@ -61,7 +64,7 @@ export default {
 
     downloadFile(){
       const length = this.duration * this.audioCtx.sampleRate;
-      const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, length, this.audioCtx.sampleRate);
+      const offlineCtx = new OfflineAudioContext(2, length, this.audioCtx.sampleRate);
       const source = offlineCtx.createBufferSource();
       source.buffer = this.audioBuffer;
       source.connect(offlineCtx.destination);

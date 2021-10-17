@@ -1,11 +1,14 @@
 import CanvasMixin from '../CanvasMixin.js';
 
-import { Player } from '../../../../midi.js';
+import { SingleNotePlayer } from '../../../../midi.js';
 
 export default {
   name: 'MidiCanvas',
   mixins: [CanvasMixin],
-  props: ['audioCtx', 'nextNode'],
+  props: {
+    audioCtx: Object,
+    nextNode: Object
+  },
   async mounted(){
     this.midiDataArray = await fetch(this.canvasData.url)
     .then(res=>res.text())
@@ -20,7 +23,7 @@ export default {
       const startTime = startPoint / this.$store.getters.second_width;
       this.sourceNodeArray = this.midiDataArray.map(midiData=>{
         if(midiData.when + this.startTime < startTime) return;
-        const player = new Player(midiData.number, midiData.velocity, this.audioCtx, this.nextNode);
+        const player = new SingleNotePlayer(midiData.number, midiData.velocity, this.audioCtx, this.nextNode);
         player.start(midiData.when, midiData.duration);
         return player;
       });

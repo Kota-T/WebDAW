@@ -1,7 +1,9 @@
 <template>
   <teleport to="#label_field">
     <VideoTrackLabel
+    :trackType="this.trackData.component"
     v-model:name="name"
+    v-model:isSelected="isSelected"
     @track-select="select"
     @track-remove="$emit('track-remove')"
     ref="label"
@@ -9,7 +11,6 @@
   </teleport>
   <teleport to="#ruler_layer">
     <VideoCanvasContainer
-    :pointer="pointer"
     :videoStream="videoStream"
     @track-select="select"
     ref="container"
@@ -36,7 +37,7 @@ export default {
     async getDownloadData(root, index){
       const name = index + "_" + this.name;
       return {
-        component: "VideoTrack",
+        component: this.trackData.component,
         name: name,
         canvases: await Promise.all(this.$refs.container.getDownloadData(root.folder(name), ".webm"))
       };
@@ -44,8 +45,8 @@ export default {
 
     async getUploadData(){
       return {
-        id: this.id,
-        component: "VideoTrack",
+        id: this.trackData.id,
+        component: this.trackData.component,
         name: this.name,
         canvases: await Promise.all(this.$refs.container.getUploadData())
       };

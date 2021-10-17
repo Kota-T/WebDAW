@@ -1,9 +1,6 @@
 import IdManager from '../../../IdManager.js';
 
 const CanvasContainerMixin = {
-  props: {
-    pointer: Object
-  },
   inject: ['socket', 'trackId'],
   emits: ['track-select'],
   data(){
@@ -70,18 +67,18 @@ const CanvasContainerMixin = {
 
     getCurrentCanvas(startPoint){
       return this.canvases.find(
-        canvas => canvas && canvas.startPoint <= startPoint && canvas.endPoint >= startPoint
+        canvas => canvas.startPoint <= startPoint && canvas.endPoint >= startPoint
       );
     },
 
     play(){
       const loop = ()=>{
-        const pointerX = this.pointer.x;
-        const canvas = this.getCurrentCanvas(pointerX);
+        const pointer_x = this.$store.state.pointer_x;
+        const canvas = this.getCurrentCanvas(pointer_x);
         if(canvas && canvas !== this.currentCanvas){
           this.currentCanvas?.pause();
           this.currentCanvas = canvas;
-          this.currentCanvas.play(pointerX, () => this.currentCanvas = null);
+          this.currentCanvas.play(pointer_x, () => this.currentCanvas = null);
         }
         this.playId = requestAnimationFrame(loop);
       }

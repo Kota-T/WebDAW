@@ -84,7 +84,12 @@ export default {
       e.returnValue = 'ページを移動すると全てのデータが失われます。';
     }
     window.onorientationchange = this.alertScreenOrientation;
-    window.onload = this.alertScreenOrientation;
+    window.onload = ()=>{
+      this.alertScreenOrientation();
+      if(location.search.substring(0, 4) === "?id="){
+        this.startProject(location.search.substring(4));
+      }
+    }
 
     window.ontouchmove = e=>e.preventDefault();
 

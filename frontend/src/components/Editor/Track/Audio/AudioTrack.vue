@@ -1,21 +1,21 @@
 <template>
   <teleport to="#label_field">
     <AudioTrackLabel
+    :trackType="this.trackData.component"
     v-model:name="name"
-    v-model:gainValue="gainValue"
-    v-model:panValue="panValue"
+    v-model:gain="gain"
+    v-model:pan="pan"
+    v-model:isSelected="isSelected"
+    v-model:isMonitoring="isMonitoring"
+    v-model:isMuted="isMuted"
+    v-model:isSolo="isSolo"
     @track-select="select"
     @track-remove="$emit('track-remove')"
-    @track-monitoring="toggleMonitoring"
-    @track-muted="toggleMuted"
-    @track-solo="$emit('track-solo')"
     ref="label"
     />
   </teleport>
   <teleport to="#ruler_layer">
     <AudioCanvasContainer
-    :pointer="pointer"
-    :audioCtx="audioCtx"
     :sourceNode="sourceNode"
     :nextNode="gainNode"
     @track-select="select"
@@ -37,30 +37,35 @@ export default {
   },
   mixins: [TrackMixin],
   props: {
-    audioCtx: Object,
     sourceNode: Object
   },
-  emits: ['track-remove', 'track-solo'],
+  emits: ['track-solo'],
   data(){
     return {
-      gainValue: 0.5,
-      panValue: 0
+      gain: this.trackData.gain || 0.5,
+      pan: this.trackData.pan || 0,
+      isMonitoring: false,
+      isMuted: false,
+      isSolo: true
     }
   },
   created(){
-    this.gainNode = this.audioCtx.createGain();
-    this.gainNode.gain.value = 0.5;
-    this.pannerNode = this.audioCtx.createStereoPanner();
-    this.muteNode = this.audioCtx.createGain();
-    this.soloNode = this.audioCtx.createGain();
+    const audioCtx = this.sourceNode.context;
+    this.gainNode = audioCtx.createGain();
+    this.pannerNode = audioCtx.createStereoPanner();
+    this.muteNode = audioCtx.createGain();
+    this.soloNode = audioCtx.createGain();
     this.gainNode
       .connect(this.pannerNode)
       .connect(this.muteNode)
       .connect(this.soloNode)
-      .connect(this.audioCtx.destination);
+      .connect(audioCtx.destination);
 
-    this.gainValue = this.trackData.gain || 0.5;
-    this.panValue = this.trackData.pan || 0;
+    this.gainNode.gain.value = this.gain;
+    this.pannerNode.pan.value = this.pan;
+  },
+  mounted(){
+    this.isSolo = false;
   },
   unmounted(){
     try{
@@ -69,15 +74,13 @@ export default {
     this.soloNode.disconnect();
   },
   watch: {
-    gainValue(newVal){
+    gain(newVal){
       this.gainNode.gain.value = newVal
     },
-    panValue(newVal){
+    pan(newVal){
       this.pannerNode.pan.value = newVal
-    }
-  },
-  methods: {
-    toggleMonitoring(newVal){
+    },
+    isMonitoring(newVal){
       if(newVal){
         this.sourceNode.connect(this.gainNode);
       }else{
@@ -86,29 +89,36 @@ export default {
         }catch(e){}
       }
     },
-
-    toggleMuted(newVal){
+    isMuted(newVal){
       this.muteNode.gain.value = newVal ? 0 : 1
+    },
+    isSolo(newVal){
+      this.$emit('track-solo');
+    }
+  },
+  methods: {
+    setSolo(value){
+      this.soloNode.gain.value = value ? 1 : 0;
     },
 
     async getDownloadData(root, index){
       const name = index + "_" + this.name;
       return {
-        component: "AudioTrack",
+        component: this.trackData.component,
         name: name,
-        gain: this.gainValue,
-        pan : this.panValue,
+        gain: this.gain,
+        pan : this.pan,
         canvases: await Promise.all(this.$refs.container.getDownloadData(root.folder(name), ".wav"))
       };
     },
 
     async getUploadData(){
       return {
-        id: this.id,
-        component: "AudioTrack",
+        id: this.trackData.id,
+        component: this.trackData.component,
         name: this.name,
-        gain: this.gainValue,
-        pan : this.panValue,
+        gain: this.gain,
+        pan : this.pan,
         canvases: await Promise.all(this.$refs.container.getUploadData())
       };
     },

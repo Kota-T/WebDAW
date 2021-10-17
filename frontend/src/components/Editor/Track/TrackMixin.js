@@ -1,7 +1,6 @@
 const TrackMixin = {
   props: {
-    trackData: Object,
-    pointer: Object
+    trackData: Object
   },
   inject: ['socket'],
   emits: ['track-remove'],
@@ -12,39 +11,29 @@ const TrackMixin = {
   },
   data(){
     return {
-      name: "",
+      name: this.trackData.name?.substring(this.trackData?.name.indexOf("_") + 1) || "新規トラック",
       isSelected: true
     }
   },
-  created(){
-    this.id = this.trackData.id;
-    this.component = this.trackData.component;
-    this.name = this.trackData.name?.substring(this.trackData?.name.indexOf("_") + 1) || "新規トラック";
-  },
-  mounted(){
+  async mounted(){
     this.trackData.canvases?.forEach(canvasData=>this.$refs.container.createCanvas(canvasData));
-    this.$nextTick(async function(){
-      if(this.socket.connected && this.trackData.send){
-        this.socket.send({
-          type: "addTrack",
-          trackData: await this.getUploadData()
-        });
-      }
-      this.select();
-    });
+    if(this.socket.connected && this.trackData.send){
+      this.socket.send({
+        type: "addTrack",
+        trackData: await this.getUploadData()
+      });
+    }
+    this.select();
   },
   watch: {
     name(newVal){
       if(this.socket.connected){
         this.socket.send({
           type: 'changeTrackName',
-          trackId: this.id,
+          trackId: this.trackData.id,
           value: newVal
         });
       }
-    },
-    isSelected(newVal){
-      this.$refs.label.$refs.container.isSelected = newVal
     }
   },
   methods: {

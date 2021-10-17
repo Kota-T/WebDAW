@@ -1,11 +1,14 @@
 <template>
   <TrackLabel
+  :isSelected="isSelected"
+  @update:isSelected="v=>$emit('update:isSelected', v)"
   @track-select="shiftKey=>$emit('track-select', shiftKey)"
   @track-remove="$emit('track-remove')"
   ref="container"
   >
+    <template v-slot:track-type>{{ trackType.slice(0, -5) }}</template>
     <template v-slot:contents>
-      <InputElement type="text" size="8" v-model="_name" />
+      <InputElement type="text" size="8" :modelValue="name" @update:modelValue="v=>$emit('update:name', v)" />
     </template>
   </TrackLabel>
 </template>
@@ -15,26 +18,19 @@ import TrackLabel from '../TrackLabel.vue';
 
 export default {
   name: 'VideoTrackLabel',
-  props: {
-    name: String
-  },
-  emits: [
-    'update:name',
-    'track-select',
-    'track-remove'
-  ],
   components: {
     TrackLabel
   },
-  data(){
-    return {
-      _name: this.name
-    }
+  props: {
+    trackType: String,
+    name: String,
+    isSelected: Boolean
   },
-  watch: {
-    name(newVal){
-      this.$emit('update:name', newVal)
-    }
-  }
+  emits: [
+    'update:name',
+    'update:isSelected',
+    'track-select',
+    'track-remove'
+  ]
 }
 </script>

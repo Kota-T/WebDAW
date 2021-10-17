@@ -44,10 +44,6 @@ const CanvasMixin = {
     canvasData: {
       type: Object,
       required: true
-    },
-    pointer: {
-      type: Object,
-      required: true
     }
   },
   inject: ['socket', 'trackId'],

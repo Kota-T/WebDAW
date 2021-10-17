@@ -60,9 +60,9 @@ export default {
     },
 
     async split(){
-      const pointerX = this.pointer.x;
-      if(this.startPoint < pointerX && pointerX < this.endPoint){
-        const splitTime = this.getTime(pointerX);
+      const pointer_x = this.$store.state.pointer_x;
+      if(this.startPoint < pointer_x && pointer_x < this.endPoint){
+        const splitTime = this.getTime(pointer_x);
 
         const base64 = await fetch(this.canvasData.url)
         .then(res=>res.blob())

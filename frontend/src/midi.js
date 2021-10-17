@@ -7,15 +7,7 @@ export function noteNumber2Freq(note_number){
   return freq;
 }
 
-export class Player {
-  /*
-  interface Note {
-    number: number
-    velocity: number
-    duration: number
-  }
-  */
-
+export class SingleNotePlayer {
   constructor(note_number, velocity, audioCtx, nextNode){
     this.note_number = note_number;
     this.velocity = velocity;
@@ -53,21 +45,50 @@ export class Player {
   }
 }
 
+export class Player {
+  constructor(midiDataArray, audioCtx, nextNode){
+    this.midiDataArray = midiDataArray
+    this.audioCtx = audioCtx;
+    this.nextNode = nextNode;
+  }
+
+  start(when=0, offset=0, duration){
+    setTimeout(()=>{
+      if(!duration){
+        const lastNote = this.midiDataArray[this.midiDataArray.length - 1];
+        duration = lastNote.when + lastNote.duration
+      }
+      this.playerArray = this.midiDataArray.map(midiData=>{
+        if(midiData.when < offset + duration || midiData.when < offset) return;
+        const player = new SingleNotePlayer(midiData.number, midiData.velocity, this.audioCtx, this.nextNode);
+        player.start(midiData.when - offset, midiData.duration);
+        return player;
+      });
+    }, when * 1000)
+  }
+
+  stop(when=0){
+    setTimeout(()=>{
+      this.playerArray.forEach(player => player && player.stop())
+    }, when * 1000)
+  }
+}
+
 export class MidiRecorder {
-  constructor(midiInput, pointer){
+  constructor(midiInput){
     this.midiInput = midiInput;
-    this.pointer = pointer;
     this.noteBuffer = [];
     this.isRecording = false;
   }
 
   start(){
-    const startTime = this.onstart();
+    this.onstart();
+    const startTime = Date.now()
     this.noteOnFn = e=>{
       this.noteBuffer.push({
         number: e.note.number,
         velocity: e.velocity,
-        when: this.pointer.time - startTime
+        when: (Date.now() - startTime) / 1000
       });
     };
     this.noteOffFn = e=>{
@@ -75,7 +96,7 @@ export class MidiRecorder {
         note => !note.duration && note.number === e.note.number
       );
       if(note)
-        note.duration = this.pointer.time - startTime - note.when;
+        note.duration = (Date.now() - startTime) / 1000 - note.when;
     };
     this.midiInput.addListener('noteon', "all", this.noteOnFn);
     this.midiInput.addListener('noteoff', "all", this.noteOffFn);

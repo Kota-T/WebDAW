@@ -9,7 +9,7 @@
     <Resizer ref="resizer"/>
   </div>
   <div id="label_field" class="no-scroll-bar" @scroll="$refs.ruler_layer.scrollTop = $refs.label_field.scrollTop" ref="label_field">
-    <div id="add_track_btn" title="トラックを追加" @click="$emit('add-track')"><img src="../../assets/plus_icon.png"></div>
+    <div id="add_track_btn" title="トラックを追加" @click="audioCtx.resume();$emit('add-track');"><img src="../../assets/plus_icon.png"></div>
   </div>
   <div id="pointer_layer" class="no-scroll-bar" @click="shiftPointer" ref="pointer_layer">
     <Pointer :margin="20" @move="onPointerMove" ref="pointer"/>
@@ -29,7 +29,6 @@
   :key="trackData.id"
   :is="trackData.component"
   :trackData="trackData"
-  :pointer="$refs.pointer"
   :audioCtx="audioCtx"
   :sourceNode="sourceNode"
   :videoStream="videoStream"
@@ -286,7 +285,9 @@ export default {
           }
         )
         .then(stream=>{
-          this.sourceNode = this.audioCtx.createMediaStreamSource(stream);
+          const sourceNode = this.audioCtx.createMediaStreamSource(stream);
+          this.sourceNode = this.audioCtx.createChannelMerger(1);
+          sourceNode.connect(this.sourceNode, 0 ,0);
         })
         .catch(err=>{
           alert("マイク入力を取得できません。");
@@ -375,10 +376,10 @@ export default {
     },
 
     makeTracksSolo(){
-      if(this.tracks.every(track => track.isSolo === false)){
-        this.tracks.forEach(track => track.soloNode.gain.value = 1);
+      if(this.tracks.every(track => !track.isSolo)){
+        this.tracks.forEach(track => track.setSolo?.(true));
       }else{
-        this.tracks.forEach(track=>track.soloNode.gain.value = track.isSolo ? 1 : 0);
+        this.tracks.forEach(track => track.setSolo?.(track.isSolo));
       }
     },
 

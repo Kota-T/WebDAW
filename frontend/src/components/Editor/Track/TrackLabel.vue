@@ -2,10 +2,13 @@
   <div
   class="track-label"
   :class="{'is-selected': isSelected}"
-  @pointerdown="isSelected=true;$emit('track-select', $event.shiftKey);"
+  @pointerdown="select"
   @contextmenu="$refs.menu.show"
   @touchstart="$refs.menu.show"
   >
+    <div class="track-type">
+      <slot name="track-type"></slot>
+    </div>
     <div>
       <slot name="contents"></slot>
     </div>
@@ -24,6 +27,7 @@
   width: 100%;
   height: 120px;
   text-align: center;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -34,15 +38,25 @@
 .track-label.is-selected{
   background-color: #606060;
 }
+.track-label .track-type{
+  color: white;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+}
 </style>
 
 <script>
 export default {
   name: 'TrackLabel',
-  emits: ['track-select', 'track-remove'],
-  data(){
-    return {
-      isSelected: false,
+  props: {
+    isSelected: Boolean
+  },
+  emits: ['update:isSelected', 'track-select', 'track-remove'],
+  methods: {
+    select(e){
+      this.$emit('update:isSelected', true);
+      this.$emit('track-select', e.shiftKey);
     }
   }
 }

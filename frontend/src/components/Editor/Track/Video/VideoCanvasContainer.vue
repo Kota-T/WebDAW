@@ -8,7 +8,6 @@
     v-for="canvasData in canvasParams"
     :key="canvasData.id"
     :canvasData="canvasData"
-    :pointer="pointer"
     :ref="setCanvasRef"
     @canvas-split="splitCanvas"
     @track-select="shiftKey=>$emit('track-select', shiftKey)"
@@ -40,7 +39,7 @@ export default {
       let chunks = [];
 
       this.recorder.onstart = () => {
-        startPoint = this.pointer.x;
+        startPoint = this.$store.state.pointer_x;
         this.$refs.draftCanvas.show(startPoint);
         let loop = ()=>{
           this.$refs.draftCanvas.draw();
@@ -51,7 +50,7 @@ export default {
 
       this.recorder.ondataavailable = e => chunks.push(e.data);
 
-      this.recorder.onstop = () => {//async
+      this.recorder.onstop = () => {
         cancelAnimationFrame(recordingId);
         const blob = new Blob(chunks, { type: 'video/webm;codecs=vp9' });
         chunks = [];

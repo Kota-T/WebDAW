@@ -10,7 +10,6 @@
     :canvasData="canvasData"
     :audioCtx="audioCtx"
     :nextNode="nextNode"
-    :pointer="pointer"
     :ref="setCanvasRef"
     @canvas-split="splitCanvas"
     @track-select="shiftKey=>$emit('track-select', shiftKey)"
@@ -38,20 +37,20 @@ export default {
   },
   methods: {
     initRecorder(){
-      this.recorder = new MidiRecorder(this.midiInput, this.pointer);
+      this.recorder = new MidiRecorder(this.midiInput);
 
       let startPoint;
       let recordingId;
 
       this.recorder.onstart = ()=>{
-        startPoint = this.pointer.x;
+        startPoint = this.$store.state.pointer_x;
+        console.log(startPoint)
         this.$refs.draftCanvas.show(startPoint);
         let loop = ()=>{
           this.$refs.draftCanvas.draw();
           recordingId = requestAnimationFrame(loop);
         }
         recordingId = requestAnimationFrame(loop);
-        return this.pointer.time;
       }
 
       this.recorder.onstop = url=>{
