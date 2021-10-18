@@ -82,18 +82,14 @@ export class Player{
     this.source.connect(this.nextNode);
   }
 
-  play(start, end, onended){
+  play(when=0, offset, duration, onended){
     this.createSource();
     this.source.onended = () => {
       this.source.disconnect();
       this.source = null;
       onended?.();
     }
-    if(start && end && onended){
-      this.source.start(0, start, end - start);
-    }else {
-      this.source.start();
-    }
+    this.source.start(this.source.context.currentTime + when, offset, duration);
   }
 
   pause(){

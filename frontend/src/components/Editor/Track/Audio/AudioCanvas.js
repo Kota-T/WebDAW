@@ -22,8 +22,9 @@ export default {
   methods: {
     play(startPoint, onended){
       this.player.play(
+        0,
         this.getTime(startPoint),
-        this.getTime(this.endPoint),
+        this.duration,
         onended
       );
     },
@@ -78,11 +79,9 @@ export default {
       }).catch(console.error);
     },
 
-    createOfflineSource(offlineCtx, nextNode, startRecordingTime, stopRecordingTime){
+    createOfflineSource(nextNode, startRecordingTime, stopRecordingTime){
       if(startRecordingTime > this.endTime) return;
-      const source = offlineCtx.createBufferSource();
-      source.buffer = this.audioBuffer;
-      source.connect(nextNode);
+      const player = new Player(this.audioBuffer, nextNode);
 
       //when: 録音を開始する時間, offset: このAudioCanvasの音声ファイルのどの時点から再生を始めるか, duration: どれくらいの時間録音するか
       let when, offset, duration;
@@ -105,7 +104,7 @@ export default {
         }
       }
 
-      source.start(when, offset, duration);
+      player.play(when, offset, duration);
     }
   }
 }

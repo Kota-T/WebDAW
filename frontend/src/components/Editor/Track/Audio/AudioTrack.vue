@@ -131,7 +131,7 @@ export default {
       gainNode.connect(pannerNode);
       pannerNode.connect(offlineCtx.destination);
 
-      this.$refs.container.createOffline(offlineCtx, gainNode, startRecordingTime, stopRecordingTime);
+      this.$refs.container.createOffline(gainNode, startRecordingTime, stopRecordingTime);
     }
   }
 }

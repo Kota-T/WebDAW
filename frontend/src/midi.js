@@ -56,12 +56,12 @@ export class Player {
     this.nextNode = nextNode;
   }
 
-  play(start, end, onended){
+  play(when, offset, duration, onended){
     this.playerArray = this.midiNoteArray
-      .filter(midiNote => start <= midiNote.when && midiNote.when < end)
+      .filter(midiNote => offset <= midiNote.when && midiNote.when < offset + duration)
       .map(midiNote => {
         const player = new SingleNotePlayer(midiNote.number, midiNote.velocity, this.nextNode);
-        player.start(midiNote.when - start, midiNote.duration, () => {
+        player.start(when + midiNote.when - offset, midiNote.duration, () => {
           this.playerArray.splice(this.playerArray.indexOf(player), 1);
           if(!this.playerArray.length)
             onended?.();

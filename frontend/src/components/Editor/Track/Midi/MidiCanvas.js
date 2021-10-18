@@ -21,7 +21,12 @@ export default {
   },
   methods: {
     play(startPoint, onended){
-      this.player.play(this.getTime(startPoint), this.getTime(this.endPoint), onended);
+      this.player.play(
+        0,
+        this.getTime(startPoint),
+        this.duration,
+        onended
+      );
     },
 
     pause(){
@@ -87,11 +92,9 @@ export default {
       link.click();
     },
 
-    createOfflineSource(offlineCtx, nextNode, startRecordingTime, stopRecordingTime){
+    createOfflineSource(nextNode, startRecordingTime, stopRecordingTime){
       if(startRecordingTime > this.endTime) return;
-      const source = offlineCtx.createBufferSource();
-      source.buffer = this.audioBuffer;
-      source.connect(nextNode);
+      const player = new Player(this.midiNoteArray, nextNode);
 
       //when: 録音を開始する時間, offset: このAudioCanvasの音声ファイルのどの時点から再生を始めるか, duration: どれくらいの時間録音するか
       let when, offset, duration;
@@ -114,7 +117,7 @@ export default {
         }
       }
 
-      source.start(when, offset, duration);
+      player.play(when, offset, duration);
     }
   }
 }

@@ -61,8 +61,8 @@ export default {
       }
     },
 
-    createOffline(offlineCtx, nextNode, startRecordingTime, stopRecordingTime){
-      this.canvases.forEach(canvas=>canvas.createOfflineSource(offlineCtx, nextNode, startRecordingTime, stopRecordingTime));
+    createOffline(nextNode, startRecordingTime, stopRecordingTime){
+      this.canvases.forEach(canvas=>canvas.createOfflineSource(nextNode, startRecordingTime, stopRecordingTime));
     }
   }
 }
