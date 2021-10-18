@@ -84,8 +84,12 @@ export class Player{
 
   play(start, end, onended){
     this.createSource();
+    this.source.onended = () => {
+      this.source.disconnect();
+      this.source = null;
+      onended?.();
+    }
     if(start && end && onended){
-      this.source.onended = onended;
       this.source.start(0, start, end - start);
     }else {
       this.source.start();
@@ -95,8 +99,6 @@ export class Player{
   pause(){
     if(!this.source) return;
     this.source.stop();
-    this.source.disconnect();
-    this.source = null;
   }
 }
 

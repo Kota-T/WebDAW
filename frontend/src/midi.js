@@ -8,74 +8,70 @@ export function noteNumber2Freq(note_number){
 }
 
 export class SingleNotePlayer {
-  constructor(note_number, velocity, audioCtx, nextNode){
+  /*
+    interface MidiNote {
+      number: number
+      velocity: number
+      when?: number
+      duration?: number
+    }
+  */
+  constructor(note_number, velocity, nextNode){
     this.note_number = note_number;
     this.velocity = velocity;
-    this.audioCtx = audioCtx;
     this.nextNode = nextNode;
+    this.audioCtx = this.nextNode.context;
   }
 
-  start(when=0, duration, onstop){
-    this.playId = setTimeout(()=>{
-      this.sourceNode = this.audioCtx.createOscillator();
-      this.gainNode = this.audioCtx.createGain();
-      this.sourceNode.frequency.value = noteNumber2Freq(this.note_number);
-      this.gainNode.gain.value = this.velocity;
-      this.sourceNode.connect(this.gainNode).connect(this.nextNode);
-      this.sourceNode.start();
-      this.isPlaying = true;
-      if(duration)
-        this.stop(duration, onstop);
-    }, when * 1000);
+  start(when=0, duration, onended){
+    this.oscNode = this.audioCtx.createOscillator();
+    this.oscNode.frequency.value = noteNumber2Freq(this.note_number);
+    this.gainNode = this.audioCtx.createGain();
+    this.gainNode.gain.value = this.velocity;
+    this.oscNode.connect(this.gainNode).connect(this.nextNode);
+    this.oscNode.onended = () => {
+      this.oscNode.disconnect();
+      this.oscNode = null;
+      this.gainNode.disconnect();
+      this.gainNode = null;
+      onended?.();
+    }
+    this.oscNode.start(this.audioCtx.currentTime + when);
+    if(duration)
+      this.stop(when + duration);
   }
 
-  stop(when=0, onstop){
-    setTimeout(()=>{
-      if(!this.isPlaying){
-        clearTimeout(this.playId);
-        onstop?.();
-        return;
-      }
-      const startTime = this.audioCtx.currentTime;
-      const tmpVal = this.gainNode.gain.value;
-      this.gainNode.gain.setValueAtTime(tmpVal, startTime);
-      this.gainNode.gain.linearRampToValueAtTime(0, startTime + 0.01);
-      setTimeout(()=>{
-        this.sourceNode.stop();
-        this.gainNode.disconnect();
-        onstop?.();
-      }, 10);
-      this.isPlaying = false;
-    }, when * 1000);
+  stop(when=0){
+    if(!this.oscNode) return;
+    const stopTime = this.audioCtx.currentTime + when;
+    this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, stopTime);
+    this.gainNode.gain.linearRampToValueAtTime(0, stopTime + 0.01);
+    this.oscNode.stop(stopTime + 0.01);
   }
 }
 
 export class Player {
-  constructor(midiDataArray, audioCtx, nextNode){
-    this.midiDataArray = midiDataArray
-    this.audioCtx = audioCtx;
+  constructor(midiNoteArray, nextNode){
+    this.midiNoteArray = midiNoteArray;
     this.nextNode = nextNode;
   }
 
-  start(offset=0, duration, onended){
-    if(!duration){
-      const lastNote = this.midiDataArray[this.midiDataArray.length - 1];
-      duration = lastNote.when + lastNote.duration
-    }
-    this.playerArray = this.midiDataArray.map(midiData=>{
-      if(midiData.when > duration || midiData.when < offset) return;
-      const player = new SingleNotePlayer(midiData.number, midiData.velocity, this.audioCtx, this.nextNode);
-      player.start(midiData.when - offset, midiData.duration, ()=>{
-        this.playerArray[this.playerArray.indexOf(player)] = null;
-        if(this.playerArray.every(player=>!player))
-          onended?.();
+  play(start, end, onended){
+    this.playerArray = this.midiNoteArray
+      .filter(midiNote => start <= midiNote.when && midiNote.when < end)
+      .map(midiNote => {
+        const player = new SingleNotePlayer(midiNote.number, midiNote.velocity, this.nextNode);
+        player.start(midiNote.when - start, midiNote.duration, () => {
+          this.playerArray.splice(this.playerArray.indexOf(player), 1);
+          if(!this.playerArray.length)
+            onended?.();
+        });
+        return player;
       });
-      return player;
-    });
   }
 
-  stop(){
-    this.playerArray.forEach(player => player && player.stop())
+  pause(){
+    this.playerArray.forEach(player => player.stop())
   }
 }
 
@@ -88,21 +84,21 @@ export class MidiRecorder {
 
   start(){
     this.onstart();
-    const startTime = Date.now()
+    const startTime = Date.now();
     this.noteOnFn = e=>{
       this.noteBuffer.push({
         number: e.note.number,
         velocity: e.velocity,
         when: (Date.now() - startTime) / 1000
       });
-    };
+    }
     this.noteOffFn = e=>{
       const note = this.noteBuffer.find(
         note => !note.duration && note.number === e.note.number
       );
       if(note)
         note.duration = (Date.now() - startTime) / 1000 - note.when;
-    };
+    }
     this.midiInput.addListener('noteon', "all", this.noteOnFn);
     this.midiInput.addListener('noteoff', "all", this.noteOffFn);
     this.isRecording = true;
@@ -112,9 +108,9 @@ export class MidiRecorder {
     if(!this.isRecording){ return; }
     this.midiInput.removeListener('noteon', "all", this.noteOnFn);
     this.midiInput.removeListener('noteoff', "all", this.noteOffFn);
-    this.isRecording = false;
     const jsonStr = JSON.stringify(this.noteBuffer);
     this.noteBuffer = [];
+    this.isRecording = false;
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     this.onstop(url);

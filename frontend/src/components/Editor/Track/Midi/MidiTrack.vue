@@ -16,7 +16,6 @@
   </teleport>
   <teleport to="#ruler_layer">
     <MidiCanvasContainer
-    :audioCtx="audioCtx"
     :nextNode="gainNode"
     :midiInput="midiInput"
     @track-select="select"
@@ -66,22 +65,22 @@ export default {
     this.gainNode.gain.value = this.gain;
     this.pannerNode.pan.value = this.pan;
 
-    const sourceNodeArray = [];
+    const playerArray = [];
 
     this.midiInput.addListener('noteon', "all", e=>{
       if(this.isSelected){
-        const player = new SingleNotePlayer(e.note.number, e.velocity, this.audioCtx, this.gainNode);
+        const player = new SingleNotePlayer(e.note.number, e.velocity, this.gainNode);
         player.start()
-        sourceNodeArray.push(player);
+        playerArray.push(player);
       }
     });
 
     this.midiInput.addListener('noteoff', "all", e=>{
-      sourceNodeArray
-      .filter(node => node.note_number === e.note.number)
-      .forEach(node=>{
-        node.stop();
-        sourceNodeArray.splice(sourceNodeArray.indexOf(node), 1);
+      playerArray
+      .filter(player => player.note_number === e.note.number)
+      .forEach(player=>{
+        player.stop();
+        playerArray.splice(playerArray.indexOf(player), 1);
       });
     });
   },

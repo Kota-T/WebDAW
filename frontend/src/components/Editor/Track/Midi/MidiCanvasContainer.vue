@@ -8,7 +8,6 @@
     v-for="canvasData in canvasParams"
     :key="canvasData.id"
     :canvasData="canvasData"
-    :audioCtx="audioCtx"
     :nextNode="nextNode"
     :ref="setCanvasRef"
     @canvas-split="splitCanvas"
@@ -31,7 +30,6 @@ export default {
   },
   mixins: [CanvasContainerMixin],
   props: {
-    audioCtx: Object,
     nextNode: Object,
     midiInput: Object
   },
@@ -63,7 +61,7 @@ export default {
     },
 
     createOffline(offlineCtx, nextNode, startRecordingTime, stopRecordingTime){
-      this.canvases.forEach(audioCanvas=>audioCanvas.createOfflineSource(offlineCtx, nextNode, startRecordingTime, stopRecordingTime));
+      this.canvases.forEach(canvas=>canvas.createOfflineSource(offlineCtx, nextNode, startRecordingTime, stopRecordingTime));
     }
   }
 }
