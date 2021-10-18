@@ -1,5 +1,6 @@
 import CanvasMixin from '../CanvasMixin.js';
 
+import { string2DataUrl } from '../../../../util.js';
 import { Player } from '../../../../midi.js';
 
 export default {
@@ -48,9 +49,41 @@ export default {
     },
 
     split(){
+      const pointer_x = this.$store.state.pointer_x;
+      if(this.startPoint < pointer_x && pointer_x < this.endPoint){
+        const splitTime = this.getTime(pointer_x);
+        const formerDataArray = this.midiDataArray
+          .filter(midiData => midiData.when < splitTime)
+          .map(midiData => {
+            if(midiData.when + midiData.duration > splitTime)
+              midiData.duration = splitTime - midiData.when
+            return midiData;
+          });
+        const latterDataArray = this.midiDataArray
+          .filter(midiData => midiData.when >= splitTime)
+          .map(midiData => {
+            midiData.when -= splitTime;
+            return midiData;
+          });
+        const former = {
+          startTime: this.startTime,
+          diminished: { leftTime: this.diminished.leftTime, rightTime: 0 },
+          url: string2DataUrl(JSON.stringify(formerDataArray), 'application/json')
+        };
+        const latter = {
+          startTime: this.startTime + splitTime,
+          diminished: { leftTime: 0, rightTime: this.diminished.rightTime },
+          url: string2DataUrl(JSON.stringify(latterDataArray), 'application/json')
+        };
+        this.$emit('canvas-split', { canvasId: this.id, former, latter });
+      }
     },
 
     downloadFile(){
+      const link = document.createElement('a');
+      link.href = this.canvasData.url;
+      link.download = "midi.json";
+      link.click();
     },
 
     createOfflineSource(offlineCtx, nextNode, startRecordingTime, stopRecordingTime){

@@ -15,3 +15,7 @@ export function base642Url(base64, mimeType){
 
   return url;
 }
+
+export function string2DataUrl(str, mimeType){
+  return `data:${mimeType};base64,${btoa(str)}`;
+}
