@@ -413,12 +413,12 @@ export default {
     },
 
     startTouches(e){
-      if(state !== "recording" || e.touches.length === 2)
+      if(this.state !== "recording" || e.touches.length === 2)
         this.oldTouchesDiff = this.getTouchesDiff(e.touches);
     },
 
     zoomWithTouches(e){
-      if(state === "recording" || e.touches.length !== 2) return;
+      if(this.state === "recording" || e.touches.length !== 2) return;
       e.preventDefault();
       const curDiff = this.getTouchesDiff(e.touches);
       const newVal = Math.round(this.$store.state.beat_width * curDiff / this.oldTouchesDiff);
