@@ -1,6 +1,6 @@
 import CanvasMixin from '../CanvasMixin.js';
 
-import { SingleNotePlayer } from '../../../../midi.js';
+import { Player } from '../../../../midi.js';
 
 export default {
   name: 'MidiCanvas',
@@ -13,6 +13,7 @@ export default {
     this.midiDataArray = await fetch(this.canvasData.url)
     .then(res=>res.text())
     .then(text=>JSON.parse(text));
+    this.player = new Player(this.midiDataArray, this.audioCtx, this.nextNode);
     const duration = this.midiDataArray.reduce((acc, midiData)=>{
       return Math.max(acc, midiData.when + midiData.duration);
     }, 0)
@@ -20,17 +21,11 @@ export default {
   },
   methods: {
     play(startPoint, onended){
-      const startTime = startPoint / this.$store.getters.second_width;
-      this.sourceNodeArray = this.midiDataArray.map(midiData=>{
-        if(midiData.when + this.startTime < startTime) return;
-        const player = new SingleNotePlayer(midiData.number, midiData.velocity, this.audioCtx, this.nextNode);
-        player.start(midiData.when, midiData.duration);
-        return player;
-      });
+      this.player.start(this.getTime(startPoint), this.getTime(this.endPoint), onended);
     },
 
     pause(){
-      this.sourceNodeArray.forEach(node => node && node.stop())
+      this.player.stop();
     },
 
     draw(){
@@ -44,7 +39,7 @@ export default {
       }, 200);
       const note_height = this.canvas.height / (highest_note_number - lowest_note_number + 1);
       this.midiDataArray.forEach(midiData => {
-        const x = midiData.when * this.$store.getters.second_width;
+        const x = midiData.when * this.$store.getters.second_width - this.diminished.left;
         const y = (highest_note_number - midiData.number) * note_height;
         const width = midiData.duration * this.$store.getters.second_width;
         this.ctx.fillStyle = "#ffffff";

@@ -44,7 +44,6 @@ export default {
 
       this.recorder.onstart = ()=>{
         startPoint = this.$store.state.pointer_x;
-        console.log(startPoint)
         this.$refs.draftCanvas.show(startPoint);
         let loop = ()=>{
           this.$refs.draftCanvas.draw();

@@ -34,7 +34,7 @@ const CanvasContainerMixin = {
 
     removeCanvas(canvasId){
       this.canvases = [];
-      const index = this.canvasParams.findIndex(canvas => canvas.id === canvasId);
+      const index = this.canvasParams.findIndex(canvasData => canvasData.id === canvasId);
       this.canvasParams.splice(index, 1);
       this.canvasIdManager.removeId(canvasId);
     },

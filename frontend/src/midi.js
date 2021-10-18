@@ -15,8 +15,8 @@ export class SingleNotePlayer {
     this.nextNode = nextNode;
   }
 
-  start(when=0, duration){
-    setTimeout(()=>{
+  start(when=0, duration, onstop){
+    this.playId = setTimeout(()=>{
       this.sourceNode = this.audioCtx.createOscillator();
       this.gainNode = this.audioCtx.createGain();
       this.sourceNode.frequency.value = noteNumber2Freq(this.note_number);
@@ -25,13 +25,17 @@ export class SingleNotePlayer {
       this.sourceNode.start();
       this.isPlaying = true;
       if(duration)
-        this.stop(duration);
+        this.stop(duration, onstop);
     }, when * 1000);
   }
 
-  stop(when=0){
-    if(!this.isPlaying) return;
+  stop(when=0, onstop){
     setTimeout(()=>{
+      if(!this.isPlaying){
+        clearTimeout(this.playId);
+        onstop?.();
+        return;
+      }
       const startTime = this.audioCtx.currentTime;
       const tmpVal = this.gainNode.gain.value;
       this.gainNode.gain.setValueAtTime(tmpVal, startTime);
@@ -39,6 +43,7 @@ export class SingleNotePlayer {
       setTimeout(()=>{
         this.sourceNode.stop();
         this.gainNode.disconnect();
+        onstop?.();
       }, 10);
       this.isPlaying = false;
     }, when * 1000);
@@ -52,25 +57,25 @@ export class Player {
     this.nextNode = nextNode;
   }
 
-  start(when=0, offset=0, duration){
-    setTimeout(()=>{
-      if(!duration){
-        const lastNote = this.midiDataArray[this.midiDataArray.length - 1];
-        duration = lastNote.when + lastNote.duration
-      }
-      this.playerArray = this.midiDataArray.map(midiData=>{
-        if(midiData.when < offset + duration || midiData.when < offset) return;
-        const player = new SingleNotePlayer(midiData.number, midiData.velocity, this.audioCtx, this.nextNode);
-        player.start(midiData.when - offset, midiData.duration);
-        return player;
+  start(offset=0, duration, onended){
+    if(!duration){
+      const lastNote = this.midiDataArray[this.midiDataArray.length - 1];
+      duration = lastNote.when + lastNote.duration
+    }
+    this.playerArray = this.midiDataArray.map(midiData=>{
+      if(midiData.when > duration || midiData.when < offset) return;
+      const player = new SingleNotePlayer(midiData.number, midiData.velocity, this.audioCtx, this.nextNode);
+      player.start(midiData.when - offset, midiData.duration, ()=>{
+        this.playerArray[this.playerArray.indexOf(player)] = null;
+        if(this.playerArray.every(player=>!player))
+          onended?.();
       });
-    }, when * 1000)
+      return player;
+    });
   }
 
-  stop(when=0){
-    setTimeout(()=>{
-      this.playerArray.forEach(player => player && player.stop())
-    }, when * 1000)
+  stop(){
+    this.playerArray.forEach(player => player && player.stop())
   }
 }
 
