@@ -247,7 +247,9 @@ const CanvasMixin = {
       const rightTime = this.canvasData.diminished?.rightTime || 0;
       this.width = (duration - leftTime - rightTime) * this.$store.getters.second_width;
       if(this.endPoint > this.$store.getters.ruler_width){
-        this.$store.commit('project_duration', this.canvasData.startTime + duration);
+        const bar_second = this.$store.getters.bar_width / this.$store.getters.second_width;
+        const number_of_bars = Math.ceil((this.canvasData.startTime + duration) / bar_second);
+        this.$store.commit('project_duration', bar_second * number_of_bars);
       }
     },
 

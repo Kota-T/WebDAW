@@ -44,8 +44,8 @@ export default {
       for(let i = 0; i < this.canvas.width / scale_width; i++){
         const x = i * scale_width;
         this.ctx.beginPath();
-        if(i%num === 0){
-          this.ctx.fillText(`${Math.floor(i/num)}`, x, 12);
+        if(i % num === 0){
+          this.ctx.fillText(`${i / num + 1}`, x, 12);
           this.ctx.moveTo(x, 15);
         }else{
           this.ctx.moveTo(x, 25);

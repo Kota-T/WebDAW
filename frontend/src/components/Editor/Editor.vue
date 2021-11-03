@@ -409,7 +409,7 @@ export default {
 
       const x2 = touches[1].clientX;
       const y2 = touches[1].clientY;
-      return Math.sqrt(Math.pow(x2 - x1, 2), Math.pow(y2 - y1));
+      return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     },
 
     startTouches(e){

@@ -58,10 +58,11 @@ export default {
   },
   computed: {
     minBar(){
-      return 0;
+      return 1;
     },
     maxBar(){
-      return this.$store.state.number_of_bars;
+      const bar_second = this.$store.getters.bar_width / this.$store.getters.second_width;
+      return Math.ceil(this.$store.state.project_duration / bar_second) + 1;
     },
     minBeat(){
       return 1;
