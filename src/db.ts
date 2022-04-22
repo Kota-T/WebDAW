@@ -19,6 +19,7 @@ const db = new class WebDAWDB extends Dexie {
 export default db
 
 export async function reset(): Promise<void> {
+  if(!confirm('アプリを初期化しますか？')) return
   db.close()
   await Dexie.delete('WebDAWDB')
   location.href = "/"

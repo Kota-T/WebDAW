@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 import { ProjectData } from './type.d'
 import db from './db'
 
@@ -14,7 +15,7 @@ export async function getLRU(): Promise<ProjectData | undefined> {
 
 export function create(): ProjectData {
   return {
-    id           : "",
+    id           : uuidv4(),
     last_updated : undefined,
     thumbnail    : "",
     name         : "新規プロジェクト",

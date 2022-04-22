@@ -1,9 +1,7 @@
 import { toRaw } from 'vue'
 import { defineStore } from 'pinia'
-import { v4 as uuidv4 } from 'uuid'
 import { clipThumbnail } from './thumbnail'
 import * as repository from './project_repository'
-import { POINTER_MARGIN } from './config'
 
 const project_data = location.pathname === '/new'
   ? repository.create()
@@ -11,7 +9,7 @@ const project_data = location.pathname === '/new'
 
 let playId: number
 
-export const useProject = defineStore('project', {
+export const useProject = defineStore(project_data.id, {
   state: () => project_data,
   getters: {
     animation_width(state) {
@@ -67,13 +65,10 @@ export const useProject = defineStore('project', {
       this.state = undefined
     },
     async save(): Promise<void> {
-      if(location.pathname === '/new') {
-        this.id = uuidv4()
+      if(location.pathname === '/new')
         history.replaceState(null, '', this.id)
-      }
       this.last_updated = new Date()
       this.thumbnail = await clipThumbnail()
-      console.log(toRaw(this.$state))
       return repository.save(toRaw(this.$state))
     }
   }
