@@ -44,6 +44,7 @@
 <script setup lang="ts">
 import Dragger from './Dragger.vue'
 import Trimmer from './Trimmer.vue'
+import { TRIMMER_WIDTH } from '../../../config'
 import { computed, reactive, ref } from 'vue'
 const props = defineProps<{
   width: number,
@@ -80,7 +81,7 @@ const trim_right = computed({
   set: trim_right => emits('update:trim_right', trim_right)
 })
 
-const MIN_WIDTH = 60
+const MIN_WIDTH = TRIMMER_WIDTH * 2
 
 function move(dif: number) {
   const moved_x = x.value + dif

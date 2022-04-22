@@ -2,7 +2,7 @@
   <canvas :style="style" width="2" ref="canvas"/>
 </template>
 
-<style>
+<style scoped>
 canvas {
   position: absolute;
   z-index: 3;
@@ -35,11 +35,16 @@ const canvas = ref<InstanceType<HTMLCanvasElement>>()
 let ctx: CanvasRenderingContext2D
 
 onMounted(()=>{
-  canvas.value.height = canvas.value.parentElement.offsetHeight;
-  ctx = canvas.value.getContext('2d');
-  ctx.fillStyle = "#f0f0f0";
-  ctx.fillRect(0, 0, canvas.value.width, canvas.value.height);
+  ctx = canvas.value.getContext('2d')
+  draw()
+  window.addEventListener('resize', draw)
 })
+
+function draw() {
+  canvas.value.height = canvas.value.parentElement.offsetHeight
+  ctx.fillStyle = "#f0f0f0"
+  ctx.fillRect(0, 0, canvas.value.width, canvas.value.height)
+}
 
 function prepareRecording(){
   const rhythm = project.rhythm;
@@ -50,6 +55,4 @@ function prepareRecording(){
     x.value = -rhythm[0] * scale_width;
   }
 }
-
-defineExpose({ layerX, x })
 </script>

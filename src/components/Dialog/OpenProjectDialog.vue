@@ -53,16 +53,22 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onBeforeUpdate, onUpdated, ref, watch } from 'vue'
 import { search } from '../../project_repository'
 
 const isOpen = ref(false)
-const projects = ref([])
 const search_word = ref("")
+const projects = ref([])
 
-onMounted(searchProject)
+onBeforeUpdate(() => {
+  console.log("before update")
+})
+onUpdated(() => {
+  console.log("updated")
+  if(isOpen.value)
+    searchProject()
+})
 watch(() => search_word.value, searchProject)
-watch(() => isOpen.value, () => search_word.value = "")
 
 async function searchProject() {
   projects.value = await search(search_word.value)

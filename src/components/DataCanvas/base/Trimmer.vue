@@ -27,7 +27,7 @@
   color: black;
   font-size: 1rem;
   opacity: 0;
-  width: 30px;
+  width: var(--trimmer-width);
   position: absolute;
   top: 0;
   bottom: 0;
@@ -39,6 +39,7 @@
 </style>
 
 <script setup lang="ts">
+import { TRIMMER_WIDTH } from '../../../config'
 const props = defineProps<{ right?: boolean, limit: boolean }>()
 const emits = defineEmits<{
   (e: 'lengthen', dif: number): void,
@@ -47,7 +48,7 @@ const emits = defineEmits<{
 let startPoint: number
 let isResizing = false
 function getCurrentPoint(e) {
-  return props.right ? 30 - e.offsetX : e.offsetX
+  return props.right ? TRIMMER_WIDTH - e.offsetX : e.offsetX
 }
 function startTrim(e) {
   startPoint = getCurrentPoint(e)

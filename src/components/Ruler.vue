@@ -26,10 +26,11 @@ onMounted(()=>{
 
 const project = useProject()
 
-watch(()=>project.rhythm, ()=>draw())
-watch(()=>project.bpm, ()=>draw())
-watch(()=>project.second_width, ()=>draw())
-watch(()=>project.width, ()=>draw())
+watch([
+  () => project.rhythm,
+  () => project.scale_width,
+  () => project.width
+], draw)
 
 function draw(){
   canvas.value.width = project.width;
@@ -38,9 +39,9 @@ function draw(){
 
   ctx.strokeStyle = ctx.fillStyle = "#f0f0f0";
   const num = project.rhythm[0];
-  const scale_width = project.scale_width;
-  for(let i = 0; i < canvas.value.width / scale_width; i++){
-    const x = i * scale_width;
+  const num_of_scales = project.width / project.scale_width;
+  for(let i = 0; i < num_of_scales; i++){
+    const x = i * project.scale_width;
     ctx.beginPath();
     if(i % num === 0){
       ctx.fillText(`${i / num + 1}`, x, 12);

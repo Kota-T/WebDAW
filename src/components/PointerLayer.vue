@@ -36,9 +36,9 @@ const pointer_layer = ref()
 
 onMounted(() => {
   project.min_width = pointer_layer.value.offsetWidth
-  window.onresize = () => {
+  window.addEventListener('resize', () => {
     project.min_width = pointer_layer.value.offsetWidth
-  }
+  })
 })
 
 function setCurrentTime(e){

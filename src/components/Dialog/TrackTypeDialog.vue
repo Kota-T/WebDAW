@@ -38,12 +38,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { TrackType } from '../type.d'
+import { MediaType } from '../type.d'
 
-const emits = defineEmits<{ (e: 'select', track_type: TrackType): void }>()
+const emits = defineEmits<{ (e: 'select', track_type: MediaType): void }>()
 const isOpen = ref(false)
 
-function select(track_type: TrackType) {
+function select(track_type: MediaType) {
   emits('select', track_type)
   isOpen.value = false
 }

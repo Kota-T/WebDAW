@@ -13,9 +13,9 @@
 .dragger {
   position: absolute;
   top: 0;
-  right: 30px;
+  right: var(--trimmer-width);
   bottom: 0;
-  left: 30px;
+  left: var(--trimmer-width);
 }
 </style>
 
