@@ -1,11 +1,10 @@
 <template>
   <div
   class="dragger"
-  @pointerdown.stop="startMove"
-  @pointermove.stop="onMove"
-  @pointerout.stop="endMove"
-  @pointerup.stop="endMove"
-  @click.stop
+  @pointerdown="startMove"
+  @pointermove="onMove"
+  @pointerout="endMove"
+  @pointerup="endMove"
   />
 </template>
 

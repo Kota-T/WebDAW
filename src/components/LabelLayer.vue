@@ -1,6 +1,5 @@
 <template>
   <div
-  id="label-layer"
   class="no-scroll-bar"
   v-scroll-value="modelValue"
   @scroll="emits('update:modelValue', $event.target.scrollTop)"
@@ -12,7 +11,7 @@
 <style scoped>
 div {
   position: absolute;
-  top: 30px;
+  top: 0;
   right: 0;
   bottom: 0;
   left: 0;

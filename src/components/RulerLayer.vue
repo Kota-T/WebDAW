@@ -1,6 +1,5 @@
 <template>
   <div
-  id="ruler-layer"
   class="no-scroll-bar"
   v-scroll-value:top="modelValue"
   @scroll="emits('update:modelValue', $event.target.scrollTop)"
@@ -17,7 +16,7 @@ div {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 20px;
+  left: var(--pointer-margin);
   overflow-x: hidden;
   overflow-y: scroll;
   font-size: 0;

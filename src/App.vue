@@ -1,43 +1,10 @@
 <template>
   <v-app style="height: 100vh;">
-    <side-menu v-model="drawer"/>
-    <v-app-bar>
-      <editable-text v-model="project.name"/>
-      <v-spacer/>
-      <v-btn
-      icon="mdi-metronome"
-      :color="project.metronome ? 'primary' : 'grey'"
-      @click.stop="project.metronome = !project.metronome"
-      />
-      <count/>
-      <v-btn
-      v-if="project.state === undefined"
-      icon="mdi-play"
-      @click.stop="project.play"
-      />
-      <v-btn
-      v-else-if="project.state === 'playing'"
-      icon="mdi-pause"
-      @click.stop="project.pause"
-      />
-      <resizer/>
-      <v-spacer/>
-      <v-app-bar-nav-icon
-      variant="text"
-      @click.stop="drawer=true"
-      />
-    </v-app-bar>
-    <v-navigation-drawer permanent class="overflow-y-auto">
-      <v-btn
-      block
-      flat
-      :rounded="0"
-      height="30px"
-      >
-        <v-icon>mdi-plus</v-icon>
-        <track-type-dialog @submit="addTrack($event, project.tracks)"/>
-      </v-btn>
+    <side-menu v-model="side_menu"/>
+    <toolbar @open-side-menu="side_menu=true"/>
+    <v-navigation-drawer permanent>
       <label-layer v-model="scrollTop">
+        <add-track-btn/>
         <draggable
         :list="project.tracks"
         :item-key="trackData => trackData.id"
@@ -69,16 +36,16 @@
 </template>
 
 <script setup lang="ts">
-import CanvasContainer from './components/CanvasContainer.vue'
 import SideMenu from './components/SideMenu.vue'
-import Count from './components/Count.vue'
-import Resizer from './components/Resizer.vue'
+import Toolbar from './components/Toolbar.vue'
+import AddTrackBtn from './components/AddTrackBtn.vue'
 import LabelLayer from './components/LabelLayer.vue'
 import PointerLayer from './components/PointerLayer.vue'
 import Pointer from "./components/Pointer.vue"
 import RulerLayer from './components/RulerLayer.vue'
 import Ruler from "./components/Ruler.vue"
 import TrackTypeDialog from './components/Dialog/TrackTypeDialog.vue'
+import CanvasContainer from './components/CanvasContainer.vue'
 import Message from './components/Message.vue'
 import draggable from 'vuedraggable'
 import { onMounted, provide, ref, watch } from 'vue'
@@ -87,7 +54,7 @@ import { useProject } from './project'
 
 import { addTrack, TrackLabelComponents } from './track'
 
-const drawer = ref(false)
+const side_menu = ref(false)
 const scrollTop = ref(0)
 
 const project = useProject()

@@ -2,11 +2,10 @@
   <div
   class="trimmer"
   :class="{ 'trimmer-right': right }"
-  @pointerdown.stop="startTrim"
-  @pointermove.stop="onTrim"
-  @pointerout.stop="endTrim"
-  @pointerup.stop="endTrim"
-  @click.stop
+  @pointerdown="startTrim"
+  @pointermove="onTrim"
+  @pointerout="endTrim"
+  @pointerup="endTrim"
   >
     <v-icon color="red">{{
       limit

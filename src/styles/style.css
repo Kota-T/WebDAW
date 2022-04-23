@@ -1,4 +1,5 @@
 :root {
+  --pointer-margin: 20px;
   --trimmer-width: 30px;
 }
 .v-card-actions {

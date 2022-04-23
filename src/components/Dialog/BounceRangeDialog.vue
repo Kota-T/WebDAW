@@ -15,72 +15,28 @@
           <tr>
             <th>開始</th>
             <td>
-              <div>
-                <v-text-field
-                v-model="start_bar"
-                autofocus
-                class="text-center"
-                type="number"
-                variant="plain"
-                density="compact"
-                hide-details
-                />
-              </div>
+              <input v-model="start_bar" autofocus>
             </td>
             <td>
-              <div>
-                <v-text-field
-                v-model="start_beat"
-                class="text-center"
-                type="number"
-                variant="plain"
-                density="compact"
-                hide-details
-                />
-              </div>
+              <input v-model="start_beat">
             </td>
           </tr>
           <tr>
             <th>終了</th>
             <td>
-              <div>
-                <v-text-field
-                v-model="end_bar"
-                class="text-center"
-                type="number"
-                variant="plain"
-                density="compact"
-                hide-details
-                />
-              </div>
+              <input v-model="end_bar">
             </td>
             <td>
-              <div>
-                <v-text-field
-                v-model="end_beat"
-                class="text-center"
-                type="number"
-                variant="plain"
-                density="compact"
-                hide-details
-                />
-              </div>
+              <input v-model="end_beat">
             </td>
           </tr>
         </table>
         <template v-if="submitted">
-          <div
-          v-if="!isStartValid"
-          class="error-message"
-          >開始には適切な値を入力してください。</div>
-          <div
-          v-if="!isEndValid"
-          class="error-message"
-          >終了には適切な値を入力してください。</div>
-          <div
-          v-if="!isStartEarlierThanEnd"
-          class="error-message"
-          >開始を終了より前にしてください。</div>
+          <div class="error-message">{{ start_bar_error.message }}</div>
+          <div class="error-message">{{ start_beat_error.message }}</div>
+          <div class="error-message">{{ end_bar_error.message }}</div>
+          <div class="error-message">{{ end_beat_error.message }}</div>
+          <div class="error-message">{{ start_later_than_end_error.message }}</div>
         </template>
       </v-card-text>
       <v-card-actions>
@@ -111,27 +67,26 @@ th, td {
 th {
   background-color: lightgrey;
   color: #333;
+  padding: 5px;
 }
-tr > th:first-child {
-  padding: 0 5px;
+input {
+  width: 150px;
+  height: 42px;
+  text-align: center;
 }
-td > div {
-  border: 1px solid transparent;
-}
-td > div:focus-within {
-  border-color: black;
+input:focus {
+  outline: none;
+  border: 1px solid;
 }
 .error-message {
   color: red;
-}
-.text-center:deep(input) {
-  text-align: center;
+  font-size: 0.8rem;
 }
 </style>
 
 <script setup lang="ts">
 import { useProject } from '../../project'
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
 const emits = defineEmits<{ (e: 'submit', value: [number, number]): void }>()
 
@@ -139,7 +94,7 @@ const project = useProject()
 
 const isOpen = ref(false)
 
-function getTime(bar: number, beat: number) {
+const getTime = (bar: number, beat: number): number => {
   return (bar - 1) * project.bar_time + (beat - 1) * project.scale_time
 }
 
@@ -155,15 +110,89 @@ const end_time = computed(() => getTime(end_bar.value, end_beat.value))
 
 const submitted = ref(false)
 
-const isStartValid = computed(() => start_time.value >= 0)
-const isEndValid = computed(() => end_time.value > 0)
-const isStartEarlierThanEnd = computed(() => start_time.value < end_time.value)
+const isEmpty = (value: string): boolean => value === ""
+const isNatural = (value: string | number): boolean => {
+  const num = Number(value)
+  return Number.isInteger(num) && num > 0
+}
+const isBar = isNatural
+const isBeat = (beat: string): boolean => {
+  const num = Number(beat)
+  return isNatural(num) && num <= project.rhythm[0]
+}
+
+const start_bar_error = computed(() => {
+  const is_empty = isEmpty(start_bar.value)
+  const is_bar = isBar(start_bar.value)
+  return {
+    is_error: is_empty || !is_bar,
+    message: is_empty
+      ? "開始の小節を入力してください。"
+      : !is_bar
+      ? "開始の小節には1以上の整数を入力してください。"
+      : ""
+  }
+})
+const start_beat_error = computed(() => {
+  const is_empty = isEmpty(start_beat.value)
+  const is_beat = isBeat(start_beat.value)
+  return {
+    is_error: is_empty || !is_beat,
+    message: is_empty
+      ? "開始の拍を入力してください。"
+      : !is_beat
+      ? `開始の拍には1から${project.rhythm[0]}までの整数を入力してください。`
+      : ""
+  }
+})
+const end_bar_error = computed(() => {
+  const is_empty = isEmpty(end_bar.value)
+  const is_bar = isBar(end_bar.value)
+  return {
+    is_error: is_empty || !is_bar,
+    message: is_empty
+      ? "終了の小節を入力してください。"
+      : !is_bar
+      ? "終了の小節には1以上の整数を入力してください。"
+      : ""
+  }
+})
+const end_beat_error = computed(() => {
+  const is_empty = isEmpty(end_beat.value)
+  const is_beat = isBeat(end_beat.value)
+  return {
+    is_error: is_empty || !is_beat,
+    message: is_empty
+      ? "終了の拍を入力してください。"
+      : !is_beat
+      ? `終了の拍には1から${project.rhythm[0]}までの整数を入力してください。`
+      : ""
+  }
+})
+const start_later_than_end_error = computed(() => {
+  const is_empty = [
+    start_bar.value,
+    start_beat.value,
+    end_bar.value,
+    end_beat.value
+  ].some(isEmpty)
+  const is_later = start_time.value >= end_time.value
+  const is_error = !is_empty && is_later
+  return {
+    is_error,
+    message: is_error
+      ? "開始は終了より前にしてください。"
+      : ""
+  }
+})
 
 function submit() {
   if(
-    !isStartValid.value ||
-    !isEndValid.value ||
-    !isStartEarlierThanEnd.value
+    start_bar_error.value.is_error ||
+    start_beat_error.value.is_error ||
+    end_bar_error.value.is_error ||
+    end_beat_error.value.is_error ||
+    start_later_than_end_error.value.is_error
   ) {
     submitted.value = true
     return
@@ -180,4 +209,13 @@ watchEffect(() => {
   end_beat.value = ""
   submitted.value = false
 })
+
+/*watchEffect(() => console.table({
+  start_bar: start_bar.value,
+  start_beat: start_beat.value,
+  end_bar: end_bar.value,
+  end_beat: end_beat.value,
+  start_time: start_time.value,
+  end_time: end_time.value
+}))*/
 </script>
