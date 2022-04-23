@@ -8,6 +8,7 @@
       <v-card-text>
         <v-text-field
         v-model="search_word"
+        autofocus
         density="compact"
         variant="outlined"
         append-inner-icon="mdi-magnify"
@@ -53,26 +54,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUpdate, onUpdated, ref, watch } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { search } from '../../project_repository'
 
 const isOpen = ref(false)
 const search_word = ref("")
 const projects = ref([])
 
-onBeforeUpdate(() => {
-  console.log("before update")
-})
-onUpdated(() => {
-  console.log("updated")
+watchEffect(async () => {
   if(isOpen.value)
-    searchProject()
+    projects.value = await search(search_word.value)
+  else
+    search_word.value = ""
 })
-watch(() => search_word.value, searchProject)
-
-async function searchProject() {
-  projects.value = await search(search_word.value)
-}
 
 function formatDate(date: Date) {
   return `${

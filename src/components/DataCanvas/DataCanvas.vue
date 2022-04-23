@@ -7,7 +7,7 @@
   :menuItems="menuItems"
   @remove="emits('remove')"
   >
-    <canvas height="150px" :style="{ left: -trim_left }" ref="canvas"/>
+    <canvas height="150" :style="{ left: -trim_left }" ref="canvas"/>
   </controller>
 </template>
 

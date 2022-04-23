@@ -35,7 +35,7 @@
       height="30px"
       >
         <v-icon>mdi-plus</v-icon>
-        <track-type-dialog @select="addTrack($event, project.tracks)"/>
+        <track-type-dialog @submit="addTrack($event, project.tracks)"/>
       </v-btn>
       <label-layer v-model="scrollTop">
         <draggable

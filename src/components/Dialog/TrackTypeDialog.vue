@@ -8,17 +8,17 @@
       <v-card-text>
         <v-row>
           <v-col>
-            <v-btn size="x-large" @click.stop="select('audio')">
+            <v-btn size="x-large" @click.stop="submit('audio')">
               <v-icon>mdi-microphone</v-icon>
             </v-btn>
           </v-col>
           <v-col>
-            <v-btn size="x-large" @click.stop="select('video')">
+            <v-btn size="x-large" @click.stop="submit('video')">
               <v-icon>mdi-video</v-icon>
             </v-btn>
           </v-col>
           <v-col>
-            <v-btn size="x-large" @click.stop="select('midi')">
+            <v-btn size="x-large" @click.stop="submit('midi')">
               <v-icon>mdi-piano</v-icon>
             </v-btn>
           </v-col>
@@ -40,11 +40,11 @@
 import { ref } from 'vue'
 import { MediaType } from '../type.d'
 
-const emits = defineEmits<{ (e: 'select', track_type: MediaType): void }>()
+const emits = defineEmits<{ (e: 'submit', track_type: MediaType): void }>()
 const isOpen = ref(false)
 
-function select(track_type: MediaType) {
-  emits('select', track_type)
+function submit(track_type: MediaType) {
+  emits('submit', track_type)
   isOpen.value = false
 }
 </script>

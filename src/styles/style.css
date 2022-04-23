@@ -2,7 +2,7 @@
   --trimmer-width: 30px;
 }
 .v-card-actions {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem !important;
 }
 .no-scroll-bar {
   -ms-overflow-style: none;
