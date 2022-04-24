@@ -1,17 +1,18 @@
 <template>
-  <v-card class="overflow-y-auto" style="height: 150px">
+  <v-card density="compact" height="150">
     <v-card-title>
       <editable-text v-model="trackData.name"/>
     </v-card-title>
-    <v-card-text>
+    <v-card-text class="py-2">
       <v-row align="center" no-gutters>
-        <v-col>
+        <v-col class="flex-grow-0">
           <v-btn-toggle
           v-model="slider_toggle"
           mandatory
+          density="compact"
           >
-            <v-btn value="v" size="small">音量</v-btn>
-            <v-btn value="p" size="small">パン</v-btn>
+            <v-btn value="v" size="x-small">音量</v-btn>
+            <v-btn value="p" size="x-small">パン</v-btn>
           </v-btn-toggle>
         </v-col>
         <v-col>

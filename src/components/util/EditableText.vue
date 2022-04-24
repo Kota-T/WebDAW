@@ -1,37 +1,73 @@
 <template>
   <span
   v-if="!isEditing"
-  @dblclick="isEditing=true"
+  class="editable-text__text"
+  @dblclick="startEdit"
   >{{ modelValue }}</span>
-  <v-text-field
-  v-else
-  v-model="text"
-  autofocus
-  variant="underlined"
-  density="compact"
-  hide-details
-  append-inner-icon="mdi-check"
-  @change="endEdit"
-  @click:append-inner="endEdit"
-  />
+  <div v-else class="editable-text__container">
+    <input
+    class="editable-text__input"
+    v-model="text"
+    @keydown.enter="endEdit($event.isComposing)"
+    ref="input"
+    >
+    <div class="editable-text__border-bottom"/>
+  </div>
 </template>
 
 <style scoped>
-span:hover {
+.editable-text__text {
+  border-bottom: 1px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.editable-text__text:hover {
   cursor: pointer;
+}
+.editable-text__container {
+  position: relative;
+}
+.editable-text__input {
+  width: 100%;
+  border-bottom: 1px solid transparent;
+  outline: none;
+}
+.editable-text__border-bottom {
+  border-bottom: 1px solid grey;
+  position: absolute;
+  bottom: 0;
+  animation: border-bottom 0.4s ease-out forwards;
+}
+@keyframes border-bottom {
+  0% {
+    left: 50%;
+    right: 50%;
+  }
+  100% {
+    left: 0;
+    right: 0;
+  }
 }
 </style>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-const props = defineProps<{ modelValue: string, validator?: any }>()
+import { nextTick, ref } from 'vue'
+const props = defineProps<{ modelValue: string, validator?: (value: string) => boolean }>()
 const emits = defineEmits<{ (e: 'update:modelValue', modelValue: string): void }>()
-const text = ref(props.modelValue)
 const isEditing = ref(false)
+const text = ref(props.modelValue)
+const input = ref()
 
-function endEdit() {
-  if(!text.value) return
-  if(!props.validator || props.validator(text.value))
+async function startEdit() {
+  isEditing.value = true
+  await nextTick()
+  input.value.focus()
+}
+
+function endEdit(isComposing: boolean) {
+  if(isComposing || text.value === "") return
+  if(props.validator === undefined || props.validator(text.value))
     emits('update:modelValue', text.value)
   isEditing.value = false
 }
