@@ -3,7 +3,7 @@
   class="controller rounded"
   tabindex="-1"
   :style="style"
-  @keydown.delete.stop="emits('remove')"
+  @keydown.delete="emits('remove')"
   @click.stop
   >
     <slot />

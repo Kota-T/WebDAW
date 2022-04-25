@@ -8,6 +8,7 @@
     @click="project.metronome = !project.metronome"
     />
     <count/>
+    <bpm/>
     <v-btn
     v-if="project.state === undefined"
     icon="mdi-play"
@@ -18,6 +19,7 @@
     icon="mdi-pause"
     @click="project.pause"
     />
+    <rhythm/>
     <resizer/>
     <v-spacer/>
     <v-app-bar-nav-icon
@@ -28,7 +30,9 @@
 </template>
 
 <script setup lang="ts">
+import Bpm from './Bpm.vue'
 import Count from './Count.vue'
+import Rhythm from './Rhythm.vue'
 import Resizer from './Resizer.vue'
 import { useProject } from '../project'
 const emits = defineEmits<{ (e: 'open-side-menu'): void }>()

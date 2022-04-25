@@ -1,5 +1,5 @@
 <template>
-  <div>{{ project.beat_count }}</div>
+  <div style="font-size: 1.5rem;">{{ project.beat_count }}</div>
 </template>
 
 <script setup lang="ts">
