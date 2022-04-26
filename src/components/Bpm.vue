@@ -3,7 +3,7 @@
   v-model="bpm"
   :validators="validators"
   style="
-    width: 60px;
+    width: 50px;
     text-align: center;
     font-size: 1.5rem;
   "

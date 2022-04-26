@@ -31,6 +31,7 @@ export function createTrack(): TrackData {
     mic: false,
     mute: false,
     solo: false,
+    selected: true,
     canvases: []
   }
 

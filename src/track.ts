@@ -3,6 +3,7 @@ import { MediaType, TrackData } from './type.d'
 import { createTrack as createAudioTrack } from './audio'
 
 export function addTrack(track_type: MediaType, tracks: TrackData[]) {
+  tracks.forEach(trackData => trackData.selected = false)
   tracks.push(createTrack(track_type))
 }
 

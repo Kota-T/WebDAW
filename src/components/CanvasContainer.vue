@@ -21,7 +21,7 @@ div {
 import { CanvasComponents } from '../canvas'
 import { useProject } from '../project'
 import { CanvasData } from '../type.d'
-import { computed, inject } from 'vue'
+import { computed, inject, readonly, ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
 const props = defineProps<{ canvases: CanvasData[] }>()
@@ -57,6 +57,6 @@ const showMessage = inject('showMessage')
 function remove(index: number) {
   if(!confirm("選択されているキャンバスを削除しますか？")) return
   props.canvases.splice(index, 1)
-  showMessage("キャンバスを削除しました。", "red")
+  showMessage("キャンバスを削除しました。", "error")
 }
 </script>

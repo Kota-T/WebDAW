@@ -13,6 +13,7 @@ export type TrackData = {
   id: string
   type: MediaType
   name: string
+  selected: boolean
   params: any
   canvases: CanvasData[]
 }

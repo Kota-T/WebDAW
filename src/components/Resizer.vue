@@ -1,11 +1,14 @@
 <template>
-  <v-slider
-  v-model="project.second_width"
-  min="20"
-  max="200"
-  step="1"
-  hide-details
-  />
+  <div style="width: 100px;">
+    <v-slider
+    v-model="project.second_width"
+    min="20"
+    max="200"
+    step="1"
+    :thumb-size="15"
+    hide-details
+    />
+  </div>
 </template>
 
 <script setup lang="ts">

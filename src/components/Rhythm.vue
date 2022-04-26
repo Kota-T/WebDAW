@@ -3,7 +3,7 @@
   v-model="rhythm"
   :validators="validators"
   style="
-    width: 70px;
+    width: 50px;
     text-align: center;
     font-size: 1.5rem;
   "
@@ -17,7 +17,7 @@ import { computed, ref } from 'vue'
 const project = useProject()
 const rhythm = computed({
   get: () => project.rhythm.join('/'),
-  set: _rhythm => project.rhythm = _rhythm.split('/').map(n => Number(n))
+  set: _rhythm => project.rhythm = _rhythm.split('/').map(Number)
 })
 const validators = ref([
   rhythm => rhythm.match(/\d+\/\d+/)?.[0] === rhythm, // 数値/数値かどうか

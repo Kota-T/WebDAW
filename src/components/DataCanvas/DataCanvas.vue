@@ -7,7 +7,7 @@
   :menuItems="menuItems"
   @remove="emits('remove')"
   >
-    <canvas height="150" :style="{ left: -trim_left }" ref="canvas"/>
+    <canvas :height="TRACK_HEIGHT" :style="{ left: -trim_left }" ref="canvas"/>
   </controller>
 </template>
 
@@ -21,7 +21,8 @@ canvas {
 import Controller from './base/Controller.vue'
 import { useProject } from '../../project'
 import { CanvasData } from '../../type.d'
-import { computed, inject, onMounted, ref, watch } from 'vue'
+import { TRACK_HEIGHT as _TRACK_HEIGHT } from '../../config'
+import { computed, inject, onMounted, readonly, ref, watch } from 'vue'
 
 const canvas = ref<InstanceType<HTMLCanvasElement>>()
 let ctx: CanvasRenderingContext2D
@@ -37,6 +38,8 @@ const emits = defineEmits<{
   (e: 'play', when: number): void,
   (e: 'remove'): void
 }>()
+
+const TRACK_HEIGHT = readonly(ref(_TRACK_HEIGHT))
 
 const x = computed({
   get: () => {

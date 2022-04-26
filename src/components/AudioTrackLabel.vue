@@ -1,5 +1,10 @@
 <template>
-  <v-card density="compact" height="150">
+  <v-card
+  density="compact"
+  :height="TRACK_HEIGHT"
+  :color="trackData.selected ? '#eee' : undefined"
+  @click="select"
+  >
     <v-card-title>
       <editable-text v-model="trackData.name"/>
     </v-card-title>
@@ -47,10 +52,14 @@
 </template>
 
 <script setup lang="ts">
+import { TRACK_HEIGHT as _TRACK_HEIGHT } from '../config'
+import { useProject } from '../project'
 import { TrackData } from '../type.d'
-import { ref } from 'vue'
+import { readonly, ref } from 'vue'
 
-defineProps<{ trackData: TrackData }>()
+const props = defineProps<{ trackData: TrackData }>()
+
+const TRACK_HEIGHT = readonly(ref(_TRACK_HEIGHT))
 
 const slider_toggle = ref('v')
 
@@ -60,4 +69,12 @@ const menuItems = ref([
     action: () => console.log('トラックを削除')
   }
 ])
+
+const project = useProject()
+
+function select(e) {
+  if(!e.shiftKey)
+    project.tracks.forEach(trackData => trackData.selected = false)
+  props.trackData.selected = true
+}
 </script>
