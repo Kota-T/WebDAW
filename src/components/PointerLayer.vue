@@ -42,13 +42,8 @@ onMounted(() => {
 })
 
 function setCurrentTime(e){
-  if(project.state === "recording") return;
-  const x = e.clientX - e.currentTarget.getBoundingClientRect().left + e.currentTarget.scrollLeft - POINTER_MARGIN
-  project.current_time = x / project.second_width
-  if(project.state === "playing"){
-    project.pause();
-    project.play();
-  }
+  if(project.state !== "recording")
+    project.current_x = e.clientX - e.currentTarget.getBoundingClientRect().left + e.currentTarget.scrollLeft - POINTER_MARGIN
 }
 function onScroll(e) {
   const scrollLeft = e.target.scrollLeft

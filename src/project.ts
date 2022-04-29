@@ -1,4 +1,4 @@
-import { toRaw } from 'vue'
+import { computed, reactive, ref, toRaw, toRefs } from 'vue'
 import { defineStore } from 'pinia'
 import { clipThumbnail } from './thumbnail'
 import * as repository from './project_repository'
@@ -7,71 +7,112 @@ const project_data = location.pathname === '/new'
   ? repository.create()
   : (await repository.get(location.pathname.slice(1)))
 
-let playId: number
+export const useProject = defineStore(project_data.id, () => {
+  const $state = reactive(project_data)
+  const {
+    name,
+    rhythm,
+    bpm,
+    metronome,
+    second_width,
+    current_time,
+    scroll_width,
+    tracks
+  } = toRefs($state)
 
-export const useProject = defineStore(project_data.id, {
-  state: () => project_data,
-  getters: {
-    animation_width(state) {
-      return state.second_width / 60
-    },
-    beat_time(state) {
-      return 60 / state.bpm
-    },
-    beat_width(state) {
-      return this.beat_time * state.second_width
-    },
-    scale_beat_ratio(state) {
-      return 4 / state.rhythm[1]
-    },
-    scale_time(state) {
-      return this.beat_time * this.scale_beat_ratio
-    },
-    scale_width(state) {
-      return this.beat_width * this.scale_beat_ratio
-    },
-    bar_time(state) {
-      return this.scale_time * state.rhythm[0]
-    },
-    bar_width(state) {
-      return this.scale_width * state.rhythm[0];
-    },
-    beat_count(state) {
-      const surplus = state.current_time % this.bar_time
-      const surplus_scales = surplus < 0 ? surplus + this.bar_time : surplus
-      return Math.floor(surplus_scales / this.scale_time) + 1
-    },
-    width(state) {
-      return state.scroll_width + state.min_width
-    },
-    current_x(state) {
-      return state.current_time * state.second_width
-    }
-  },
-  actions: {
-    play() {
-      this.state = "playing"
-      let previous_time = performance.now() / 1000
-      let loop = timestamp => {
-        const current_time = timestamp / 1000
-        this.current_time += current_time - previous_time
-        previous_time = current_time
-        playId = requestAnimationFrame(loop)
-      }
+  const state = ref()
+  const min_width = ref(1000)
+
+  const animation_width = computed(() => second_width.value / 60)
+  const beat_time = computed(() => 60 / bpm.value)
+  const beat_width = computed(() => beat_time.value * second_width.value)
+  const scale_beat_ratio = computed(() => 4 / rhythm.value[1])
+  const scale_time = computed(() => beat_time.value * scale_beat_ratio.value)
+  const scale_width = computed(() => beat_width.value * scale_beat_ratio.value)
+  const bar_time = computed(() => scale_time.value * rhythm.value[0])
+  const bar_width = computed(() => scale_width.value * rhythm.value[0])
+  const beat_count = computed(() => {
+    const surplus = current_time.value % bar_time.value
+    const surplus_scales = surplus < 0 ? surplus + bar_time.value : surplus
+    return Math.floor(surplus_scales / scale_time.value) + 1
+  })
+  const width = computed(() => scroll_width.value + min_width.value)
+  const current_x = computed({
+    get: () => current_time.value * second_width.value,
+    set: _x => current_time.value = _x / second_width.value
+  })
+
+  let playId: number
+
+  function _play() {
+    let previous_timestamp = performance.now()
+    let loop = timestamp => {
+      current_time.value += (timestamp - previous_timestamp) / 1000
+      previous_timestamp = timestamp
       playId = requestAnimationFrame(loop)
-    },
-    pause() {
-      cancelAnimationFrame(playId)
-      this.state = undefined
-    },
-    async save(): Promise<void> {
-      if(location.pathname === '/new')
-        history.replaceState(null, '', this.id)
-      this.last_updated = new Date()
-      this.thumbnail = await clipThumbnail()
-      return repository.save(toRaw(this.$state))
     }
+    playId = requestAnimationFrame(loop)
+  }
+
+  function _prepare() {
+    const start_bar = Math.floor(current_time.value / bar_time.value) - 1
+    current_time.value = start_bar * bar_time.value
+  }
+
+  function play() {
+    state.value = 'playing'
+    _play()
+  }
+
+  let timeoutId: number
+
+  function prepare() {
+    _prepare()
+    if(state.value === undefined)
+      _play()
+    timeoutId = setTimeout(() => state.value = 'recording', bar_time.value * 1000)
+    state.value = 'preparing'
+  }
+
+  function pause() {
+    state.value = undefined
+    clearTimeout(timeoutId)
+    cancelAnimationFrame(playId)
+  }
+
+  async function save(): Promise<void> {
+    if(location.pathname === '/new')
+      history.replaceState(null, '', $state.id)
+    $state.last_updated = new Date()
+    $state.thumbnail = await clipThumbnail()
+    return repository.save(toRaw($state))
+  }
+
+  return {
+    name,
+    rhythm,
+    bpm,
+    metronome,
+    second_width,
+    current_time,
+    scroll_width,
+    tracks,
+    state,
+    min_width,
+    animation_width,
+    beat_time,
+    beat_width,
+    scale_beat_ratio,
+    scale_time,
+    scale_width,
+    bar_time,
+    bar_width,
+    beat_count,
+    width,
+    current_x,
+    play,
+    pause,
+    prepare,
+    save
   }
 })
-
-setInterval(() => console.log(new Date(), project_data), 10000)

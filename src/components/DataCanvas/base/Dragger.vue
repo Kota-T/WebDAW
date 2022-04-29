@@ -19,9 +19,7 @@
 </style>
 
 <script setup lang="ts">
-const emits = defineEmits<{
-  (e: 'move', dif: number): void
-}>()
+const emits = defineEmits<{ (e: 'move', dif: number): void }>()
 let isMoving = false
 let startX: number
 

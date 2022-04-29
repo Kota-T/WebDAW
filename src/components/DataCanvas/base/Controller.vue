@@ -46,20 +46,25 @@ import Dragger from './Dragger.vue'
 import Trimmer from './Trimmer.vue'
 import { TRIMMER_WIDTH } from '../../../config'
 import { computed, reactive, ref } from 'vue'
-const props = defineProps<{
-  width: number,
-  x: number,
-  trim_left: number,
-  trim_right: number,
-  menuItems: Object[]
-}>()
-const emits = defineEmits<{
-  (e: 'update:x', x: number): void,
-  (e: 'update:width', width: number): void,
-  (e: 'update:trim_left', trim_left: number): void,
-  (w: 'update:trim_right', trim_right: number): void,
+
+type ControllerProps = {
+  width: number
+  x: number
+  trim_left: number
+  trim_right: number
+  menuItems: { text: string, action: () => void }[]
+}
+
+type ControllerEmits = {
+  (e: 'update:x', x: number): void
+  (e: 'update:width', width: number): void
+  (e: 'update:trim_left', trim_left: number): void
+  (w: 'update:trim_right', trim_right: number): void
   (e: 'remove'): void
-}>()
+}
+
+const props = defineProps<ControllerProps>()
+const emits = defineEmits<ControllerEmits>()
 const style = computed(() => ({
   width: props.width + 'px',
   left: props.x + 'px'

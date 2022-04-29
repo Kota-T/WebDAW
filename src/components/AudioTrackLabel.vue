@@ -52,29 +52,27 @@
 </template>
 
 <script setup lang="ts">
-import { TRACK_HEIGHT as _TRACK_HEIGHT } from '../config'
+import { TRACK_HEIGHT } from '../config'
 import { useProject } from '../project'
 import { TrackData } from '../type.d'
-import { readonly, ref } from 'vue'
+import { ref } from 'vue'
 
-const props = defineProps<{ trackData: TrackData }>()
-
-const TRACK_HEIGHT = readonly(ref(_TRACK_HEIGHT))
+const { trackData } = defineProps<{ trackData: TrackData }>()
 
 const slider_toggle = ref('v')
 
-const menuItems = ref([
+const menuItems = [
   {
     text: "削除",
     action: () => console.log('トラックを削除')
   }
-])
+]
 
 const project = useProject()
 
 function select(e) {
   if(!e.shiftKey)
     project.tracks.forEach(trackData => trackData.selected = false)
-  props.trackData.selected = true
+  trackData.selected = true
 }
 </script>

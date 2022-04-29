@@ -16,17 +16,13 @@ export async function getLRU(): Promise<ProjectData | undefined> {
 export function create(): ProjectData {
   return {
     id           : uuidv4(),
-    last_updated : undefined,
-    thumbnail    : "",
     name         : "新規プロジェクト",
     rhythm       : [4, 4],
     bpm          : 120,
     metronome    : true,
     second_width : 40,
     current_time : 0,
-    state        : undefined,
     scroll_width : 0,
-    min_width    : 1000,
     tracks       : []
   }
 }

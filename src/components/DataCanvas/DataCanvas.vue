@@ -21,8 +21,8 @@ canvas {
 import Controller from './base/Controller.vue'
 import { useProject } from '../../project'
 import { CanvasData } from '../../type.d'
-import { TRACK_HEIGHT as _TRACK_HEIGHT } from '../../config'
-import { computed, inject, onMounted, readonly, ref, watch } from 'vue'
+import { TRACK_HEIGHT } from '../../config'
+import { computed, inject, onMounted, ref, watch } from 'vue'
 
 const canvas = ref<InstanceType<HTMLCanvasElement>>()
 let ctx: CanvasRenderingContext2D
@@ -38,8 +38,6 @@ const emits = defineEmits<{
   (e: 'play', when: number): void,
   (e: 'remove'): void
 }>()
-
-const TRACK_HEIGHT = readonly(ref(_TRACK_HEIGHT))
 
 const x = computed({
   get: () => {
@@ -82,7 +80,7 @@ watch(() => project.current_time, newVal => {
     emits('play', newVal - canvasData.start_time)
 })
 
-const menuItems = ref([
+const menuItems = [
   {
     text: 'ダウンロード',
     action: () => console.log('ダウンロード')
@@ -91,5 +89,5 @@ const menuItems = ref([
     text: '削除',
     action: () => emits('remove')
   }
-])
+]
 </script>

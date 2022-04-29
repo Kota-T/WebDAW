@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { getCurrentInstance, onMounted, reactive, ref } from 'vue'
-const props = defineProps<{ menuItems: Object[] }>()
+defineProps<{ menuItems: Object[] }>()
 
 const isOpen = ref(false)
 

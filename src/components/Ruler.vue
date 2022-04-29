@@ -19,9 +19,9 @@ const canvas = ref<InstanceType<HTMLCanvasElement>>()
 let ctx: CanvasRenderingContext2D
 
 onMounted(()=>{
-  ctx = canvas.value.getContext('2d');
-  ctx.font = '10px';
-  draw();
+  ctx = canvas.value.getContext('2d')
+  ctx.font = '10px'
+  draw()
 })
 
 const project = useProject()

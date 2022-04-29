@@ -34,8 +34,6 @@ export type ProjectData = {
   metronome: boolean
   second_width: number
   current_time: number
-  state: EditorState
   scroll_width: number
-  min_width: number
   tracks: TrackData[]
 }

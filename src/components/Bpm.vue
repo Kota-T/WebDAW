@@ -12,13 +12,13 @@
 
 <script setup lang="ts">
 import { useProject } from '../project'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 const project = useProject()
 const bpm = computed({
   get: () => String(project.bpm),
   set: _bpm => project.bpm = Number(_bpm)
 })
-const validators = ref([
+const validators = [
   bpm => bpm.match(/[1-9]\d{1,2}/)?.[0] === bpm
-])
+]
 </script>

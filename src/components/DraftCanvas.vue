@@ -1,33 +1,58 @@
 <template>
-  <canvas width="1000" height="150" ref="canvas"/>
+  <canvas
+  width="1000"
+  :height="TRACK_HEIGHT"
+  :style="{ left: project.current_x + 'px' }"
+  ref="canvas"
+  />
 </template>
 
-<script setup lang="ts">
-import { sourceNode } from '../audio'
-import { InstanceType, onMounted, ref } from 'vue'
+<style scoped>
+canvas {
+  position: absolute;
+}
+</style>
 
-const props = defineProps<{
+<script setup lang="ts">
+import { TRACK_HEIGHT } from '../config'
+import { useProject } from '../project'
+import { InstanceType, onBeforeMount, onMounted, onBeforeUnmount, ref } from 'vue'
+
+type DraftCanvasProps = {
   initCtxStyle: (ctx: CanvasRenderingContext2D) => void,
   draw: (
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
-    drawPoint: { value: number }
+    drawPoint: number
   ) => void
-}>()
+}
+
+const props = defineProps<DraftCanvasProps>()
 
 const canvas = ref<InstanceType<HTMLCanvasElement>>()
 let ctx: CanvasRenderingContext2D
 
+let drawId: number
+
 onMounted(() => {
   ctx = canvas.value.getContext('2d')
+  props.initCtxStyle(ctx)
+  drawId = requestAnimationFrame(draw)
 })
 
-const drawPoint = { value: 0 }
+onBeforeUnmount(() => {
+  cancelAnimationFrame(drawId)
+})
+
+const project = useProject()
+
+let drawPoint = 0
 
 function draw(){
-  if(drawPoint.value >= canvas.value.width)
+  if(drawPoint >= canvas.value.width)
     resize()
-  props.draw(canvas.value, ctx, drawPoint)
+  drawPoint = props.draw(canvas.value, ctx, drawPoint)
+  drawId = requestAnimationFrame(draw)
 }
 
 function resize(){

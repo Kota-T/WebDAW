@@ -4,14 +4,14 @@
   icon="mdi-circle"
   color="red"
   size="x-large"
-  @click="project.state = 'preparing'"
+  @click="project.prepare"
   />
   <v-btn
   v-else-if="['preparing', 'recording'].includes(project.state)"
   icon="mdi-radiobox-marked"
   color="red"
   size="x-large"
-  @click="project.state = undefined"
+  @click="project.pause"
   />
   <v-btn
   v-else

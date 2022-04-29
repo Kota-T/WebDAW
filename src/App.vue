@@ -26,7 +26,7 @@
           <canvas-container
           v-for="trackData in project.tracks"
           :key="trackData.id"
-          :canvases="trackData.canvases"
+          :trackData="trackData"
           />
         </ruler-layer>
       </pointer-layer>
@@ -48,7 +48,7 @@ import TrackTypeDialog from './components/Dialog/TrackTypeDialog.vue'
 import CanvasContainer from './components/CanvasContainer.vue'
 import Message from './components/Message.vue'
 import draggable from 'vuedraggable'
-import { onMounted, provide, ref, watch } from 'vue'
+import { onMounted, provide, readonly, ref, watch } from 'vue'
 import { POINTER_MARGIN } from './config'
 import { useProject } from './project'
 
